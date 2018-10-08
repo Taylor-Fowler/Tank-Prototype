@@ -21,6 +21,12 @@ public class OurServerConnection : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinLobby();
     }
 
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+        _connectedRoom = null;
+    }
+
     public override void OnCreatedRoom()
     {
         Debug.Log("OnCreatedRoom");

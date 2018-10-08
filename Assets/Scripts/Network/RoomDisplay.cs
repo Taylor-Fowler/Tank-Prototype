@@ -71,7 +71,6 @@ public class RoomDisplay : MonoBehaviourPunCallbacks
         }
     }
 
-
     private void ClearRoomDetails()
     {
         foreach(var go in _spawnedRoomDetails)
