@@ -6,8 +6,6 @@ using Photon.Realtime;
 
 public class OurServerConnection : MonoBehaviourPunCallbacks
 {
-    private Room _connectedRoom;
-
     private void Start()
     {
         DontDestroyOnLoad(this);
@@ -21,21 +19,21 @@ public class OurServerConnection : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinLobby();
     }
 
-    public void LeaveRoom()
-    {
-        PhotonNetwork.LeaveRoom();
-        _connectedRoom = null;
-    }
-
     public override void OnCreatedRoom()
     {
         Debug.Log("OnCreatedRoom");
     }
 
+    public void MyJoinOrCreateRoom()
+    {
+        RoomOptions roomOptions = new RoomOptions();
+        PhotonNetwork.JoinOrCreateRoom("a room", roomOptions, PhotonNetwork.CurrentLobby);
+    }
+
     public override void OnJoinedRoom()
     {
         Debug.Log("OnJoinedRoom");
-        _connectedRoom = PhotonNetwork.CurrentRoom;
+        PhotonNetwork.LoadLevel(1);
     }
 
     public override void OnLeftRoom()

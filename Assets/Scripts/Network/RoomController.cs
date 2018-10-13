@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RoomController : MonoBehaviour
-{
+public class RoomController : MonoBehaviour {
+
+	// Use this for initialization
+	void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
 }
