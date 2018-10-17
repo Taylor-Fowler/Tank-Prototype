@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: a69d91d595945b94ba3e893ab30d72c1
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _FrontTex: {fileID: 2800000, guid: 1328f6b59d2a0dc4d8ca11a18c78e211, type: 3}
+  - _BackTex: {fileID: 2800000, guid: 281fa02a7a02da849927f07e80c809fe, type: 3}
+  - _LeftTex: {fileID: 2800000, guid: 99232072f07aae7458f2c12897b7729f, type: 3}
+  - _RightTex: {fileID: 2800000, guid: 54dc0dcb993cb7744a21641932b529da, type: 3}
+  - _UpTex: {fileID: 2800000, guid: 76fafee3589b1c44bbb2a11afe8979ce, type: 3}
+  - _DownTex: {fileID: 2800000, guid: 19800fc26380d3842a470a6cc2f7662c, type: 3}
+  - _FrontTex2: {fileID: 2800000, guid: 59514b67e284d094497afad24a76ec81, type: 3}
+  - _BackTex2: {fileID: 2800000, guid: 16e69d130bc49524fb1a66ed0867aa2d, type: 3}
+  - _LeftTex2: {fileID: 2800000, guid: 2addee917d2652a4f986883cd55644e8, type: 3}
+  - _RightTex2: {fileID: 2800000, guid: 2a74679ff11e7744d873e92822f370d9, type: 3}
+  - _UpTex2: {fileID: 2800000, guid: 8e0ed29b7cf6ef348bc86971055d2338, type: 3}
+  - _DownTex2: {fileID: 2800000, guid: f9fb21f315ebb774ca4ca7d999f9a22a, type: 3}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

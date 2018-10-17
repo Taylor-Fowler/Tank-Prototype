@@ -6,7 +6,7 @@ using Photon.Realtime;
 
 namespace Network
 {
-    public class NetworkManager : MonoBehaviourPunCallbacks, IManager
+    public class NetworkManager : MonoBehaviourPunCallbacks, IManager 
     {
         public NetworkService NetworkService { get; private set; }
         
