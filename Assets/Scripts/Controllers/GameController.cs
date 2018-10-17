@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Network;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class GameController : MonoBehaviour {
 
@@ -8,13 +10,17 @@ public class GameController : MonoBehaviour {
 
     [Header("Master Game Variables")]
     public int PlayerCount = 0;
+    public string DeviceID { get; private set; }
 
     [Header("Serialized Fields - for debug reference only")]
-    [SerializeField]  string DeviceID = null;
-    [SerializeField]  CommsManager Comms;
+    [SerializeField] CommsManager Comms;
+    [SerializeField] private NetworkManager _networkManager;
+
+    private List<IManager> _managers;
+    private NetworkService _networkService;
 
     // --------------------//
-    // establish Singelton //
+    // establish Singleton //
     // ------------------- //
     public static GameController Instance
     {
@@ -24,6 +30,7 @@ public class GameController : MonoBehaviour {
         }
     }
     private static GameController instance = null;
+    
     void Awake()
     {
         if (instance)
@@ -36,7 +43,7 @@ public class GameController : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
     }
     //---------------------------//
-    // Finished Singelton set up //
+    // Finished Singleton set up //
     // --------------------------//
 
 
@@ -47,13 +54,29 @@ public class GameController : MonoBehaviour {
         DeviceID = SystemInfo.deviceUniqueIdentifier;
         Debug.Log("DevID: " + DeviceID + " Length : " + DeviceID.Length + " Chars");
 
+        _managers = new List<IManager>();
+        
         // add Comms
         Comms = gameObject.AddComponent<CommsManager>();
+        _networkManager = gameObject.AddComponent<NetworkManager>();
 
-	}
+        _managers.Add(_networkManager);
+        
+        InjectServices();
+    }
 	
 	// Update is called once per frame // currently masked to save a bit of update overhead
 	//void Update () {
 	//	
 	//}
+
+    void InjectServices()
+    {
+        _networkService = new NetworkService();
+        
+        foreach (var manager in _managers)
+        {
+            manager.Startup(_networkService);
+        }
+    }
 }

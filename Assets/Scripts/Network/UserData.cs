@@ -2,8 +2,15 @@
 [System.Serializable]
 public class UserData
 {
-    public int id;
-    public string username;
-    public float time_played_mins;
+    public int Player_ID;
+    public string Username;
+    public string Device_ID;
+    public int 
+        Games_Played,
+        Kills,
+        Deaths,
+        Assists,
+        Wins,
+        Losses;
 }
 
