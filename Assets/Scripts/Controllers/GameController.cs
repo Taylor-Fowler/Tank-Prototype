@@ -15,6 +15,7 @@ public class GameController : MonoBehaviour {
     [Header("Serialized Fields - for debug reference only")]
     [SerializeField] CommsManager Comms;
     [SerializeField] private NetworkManager _networkManager;
+    [SerializeField] private PlayerManager _playerManager;
 
     private List<IManager> _managers;
     private NetworkService _networkService;
@@ -59,9 +60,11 @@ public class GameController : MonoBehaviour {
         // add Comms
         Comms = gameObject.AddComponent<CommsManager>();
         _networkManager = gameObject.AddComponent<NetworkManager>();
+        _playerManager = gameObject.AddComponent<PlayerManager>();
 
         _managers.Add(_networkManager);
-        
+        _managers.Add(_playerManager);
+
         InjectServices();
     }
 	

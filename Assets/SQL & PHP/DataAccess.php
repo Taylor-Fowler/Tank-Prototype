@@ -30,7 +30,7 @@ class DataAccess
 		$query->bindValue(":device_id", $device_id);
 		
 		if($query->execute())
-			return json_encode($query->fetchAll(PDO::FETCH_ASSOC));
+			return str_replace(array('[', ']'), '', json_encode($query->fetchAll(PDO::FETCH_ASSOC)));
 
 		return '[{"Player_ID":"-1"}]';		
 	}
