@@ -3,7 +3,15 @@ guid: 8f229e503ef49a240a9ab947b5ac1969
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - Floor: {fileID: 4103473511320174, guid: 4f1363661bf34a44dbf609d1c62f20ce, type: 2}
+  - SpawnPoint: {fileID: 4900252342358180, guid: 4ed145793d4d75545a9a014f51275a33,
+      type: 2}
+  - Wall1: {fileID: 4728384880197588, guid: 27b2d141f8646ab41bb68fdc94fcf912, type: 2}
+  - Wall2: {fileID: 4759440630400998, guid: f2c72cd896e91fd4285d7fd46a2eef87, type: 2}
+  - Wall3: {fileID: 4461932386773890, guid: 49bfc07b79042f44b8040e80b137bc82, type: 2}
+  - Wall4: {fileID: 4900314261810044, guid: ff628189911da4e4ba2d134f7ba1febd, type: 2}
+  - PU01: {fileID: 4616015690493952, guid: 52bfa6991e3c3364c964413035afb60b, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
