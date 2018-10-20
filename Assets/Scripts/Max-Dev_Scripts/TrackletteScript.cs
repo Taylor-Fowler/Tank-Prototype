@@ -20,8 +20,10 @@ public class TrackletteScript : MonoBehaviour {
     private float ParentTravel;
     private Vector3 _toPos;
     private Quaternion _toAngle;
+    //private float _toAngle;
     private Vector3 _fromPos;
     private Quaternion _fromAngle;
+    //private float _fromAngle;
 
     private TrackletteScript MyLeader;
 
@@ -37,8 +39,10 @@ public class TrackletteScript : MonoBehaviour {
         _range = Vector3.Distance(_fromPos , _toPos);
 
         // will get around to angles eventually
-        _fromAngle = transform.rotation;
-        _toAngle = to.rotation;
+        _fromAngle = transform.localRotation;
+        _toAngle = to.localRotation;
+        //_fromAngle = transform.rotation.eulerAngles.x;
+        //_toAngle = to.rotation.eulerAngles.x;
 
         if (!LeadTrack) MyLeader = LeaderTrack.GetComponent<TrackletteScript>();
 	}
@@ -46,10 +50,11 @@ public class TrackletteScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        // reset back to initial local position
+        // reset back to initial local position & rotation
         transform.localPosition = _fromPos;
+        transform.localRotation = _fromAngle;
 
-        if (LeadTrack)
+        if (LeadTrack) // Lead Track establishes Lerp for the whole train
         { 
             CurrParentPos = Parent.transform.position;
             ParentTravel = Vector3.Distance(LastParentPos, CurrParentPos);
@@ -65,12 +70,13 @@ public class TrackletteScript : MonoBehaviour {
 
             LastParentPos = CurrParentPos;
         }
-        else
+        else // if not Lead Track ... get the Lerp value calculated by the Lead Track
         {
             _LerpFactor = MyLeader.GetLerp();
         }
+
         transform.Translate((_travelVector * _LerpFactor), Space.World);
-        transform.rotation = Quaternion.Slerp(_fromAngle, _toAngle, _LerpFactor) * Parent.rotation;
+        transform.localRotation = Quaternion.Slerp(_fromAngle, _toAngle, _LerpFactor);
     }
 
     public float GetLerp()
