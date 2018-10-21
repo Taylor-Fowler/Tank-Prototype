@@ -42,7 +42,9 @@ namespace Network
                     { "room_host", callingUser.Username },
                     { "room_name", roomName }
                 },
-                MaxPlayers = (byte)maxPlayers                
+                MaxPlayers = (byte)maxPlayers,
+                IsVisible = true,
+                IsOpen = true
             };
 
 
