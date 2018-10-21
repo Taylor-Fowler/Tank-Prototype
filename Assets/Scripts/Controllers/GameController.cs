@@ -11,11 +11,11 @@ public class GameController : MonoBehaviour {
     [Header("Master Game Variables")]
     public int PlayerCount = 0;
     public string DeviceID { get; private set; }
+    public NetworkManager NetworkManager { get; private set; }
+    public PlayerManager PlayerManager { get; private set; }
 
     [Header("Serialized Fields - for debug reference only")]
     [SerializeField] CommsManager Comms;
-    [SerializeField] private NetworkManager _networkManager;
-    [SerializeField] private PlayerManager _playerManager;
 
     private List<IManager> _managers;
     private NetworkService _networkService;
@@ -59,11 +59,11 @@ public class GameController : MonoBehaviour {
         
         // add Comms
         Comms = gameObject.AddComponent<CommsManager>();
-        _networkManager = gameObject.AddComponent<NetworkManager>();
-        _playerManager = gameObject.AddComponent<PlayerManager>();
+        NetworkManager = gameObject.AddComponent<NetworkManager>();
+        PlayerManager = gameObject.AddComponent<PlayerManager>();
 
-        _managers.Add(_networkManager);
-        _managers.Add(_playerManager);
+        _managers.Add(NetworkManager);
+        _managers.Add(PlayerManager);
 
         InjectServices();
     }

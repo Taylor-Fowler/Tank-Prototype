@@ -2,10 +2,11 @@
 
 using Photon.Pun;
 using Photon.Realtime;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 namespace Network
 {
-    public class NetworkManager : MonoBehaviourPunCallbacks, IManager 
+    public class NetworkManager : MonoBehaviourPunCallbacks, IManager
     {
         public NetworkService NetworkService { get; private set; }
         public ManagerStatus Status { get; private set; }
@@ -31,25 +32,56 @@ namespace Network
             Debug.Log("OnCreatedRoom");
         }
 
-        public void MyJoinOrCreateRoom()
+        public void CreatePublicRoom(UserData callingUser, string roomName, int maxPlayers)
         {
-            RoomOptions roomOptions = new RoomOptions();
-            PhotonNetwork.JoinOrCreateRoom("a room", roomOptions, PhotonNetwork.CurrentLobby);
+            RoomOptions roomOptions = new RoomOptions
+            {
+                CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name" },
+                CustomRoomProperties = new PhotonHashtable()
+                {
+                    { "room_host", callingUser.Username },
+                    { "room_name", roomName }
+                },
+                MaxPlayers = (byte)maxPlayers                
+            };
+
+
+            PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID, roomOptions, PhotonNetwork.CurrentLobby);
+        }
+
+        public void CreatePrivateRoom(UserData callingUser, string roomName, int maxPlayers, string roomPassword)
+        {
+            RoomOptions roomOptions = new RoomOptions
+            {
+                CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name", "room_pass" },
+                CustomRoomProperties = new PhotonHashtable()
+                {
+                    { "room_host", callingUser.Username },
+                    { "room_name", roomName },
+                    { "room_pass", roomPassword }
+                },
+                MaxPlayers = (byte)maxPlayers,
+                IsVisible = true,
+                IsOpen = true
+            };
+
+
+            PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID, roomOptions, PhotonNetwork.CurrentLobby);
+        }
+
+        public void StartGame()
+        {
+            PhotonNetwork.LoadLevel(1);
         }
 
         public override void OnJoinedRoom()
         {
             Debug.Log("OnJoinedRoom");
-
-
-            PhotonNetwork.LoadLevel(1);
         }
 
         public override void OnLeftRoom()
         {
             Debug.Log("OnLeftRoom");
-
-
         }
         
         private static bool ConnectToServer()

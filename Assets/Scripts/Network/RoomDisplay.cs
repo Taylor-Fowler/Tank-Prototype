@@ -30,14 +30,12 @@ public class RoomDisplay : MonoBehaviourPunCallbacks
         int maxPlayers = 2;
         int.TryParse(NumberOfPlayersDropdown.captionText.text, out maxPlayers);
 
-        RoomOptions roomOptions = new RoomOptions
-        {
-            PublishUserId = true,
-            MaxPlayers = (byte)maxPlayers,
-            IsVisible = true,
-            IsOpen = true
-        };
-        PhotonNetwork.CreateRoom(RoomNameInput.text, roomOptions);
+        GameController.Instance.NetworkManager.CreatePublicRoom
+        (
+            GameController.Instance.PlayerManager.User, 
+            RoomNameInput.text, 
+            maxPlayers
+        );
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -83,12 +81,12 @@ public class RoomDisplay : MonoBehaviourPunCallbacks
     private void SpawnRoomDetails(RoomInfo room)
     {
         GameObject name = Instantiate(RoomDetailsPrefab, RoomNamesAnchor.transform);
-        name.GetComponent<Text>().text = room.Name;
+        name.GetComponent<Text>().text = (string)room.CustomProperties["room_name"];
         
         _spawnedRoomDetails.Add(name);
 
         GameObject user = Instantiate(RoomDetailsPrefab, RoomCreatorsAnchor.transform);
-        user.GetComponent<Text>().text = room.masterClientId.ToString();
+        user.GetComponent<Text>().text = (string)room.CustomProperties["room_host"];
 
         _spawnedRoomDetails.Add(user);
 

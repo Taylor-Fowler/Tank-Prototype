@@ -65,7 +65,7 @@ namespace Network
             form.AddField("Wins", userData.Wins);
             form.AddField("Losses", userData.Losses);
             
-            UnityWebRequest webRequest = UnityWebRequest.Post(WebPath + "Updates.php", form);
+            UnityWebRequest webRequest = UnityWebRequest.Post(WebPath + "updates.php", form);
             yield return webRequest.SendWebRequest();
 
             callback(IsRequestValid(webRequest));
