@@ -36,11 +36,14 @@ public class TracksLeader : MonoBehaviour {
             _childList[i] = _tempList[i + 1];
             _StartPositions[i] = _childList[i].localPosition;
             _index[i] = i + 1;
-            if (i == _size - 1) _index[i] = 0; // Enable wraparound
+        }
+        _index[_size - 1] = 0; // enable wrap-around
+        for (int i = 0; i < _size; i++)
+        {
             _distances[i] = Vector3.Distance(_StartPositions[i], _StartPositions[_index[i]]);
             Debug.Log("Distance from element " + i.ToString() + " to " + _index[i].ToString() + " = " + _distances[i].ToString());
         }
-        _range = Vector3.Distance(_StartPositions[0], _StartPositions[1]); // datum range from element 0 to 1
+        _range = _distances[0]; // datum range
     }
 	
 	// Update is called once per frame
