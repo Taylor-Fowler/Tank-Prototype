@@ -8,6 +8,7 @@ TagManager:
   - Floor
   - PowerUp
   - SpawnPoint
+  - Colourable
   layers:
   - Default
   - TransparentFX

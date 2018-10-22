@@ -4,23 +4,23 @@ using UnityEngine;
 
 public class TracksLeader : MonoBehaviour {
 
-    [Header("Debug Serialized Fields")]
-    [SerializeField] private Transform _Parent;
-    [SerializeField] private Vector3 _LastParentPos;
-    [SerializeField] private Vector3 _CurrParentPos;
-    [SerializeField] private float _range;
-    [SerializeField] private float _HaveTravelled = 0f;
-    [SerializeField] private float _LerpFactor = 0f;
-    [SerializeField] private int _size = 0;
-    [SerializeField] Transform[] _childList;
-    [SerializeField] Vector3[] _StartPositions;
-    [SerializeField] float[] _distances;
-    [SerializeField] int[] _index;
+    private Transform _Parent;
+    private Vector3 _LastParentPos;
+    private Vector3 _CurrParentPos;
+    private float _range;
+    private float _HaveTravelled = 0f;
+    private float _LerpFactor = 0f;
+    private int _size = 0;
+    private Transform[] _childList;
+    private Vector3[] _StartPositions;
+    private float[] _distances;
+    private int[] _index;
+    public bool TracksForward = true; // Used to customise direction, is case assembly motion is against the flow
 
 	// Use this for initialization
 	void Start ()
     {
-        _Parent = transform.parent.transform;
+        _Parent = transform.parent.transform; // edit as appropriate to get "reference movement" object
 
         // Get all children and populate Arrays
         // n.b. calling object added to front of array, so need to get rid of it
@@ -54,6 +54,7 @@ public class TracksLeader : MonoBehaviour {
 
         // check if parent moved "forward"
         int forward = 1;
+        if (!TracksForward) forward = -1;
         if (Vector3.Dot((_CurrParentPos - _LastParentPos), _Parent.transform.forward) > 0) forward = -1;
 
         _HaveTravelled += _ParentTravel * forward;

@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 using Photon.Pun;
 using UnityEngine;
 
-public class TrackScript : MonoBehaviourPun {
+public class ThirtiesTankControls : MonoBehaviourPun {
 
     public bool TESTING = true;
     public float SpeedMax = 2f;
@@ -14,14 +14,16 @@ public class TrackScript : MonoBehaviourPun {
     public float CurrentSpeed = 0f;
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         if (!photonView.IsMine && !TESTING) return; // Not local Player ... don't bother
 
-	}
-	
+    }
 
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update()
+    {
         if (!photonView.IsMine && !TESTING) return; // Not local Player ... don't bother
         float turning = 0;
         if (Input.GetKeyDown("w"))
@@ -46,3 +48,4 @@ public class TrackScript : MonoBehaviourPun {
         transform.Rotate(turning * Time.deltaTime * Vector3.up);
     }
 }
+
