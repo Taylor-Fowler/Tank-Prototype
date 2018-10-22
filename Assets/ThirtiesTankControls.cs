@@ -12,14 +12,29 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     public float Accel = 0.1f;
     public float TurnRate = 30f;
     public float CurrentSpeed = 0f;
+    public Material[] ColourChoices = new Material[3];
+    private int _CurrentColor = 0;
 
     // Use this for initialization
     void Start()
     {
         if (!photonView.IsMine && !TESTING) return; // Not local Player ... don't bother
+        ChangeColor();
+
 
     }
 
+    void ChangeColor ()
+    {
+        Renderer[] RendList = GetComponentsInChildren<Renderer>();
+        foreach ( Renderer Rend in RendList)
+        {
+            if (Rend.tag == "Colourable")
+            {
+                Rend.material = ColourChoices[_CurrentColor];
+            }
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -46,6 +61,18 @@ public class ThirtiesTankControls : MonoBehaviourPun {
             turning -= TurnRate;
         }
         transform.Rotate(turning * Time.deltaTime * Vector3.up);
+
+        // Colour Change
+        if (Input.GetKeyDown("space"))
+        {
+            _CurrentColor += 1;
+            if (_CurrentColor > ColourChoices.Length - 1)
+            {
+                _CurrentColor = 0;
+            }
+            ChangeColor();
+        }
+
     }
 }
 
