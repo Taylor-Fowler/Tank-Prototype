@@ -15,11 +15,13 @@ public class TracksLeader : MonoBehaviour {
     private Vector3[] _StartPositions;
     private float[] _distances;
     private int[] _index;
+    private float _ParentScaleMod = 1;
     public bool TracksForward = true; // Used to customise direction, is case assembly motion is against the flow
 
 	// Use this for initialization
 	void Start ()
     {
+        _ParentScaleMod = transform.root.localScale.z;
         _Parent = transform.parent.transform; // edit as appropriate to get "reference movement" object
 
         // Get all children and populate Arrays
@@ -41,7 +43,6 @@ public class TracksLeader : MonoBehaviour {
         for (int i = 0; i < _size; i++)
         {
             _distances[i] = Vector3.Distance(_StartPositions[i], _StartPositions[_index[i]]);
-            Debug.Log("Distance from element " + i.ToString() + " to " + _index[i].ToString() + " = " + _distances[i].ToString());
         }
         _range = _distances[0]; // datum range
     }
@@ -50,7 +51,7 @@ public class TracksLeader : MonoBehaviour {
 	void Update () {
 
         _CurrParentPos = _Parent.transform.position;
-        float _ParentTravel = Vector3.Distance(_LastParentPos, _CurrParentPos);
+        float _ParentTravel = Vector3.Distance(_LastParentPos, _CurrParentPos) / _ParentScaleMod;
 
         // check if parent moved "forward"
         int forward = 1;
