@@ -21,7 +21,7 @@ public class TracksLeader : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-        _ParentScaleMod = transform.root.localScale.z;
+        _ParentScaleMod = transform.root.localScale.z; // since someone can/will scale the parent transform
         _Parent = transform.parent.transform; // edit as appropriate to get "reference movement" object
 
         // Get all children and populate Arrays

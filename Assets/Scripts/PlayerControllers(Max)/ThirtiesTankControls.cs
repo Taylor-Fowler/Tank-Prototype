@@ -9,6 +9,8 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     public static PlayerController LocalPlayer; // what is this magic ??
 
     public GameObject Turret;
+    public Transform _firePos;
+    public Transform Shell;
 
     public Vector3 Spawn = new Vector3(20f, 0.21f, 20f); // Dev purposes spawn only
 
@@ -23,6 +25,7 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     public float BaseArmour = 3;
     public float BaseDamage = 5;
     public float BaseFireRate = 1;
+    public int BaseShell = 1; // default Shell type, will be changed by Power up's
 
     [Header("Stat Modifiers")] // either to mod "Core Stats" at start ... and/or to apply Power Up goodies
     public float ModSpeed = 1f;
@@ -44,6 +47,7 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     float C_Damage          { get { return BaseDamage * ModDamage; } } // Placeholder only until mechanics established
     float C_FireRate        { get { return BaseFireRate * ModFireRate; } }
     public float CurrentSpeed {get; private set;}
+    private int C_ShellType = 1;
 
 
     [SerializeField]
@@ -102,7 +106,33 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     void Update()
     {
         if (!photonView.IsMine && !TESTING) return; // Not local Player ... don't bother
+        ControlMovement();
+        ControlFiring();
 
+    }
+
+    void ControlFiring()
+    {
+        // Reduce cooldown
+        Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
+        if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
+        {
+            Fire(C_Damage, _firePos.transform.position, _firePos.transform.rotation, C_ShellType, OwnTeamColor);
+            Cooldown = C_FireRate;
+        }
+    }
+
+    void Fire (float dmg, Vector3 start, Quaternion direction, int type, Color color)
+    {
+        Transform shell = (Transform)Instantiate(Shell,start,direction);
+        ShellScript ss = shell.GetComponent<ShellScript>();
+        ss.dmg = dmg;
+        ss.type = type;
+        ss.color = color;
+    }
+
+    void ControlMovement()
+    {
         // Tank Hull Forward / Backward input
         if (Input.GetKey("w")) CurrentSpeed += C_Accel;
         if (Input.GetKey("s")) CurrentSpeed -= C_Accel;
@@ -123,7 +153,7 @@ public class ThirtiesTankControls : MonoBehaviourPun {
         // tried various ... this seems to work best with a "dead zone" in the middle
         if (TurrToGo < 0.48) { Turret.transform.Rotate(new Vector3(0, -C_TurrTurnRate * Time.deltaTime, 0)); }
         else if (TurrToGo > 0.52) { Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime, 0)); }
-
     }
+
 }
 

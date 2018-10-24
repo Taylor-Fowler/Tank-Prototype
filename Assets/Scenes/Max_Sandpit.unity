@@ -113,6 +113,48 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &36309135
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -0.019137025
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 2.2924917
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: -2.981
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+  m_IsPrefabAsset: 0
 --- !u!1 &49029831
 GameObject:
   m_ObjectHideFlags: 0
@@ -1304,6 +1346,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Turret: {fileID: 1266611081}
+  _firePos: {fileID: 1160996269}
+  Shell: {fileID: 4492180328472884, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
   Spawn: {x: 20, y: 0.21, z: 20}
   TESTING: 1
   BaseSpeedMax: 2
@@ -1315,6 +1359,7 @@ MonoBehaviour:
   BaseArmour: 3
   BaseDamage: 5
   BaseFireRate: 1
+  BaseShell: 1
   ModSpeed: 1
   ModAccel: 1
   ModTurn: 1
