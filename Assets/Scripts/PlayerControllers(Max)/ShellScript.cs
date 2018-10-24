@@ -19,7 +19,6 @@ public class ShellScript : MonoBehaviour
 
 	// Use this for initialization
 	void Start () {
-        Debug.Log("Shell Fired");
         Configure();
         Destroy(gameObject, life); // REMEMBER to set life span in Configure()
 	}
@@ -27,7 +26,7 @@ public class ShellScript : MonoBehaviour
 	// Update is called once per frame
 	void Update () {
         // Move
-        transform.Translate(transform.forward * velocity * Time.deltaTime);
+        transform.Translate(transform.forward * velocity * Time.deltaTime,Space.World);
 	}
 
     void Configure ()
@@ -41,8 +40,8 @@ public class ShellScript : MonoBehaviour
         foreach (Renderer r in Rs) r.material.color = color;
 
         // "Default"
-        life = 5f;
-        velocity = 1f;
+        life = 2f;
+        velocity = 15f;
 
         // Switch for "Others" inc bouncy and further customising
         switch (type)
@@ -51,6 +50,17 @@ public class ShellScript : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    // Collision Script
+    void OnCollisionEnter (Collision col)
+    {
+        Debug.Log("Hit Wall");
+        if (col.gameObject.tag == "Wall" && !bouncy)
+        {
+            Debug.Log("Shell hit wall and dies");
+            Destroy(gameObject);
         }
     }
 
