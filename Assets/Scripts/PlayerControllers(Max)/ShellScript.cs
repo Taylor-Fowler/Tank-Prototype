@@ -16,9 +16,11 @@ public class ShellScript : MonoBehaviour
     public float velocity;
     public float life;
     public bool bouncy;
+    private Rigidbody RB;
 
 	// Use this for initialization
 	void Start () {
+        RB = GetComponent<Rigidbody>();
         Configure();
         Destroy(gameObject, life); // REMEMBER to set life span in Configure()
 	}
@@ -41,7 +43,8 @@ public class ShellScript : MonoBehaviour
 
         // "Default"
         life = 2f;
-        velocity = 15f;
+        RB.AddForce(transform.forward * 15);
+        velocity = 2f;
 
         // Switch for "Others" inc bouncy and further customising
         switch (type)

@@ -115,7 +115,8 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     {
         // Reduce cooldown
         Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
-        if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
+        if (Cooldown <=0) // Auto fire for testing
+        //if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
         {
             Fire(C_Damage, _firePos.transform.position, _firePos.transform.rotation, C_ShellType, OwnTeamColor);
             Cooldown = C_FireRate;

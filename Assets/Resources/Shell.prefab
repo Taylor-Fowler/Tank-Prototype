@@ -129,8 +129,8 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 1
+  m_Constraints: 4
+  m_CollisionDetection: 2
 --- !u!96 &96230860212895682
 TrailRenderer:
   serializedVersion: 2
@@ -250,7 +250,7 @@ MonoBehaviour:
   color: {r: 0, g: 0, b: 0, a: 0}
   velocity: 0
   life: 0
-  bouncy: 0
+  bouncy: 1
 --- !u!136 &136280632342584356
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -261,6 +261,6 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.015
-  m_Height: 0.1
+  m_Height: 0.03
   m_Direction: 2
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0, z: 0.034999996}

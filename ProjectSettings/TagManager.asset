@@ -9,6 +9,7 @@ TagManager:
   - PowerUp
   - SpawnPoint
   - Colourable
+  - Tank
   layers:
   - Default
   - TransparentFX
