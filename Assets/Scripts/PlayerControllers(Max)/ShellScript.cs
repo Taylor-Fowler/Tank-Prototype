@@ -27,25 +27,22 @@ public class ShellScript : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-        // Move
-        transform.Translate(transform.forward * velocity * Time.deltaTime,Space.World);
+        // Move handled by RigidBody
 	}
 
     void Configure ()
     {
         // record Instantiation position and rotation
-        //start = transform.position;
-        //direction = transform.rotation;
+        start = transform.position;
+        direction = transform.rotation;
 
         // set Colours
         Renderer[] Rs = gameObject.GetComponentsInChildren<Renderer>();
         foreach (Renderer r in Rs) r.material.color = color;
 
-        // "Default"
+        // "Default" // maybe changed for different shells
         life = 2f;
-        RB.AddForce(transform.forward * 15);
-        velocity = 2f;
-
+        velocity = 10f; 
         // Switch for "Others" inc bouncy and further customising
         switch (type)
         {
@@ -54,12 +51,14 @@ public class ShellScript : MonoBehaviour
             default:
                 break;
         }
+        
+        RB.velocity = transform.forward * velocity;
+
     }
 
     // Collision Script
     void OnCollisionEnter (Collision col)
     {
-        Debug.Log("Hit Wall");
         if (col.gameObject.tag == "Wall" && !bouncy)
         {
             Debug.Log("Shell hit wall and dies");

@@ -24,7 +24,7 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     public float BaseHealth = 20;
     public float BaseArmour = 3;
     public float BaseDamage = 5;
-    public float BaseFireRate = 1;
+    public float BaseFireRate = 0.2f;
     public int BaseShell = 1; // default Shell type, will be changed by Power up's
 
     [Header("Stat Modifiers")] // either to mod "Core Stats" at start ... and/or to apply Power Up goodies
@@ -48,6 +48,7 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     float C_FireRate        { get { return BaseFireRate * ModFireRate; } }
     public float CurrentSpeed {get; private set;}
     private int C_ShellType = 1;
+    private Rigidbody RB;
 
 
     [SerializeField]
@@ -79,11 +80,13 @@ public class ThirtiesTankControls : MonoBehaviourPun {
 
         ChangeColor(OwnTeamColor);
         transform.position = Spawn;
+        RB = GetComponent<Rigidbody>();
 
 
-    }
 
-    [PunRPC] void ChangeColor (Color color)
+}
+
+[PunRPC] void ChangeColor (Color color)
     {
         Renderer[] RendList = GetComponentsInChildren<Renderer>();
         foreach ( Renderer Rend in RendList)
@@ -115,8 +118,8 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     {
         // Reduce cooldown
         Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
-        if (Cooldown <=0) // Auto fire for testing
-        //if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
+        //if (Cooldown <=0) // Auto fire for testing
+        if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
         {
             Fire(C_Damage, _firePos.transform.position, _firePos.transform.rotation, C_ShellType, OwnTeamColor);
             Cooldown = C_FireRate;
@@ -135,15 +138,15 @@ public class ThirtiesTankControls : MonoBehaviourPun {
     void ControlMovement()
     {
         // Tank Hull Forward / Backward input
-        if (Input.GetKey("w")) CurrentSpeed += C_Accel;
-        if (Input.GetKey("s")) CurrentSpeed -= C_Accel;
+        if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel); //CurrentSpeed += C_Accel;
+        if (Input.GetKey("s")) RB.AddForce(-transform.forward * C_Accel); //CurrentSpeed -= C_Accel;
         if (!Input.GetKey("w") && !Input.GetKey("s")) // no input deceleration ... stops @ 0
         {
             if (CurrentSpeed > 0) { CurrentSpeed = Mathf.Max(0, CurrentSpeed - (C_Accel / 4)); }
             else { CurrentSpeed = Mathf.Min(0, CurrentSpeed + (C_Accel / 4)); }
         }
         CurrentSpeed = Mathf.Clamp(CurrentSpeed, C_ReverseSpeedMax, C_SpeedMax); // Clamp Speed
-        transform.Translate(CurrentSpeed * Time.deltaTime * Vector3.forward);
+        //transform.Translate(CurrentSpeed * Time.deltaTime * Vector3.forward);
 
         // Tank Hull Rotation
         if (Input.GetKey("a")) transform.Rotate(-C_TurnRate *Time.deltaTime * Vector3.up);
