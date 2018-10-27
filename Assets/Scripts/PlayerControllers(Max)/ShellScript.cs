@@ -17,6 +17,7 @@ public class ShellScript : MonoBehaviour
     public float life;
     public bool bouncy;
     private Rigidbody RB;
+    public float ArmingTime = 0.05f; // required to prevent hitting own collider (or could eventually use an owner ID .. but that would prevent "accidental" bounce self kills)
 
 	// Use this for initialization
 	void Start () {
@@ -27,7 +28,8 @@ public class ShellScript : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-        // Move handled by RigidBody
+        // Movement handled by RigidBody
+        ArmingTime = Mathf.Max(0, ArmingTime - Time.deltaTime);
 	}
 
     void Configure ()
@@ -46,7 +48,23 @@ public class ShellScript : MonoBehaviour
         // Switch for "Others" inc bouncy and further customising
         switch (type)
         {
-            case 1:
+            case 1: // basic Default Shell
+                bouncy = false;
+                break;
+            case 2: // Bouncy Shell
+                bouncy = true;
+                break;
+            case 3: // Triple Shot
+                bouncy = false;
+                for (int i = -1; i <= 1; i +=2)
+                { 
+                    GameObject clone = Instantiate(gameObject);
+                    clone.GetComponent<ShellScript>().type = 1;
+                    // Care of https://answers.unity.com/questions/316918/local-forward.html (27 Oct 2018)
+                    //clone.transform.Translate(clone.transform.worldToLocalMatrix.MultiplyVector(clone.transform.forward) * 0.1f * i);
+                    clone.transform.Rotate(clone.transform.up, 4 * i);
+                    clone.transform.Translate(clone.transform.forward * i * 0.01f); // a bit buggy here ..... maybe a timed callback?
+                }
                 break;
             default:
                 break;
@@ -57,12 +75,23 @@ public class ShellScript : MonoBehaviour
     }
 
     // Collision Script
-    void OnCollisionEnter (Collision col)
+    void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag == "Wall" && !bouncy)
+        //if (ArmingTime > 0) Debug.Log("Too soon : Arming = " + ArmingTime.ToString());
+        if (ArmingTime <= 0)
         {
-            Debug.Log("Shell hit wall and dies");
-            Destroy(gameObject);
+            IDamageable dam = col.gameObject.GetComponent<IDamageable>();
+            if (dam != null)
+            {
+                dam.TakeDamage(dmg);
+                Debug.Log("Shell Injecting damage");
+                Destroy(gameObject); // Add Explosion animation here too
+            }
+            else if (!bouncy)
+            {
+                Debug.Log("Shell hits something not IDamageable and dies");
+                Destroy(gameObject);
+            }
         }
     }
 
