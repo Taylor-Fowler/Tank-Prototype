@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 using Photon.Pun;
 using Photon.Realtime;
@@ -10,30 +11,84 @@ namespace Network
     {
         public NetworkService NetworkService { get; private set; }
         public ManagerStatus Status { get; private set; }
-        
+
+        public List<RoomInfo> CachedRooms { get; private set; }
+
+        public delegate void RoomCacheUpdate(List<RoomInfo> rooms);
+        public RoomCacheUpdate OnRoomCacheUpdate;
+
+        #region PUN2 API
+        public override void OnConnectedToMaster()
+        {
+            Debug.Log("[NetworkManager] OnConnectedToMaster");
+            Status = ManagerStatus.Started;
+
+            PhotonNetwork.JoinLobby();
+        }
+
+        public override void OnRoomListUpdate(List<RoomInfo> roomList)
+        {
+            Debug.Log("[NetworkManager] OnRoomListUpdate");
+
+            // Loop through all the currently cached rooms and REMOVE,
+            // UPDATE or ADD rooms based on the updated room list given.
+            foreach (var room in roomList)
+            {
+                int cachedIndex = CachedRooms.IndexOf(room);
+                bool valid = room.PlayerCount != 0;
+
+                if (cachedIndex != -1)
+                {
+                    if (valid)
+                    {
+                        CachedRooms[cachedIndex] = room;
+                    }
+                    else
+                    {
+                        CachedRooms.RemoveAt(cachedIndex);
+                    }
+                }
+                else if (valid)
+                {
+
+                    CachedRooms.Add(room);
+                }
+            }
+
+            if(OnRoomCacheUpdate != null)
+            {
+                OnRoomCacheUpdate(CachedRooms);
+            }
+        }
+
+        public override void OnCreatedRoom()
+        {
+            Debug.Log("[NetworkManager] OnCreatedRoom");
+        }
+
+        public override void OnJoinedRoom()
+        {
+            Debug.Log("[NetworkManager] OnJoinedRoom");
+        }
+
+        public override void OnLeftRoom()
+        {
+            Debug.Log("[NetworkManager] OnLeftRoom");
+        }
+        #endregion
+
         public void Startup(NetworkService networkService)
         {
             Status = ManagerStatus.Initializing;
 
             NetworkService = networkService;
+            CachedRooms = new List<RoomInfo>();
             ConnectToServer();
         }
 
-        public override void OnConnectedToMaster()
+        public void CreatePublicRoom(string roomName, int maxPlayers)
         {
-            Debug.Log("Connected to Master");
-
-            Status = ManagerStatus.Started;
-            PhotonNetwork.JoinLobby();
-        }
-
-        public override void OnCreatedRoom()
-        {
-            Debug.Log("OnCreatedRoom");
-        }
-
-        public void CreatePublicRoom(UserData callingUser, string roomName, int maxPlayers)
-        {
+            UserData callingUser = GameController.Instance.PlayerManager.User;
             RoomOptions roomOptions = new RoomOptions
             {
                 CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name" },
@@ -47,12 +102,12 @@ namespace Network
                 IsOpen = true
             };
 
-
             PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID, roomOptions, PhotonNetwork.CurrentLobby);
         }
 
-        public void CreatePrivateRoom(UserData callingUser, string roomName, int maxPlayers, string roomPassword)
+        public void CreatePrivateRoom(string roomName, int maxPlayers, string roomPassword)
         {
+            UserData callingUser = GameController.Instance.PlayerManager.User;
             RoomOptions roomOptions = new RoomOptions
             {
                 CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name", "room_pass" },
@@ -67,23 +122,17 @@ namespace Network
                 IsOpen = true
             };
 
-
             PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID, roomOptions, PhotonNetwork.CurrentLobby);
+        }
+
+        public void JoinRoom(string roomName)
+        {
+            PhotonNetwork.JoinRoom(roomName);
         }
 
         public void StartGame()
         {
             PhotonNetwork.LoadLevel(1);
-        }
-
-        public override void OnJoinedRoom()
-        {
-            Debug.Log("OnJoinedRoom");
-        }
-
-        public override void OnLeftRoom()
-        {
-            Debug.Log("OnLeftRoom");
         }
         
         private static bool ConnectToServer()
@@ -96,7 +145,5 @@ namespace Network
 
             return true;
         }
-
-
     }
 }

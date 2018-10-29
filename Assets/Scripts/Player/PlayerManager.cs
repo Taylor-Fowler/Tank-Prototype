@@ -22,7 +22,7 @@ public class PlayerManager : MonoBehaviour, IManager
 
     public void Startup(NetworkService networkService)
     {
-        Status = ManagerStatus.Started;
+        Status = ManagerStatus.Initializing;
 
         NetworkService = networkService;
         StartCoroutine(NetworkService.DownloadUserData(GameController.Instance.DeviceID, GetUserData));
@@ -35,6 +35,7 @@ public class PlayerManager : MonoBehaviour, IManager
 
         if(response.Status == NetworkRequestStatus.Success)
         {
+            Status = ManagerStatus.Started;
             User = JsonUtility.FromJson<UserData>(response.Message);
 
 #if UNITY_EDITOR

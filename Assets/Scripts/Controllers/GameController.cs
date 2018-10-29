@@ -48,7 +48,6 @@ public class GameController : MonoBehaviour {
     // --------------------------//
 
 
-
     // Doesn't do much at the mo ... probably will configure via a Plug-in eventually
     void Start () {
         // Get Unique Device ID N.B. was attached to a "if null" condition .... fell over on the second run (I'm guessing it was internally saves as something)
@@ -67,11 +66,6 @@ public class GameController : MonoBehaviour {
 
         InjectServices();
     }
-	
-	// Update is called once per frame // currently masked to save a bit of update overhead
-	//void Update () {
-	//	
-	//}
 
     void InjectServices()
     {

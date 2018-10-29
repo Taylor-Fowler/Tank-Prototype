@@ -13,14 +13,27 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public Text ServerPlayersInRoomsCountText;
     public Text ServerPlayersOnMasterCountText;
 
+    public GameObject ViewRoomCanvas;
+    public GameObject ViewLobbyCanvas;
+    public GameObject[] AllCanvases;
+
+    #region UNITY API
     private void Start()
     {
         Messenger.AddListener("OnDeviceIdNotRegistered", OnDeviceIdNotRegistered);
-        Messenger.AddListener("OnConnectedToMaster", OnConnectedToMaster);
         Messenger<string>.AddListener("OnUserDataUpdate", OnUserDataUpdate);
         Messenger<string>.AddListener("OnUserDataDownloadError", OnUserDataDownloadError);
     }
 
+    private void OnDestroy()
+    {
+        Messenger.RemoveListener("OnDeviceIdNotRegistered", OnDeviceIdNotRegistered);
+        Messenger<string>.RemoveListener("OnUserDataUpdate", OnUserDataUpdate);
+        Messenger<string>.RemoveListener("OnUserDataDownloadError", OnUserDataDownloadError);
+    }
+    #endregion
+
+    #region PUN2 API
     public override void OnConnectedToMaster()
     {
         ServerConnectionText.text = "Connected to Server";
@@ -29,30 +42,53 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        Debug.Log("OnJoinedLobby");
+        Debug.Log("[MainMenuNav] OnJoinedLobby");
 
         UpdateOnlinePlayerStatistics();
     }
 
     public override void OnLobbyStatisticsUpdate(List<TypedLobbyInfo> lobbyStatistics)
     {
-        Debug.Log("OnLobbyStatisticsUpdate");
+        Debug.Log("[MainMenuNav] OnLobbyStatisticsUpdate");
 
         UpdateOnlinePlayerStatistics();
     }
 
-    public void QuitApplication()
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        Application.Quit();
+        Debug.Log("[MainMenuNav] OnRoomListUpdate");
+
+        UpdateOnlinePlayerStatistics();
     }
 
-    private void UpdateOnlinePlayerStatistics()
+    public override void OnJoinedRoom()
     {
-        ServerPlayerCountText.text = "Total Players Online: " + PhotonNetwork.CountOfPlayers.ToString();
-        ServerPlayersInRoomsCountText.text = "Players In Rooms: " + PhotonNetwork.CountOfPlayersInRooms.ToString();
-        ServerPlayersOnMasterCountText.text = "Players In Lobbies: " + PhotonNetwork.CountOfPlayersOnMaster.ToString();
+        ViewRoomCanvas.SetActive(true);
+
+        foreach(var canvas in AllCanvases)
+        {
+            if(canvas != ViewRoomCanvas)
+            {
+                canvas.SetActive(false);
+            }
+        }
     }
 
+    public override void OnLeftRoom()
+    {
+        ViewLobbyCanvas.SetActive(true);
+
+        foreach (var canvas in AllCanvases)
+        {
+            if (canvas != ViewLobbyCanvas)
+            {
+                canvas.SetActive(false);
+            }
+        }
+    }
+    #endregion
+
+    #region CUSTOM EVENTS
     private void OnDeviceIdNotRegistered()
     {
         // TODO: Add a registration icon/button that takes to a canvas to
@@ -74,13 +110,18 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
         UserDataConnectionText.text = "Error";
         UserDataConnectionText.color = Color.red;
     }
+    #endregion
 
-
-    private void OnDestroy()
+    public void QuitApplication()
     {
-        Messenger.RemoveListener("OnDeviceIdNotRegistered", OnDeviceIdNotRegistered);
-        Messenger.RemoveListener("OnConnectedToMaster", OnConnectedToMaster);
-        Messenger<string>.RemoveListener("OnUserDataUpdate", OnUserDataUpdate);
-        Messenger<string>.RemoveListener("OnUserDataDownloadError", OnUserDataDownloadError);
+        Application.Quit();
     }
+
+    private void UpdateOnlinePlayerStatistics()
+    {
+        ServerPlayerCountText.text = "Total Players Online: " + PhotonNetwork.CountOfPlayers.ToString();
+        ServerPlayersInRoomsCountText.text = "Players In Rooms: " + PhotonNetwork.CountOfPlayersInRooms.ToString();
+        ServerPlayersOnMasterCountText.text = "Players In Lobbies: " + PhotonNetwork.CountOfPlayersOnMaster.ToString();
+    }
+
 }

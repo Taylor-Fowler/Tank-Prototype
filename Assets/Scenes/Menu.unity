@@ -376,6 +376,75 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 81957948}
   m_CullTransparentMesh: 0
+--- !u!1 &186213690
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 186213691}
+  - component: {fileID: 186213693}
+  - component: {fileID: 186213692}
+  m_Layer: 5
+  m_Name: Gradient Overlay Panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &186213691
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 186213690}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1726425236}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &186213692
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 186213690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.32595584, g: 0.10435208, b: 0.3301887, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 21300000, guid: 9df27cc8ee50d0348a7ded7f82c4bac2, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+--- !u!222 &186213693
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 186213690}
+  m_CullTransparentMesh: 0
 --- !u!1 &186888795
 GameObject:
   m_ObjectHideFlags: 0
@@ -889,7 +958,7 @@ GameObject:
   - component: {fileID: 295215972}
   - component: {fileID: 295215976}
   m_Layer: 5
-  m_Name: Rooms Display Canvas
+  m_Name: View Lobby Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -980,7 +1049,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 295215971}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64e3ece60988f664e8cca0ffce98131c, type: 3}
+  m_Script: {fileID: 11500000, guid: fa99e2a106b9cbf4ea033007075c2d0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   RoomNamesAnchor: {fileID: 1817348834}
@@ -993,13 +1062,7 @@ MonoBehaviour:
   RoomJoinPrefab: {fileID: 1330518662872156, guid: 28152efcc502bd844b94f36ca8bfc217,
     type: 2}
   RoomLockPrefab: {fileID: 0}
-  RoomAuthenticationObjects:
-    Prefab: {fileID: 1685387560}
-    PasswordInput: {fileID: 1656162266}
-    ConfirmButton: {fileID: 2066470793}
-    CloseButton: {fileID: 1232007721}
-  RoomNameInput: {fileID: 660862647}
-  PrivateRoomPassword: {fileID: 425428692}
+  _joinRoom: {fileID: 1685387564}
 --- !u!1 &363696687
 GameObject:
   m_ObjectHideFlags: 0
@@ -1277,7 +1340,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 295215976}
+      - m_Target: {fileID: 1114970183}
         m_MethodName: SetMaxPlayers
         m_Mode: 2
         m_Arguments:
@@ -1850,8 +1913,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 295215976}
-        m_MethodName: CreateRoom
+      - m_Target: {fileID: 1114970183}
+        m_MethodName: Create
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1860,28 +1923,6 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1114970178}
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 295215971}
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
@@ -2380,6 +2421,14 @@ MonoBehaviour:
   ServerPlayerCountText: {fileID: 2125654411}
   ServerPlayersInRoomsCountText: {fileID: 1098556147}
   ServerPlayersOnMasterCountText: {fileID: 372664129}
+  ViewRoomCanvas: {fileID: 1429991183}
+  ViewLobbyCanvas: {fileID: 295215971}
+  AllCanvases:
+  - {fileID: 1463184399}
+  - {fileID: 413470621}
+  - {fileID: 295215971}
+  - {fileID: 1114970178}
+  - {fileID: 1429991183}
 --- !u!4 &636982675
 Transform:
   m_ObjectHideFlags: 0
@@ -4137,6 +4186,7 @@ GameObject:
   - component: {fileID: 1114970181}
   - component: {fileID: 1114970180}
   - component: {fileID: 1114970179}
+  - component: {fileID: 1114970183}
   m_Layer: 5
   m_Name: Create Room Canvas
   m_TagString: Untagged
@@ -4220,6 +4270,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1114970183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1114970178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5834cc345ef4be640b024383ad98226f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RoomNameInput: {fileID: 660862647}
+  RoomPasswordInput: {fileID: 425428692}
 --- !u!1001 &1125911776
 Prefab:
   m_ObjectHideFlags: 0
@@ -5321,7 +5384,7 @@ GameObject:
   - component: {fileID: 1242803721}
   - component: {fileID: 1242803720}
   m_Layer: 5
-  m_Name: Prive Room Panel
+  m_Name: Private Room Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5793,7 +5856,7 @@ GameObject:
   - component: {fileID: 1429603630}
   - component: {fileID: 1429603629}
   m_Layer: 5
-  m_Name: Create Room Text
+  m_Name: Leave Room Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5837,11 +5900,11 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_Font: {fileID: 12800000, guid: 495c9e2a934bcc640a8d7427b13cb680, type: 3}
+    m_FontSize: 18
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 1
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -5849,7 +5912,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Create Room
+  m_Text: LEAVE ROOM
 --- !u!222 &1429603630
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5868,6 +5931,7 @@ GameObject:
   - component: {fileID: 1429991186}
   - component: {fileID: 1429991185}
   - component: {fileID: 1429991184}
+  - component: {fileID: 1429991188}
   m_Layer: 5
   m_Name: View Room Canvas
   m_TagString: Untagged
@@ -5902,7 +5966,7 @@ MonoBehaviour:
   m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -5951,6 +6015,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1429991188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1429991183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09477da918dfa454cbd098877f8f875b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1450816493
 GameObject:
   m_ObjectHideFlags: 0
@@ -7180,6 +7255,7 @@ GameObject:
   - component: {fileID: 1685387561}
   - component: {fileID: 1685387563}
   - component: {fileID: 1685387562}
+  - component: {fileID: 1685387564}
   m_Layer: 5
   m_Name: Join Room Authentication Cover Panel
   m_TagString: Untagged
@@ -7240,6 +7316,22 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1685387560}
   m_CullTransparentMesh: 0
+--- !u!114 &1685387564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1685387560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3d9a9ac217c4e341b752fea17fc6728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _authentication:
+    Panel: {fileID: 1685387560}
+    PasswordInput: {fileID: 1656162266}
+    ConfirmButton: {fileID: 2066470793}
+    CloseButton: {fileID: 1232007721}
 --- !u!1 &1726425235
 GameObject:
   m_ObjectHideFlags: 0
@@ -7252,7 +7344,7 @@ GameObject:
   - component: {fileID: 1726425238}
   - component: {fileID: 1726425237}
   m_Layer: 5
-  m_Name: Create Room Button
+  m_Name: Leave Room Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7266,17 +7358,18 @@ RectTransform:
   m_GameObject: {fileID: 1726425235}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1429603628}
+  - {fileID: 186213691}
   m_Father: {fileID: 1491597467}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 30}
-  m_Pivot: {x: 1, y: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: -258, y: -10}
+  m_SizeDelta: {x: 140, y: 50}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1726425237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7316,9 +7409,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 295215971}
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 1429991188}
+        m_MethodName: LeaveRoom
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -7326,17 +7419,6 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1114970178}
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
@@ -7352,15 +7434,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.29169634, g: 0.6025963, b: 0.8962264, a: 1}
+  m_Color: {r: 0.9607843, g: 0.44705883, b: 0.3137255, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 43a48b01bde486648965169eceddee91, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -9114,7 +9196,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 295215976}
+      - m_Target: {fileID: 1114970183}
         m_MethodName: TogglePrivateRoom
         m_Mode: 2
         m_Arguments:
