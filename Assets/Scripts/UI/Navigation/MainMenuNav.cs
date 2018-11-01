@@ -63,6 +63,8 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        Debug.Log("[MainMenuNav] OnJoinedRoom");
+
         ViewRoomCanvas.SetActive(true);
 
         foreach(var canvas in AllCanvases)

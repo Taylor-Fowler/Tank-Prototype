@@ -42,27 +42,25 @@ public class GameController : MonoBehaviour {
         }
         instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // add Comms
+        Comms = gameObject.AddComponent<CommsManager>();
+        NetworkManager = gameObject.AddComponent<NetworkManager>();
+        PlayerManager = gameObject.AddComponent<PlayerManager>();
+
+        _managers = new List<IManager>();
+        _managers.Add(NetworkManager);
+        _managers.Add(PlayerManager);
     }
     //---------------------------//
     // Finished Singleton set up //
     // --------------------------//
-
 
     // Doesn't do much at the mo ... probably will configure via a Plug-in eventually
     void Start () {
         // Get Unique Device ID N.B. was attached to a "if null" condition .... fell over on the second run (I'm guessing it was internally saves as something)
         DeviceID = SystemInfo.deviceUniqueIdentifier;
         Debug.Log("DevID: " + DeviceID + " Length : " + DeviceID.Length + " Chars");
-
-        _managers = new List<IManager>();
-        
-        // add Comms
-        Comms = gameObject.AddComponent<CommsManager>();
-        NetworkManager = gameObject.AddComponent<NetworkManager>();
-        PlayerManager = gameObject.AddComponent<PlayerManager>();
-
-        _managers.Add(NetworkManager);
-        _managers.Add(PlayerManager);
 
         InjectServices();
     }

@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using UnityEngine;
+using Photon.Pun;
 using Network;
-using UnityEngine;
+
 
 public class PlayerManager : MonoBehaviour, IManager
 {
@@ -16,7 +16,6 @@ public class PlayerManager : MonoBehaviour, IManager
     private UserData _user;
 #endif
 
-
     [SerializeField]
     private float _requestPlayerDataDelay = 3.0f;
 
@@ -30,8 +29,8 @@ public class PlayerManager : MonoBehaviour, IManager
 
     private void GetUserData(NetworkResponseMessage response)
     {
-        Debug.Log("Response Status: " + response.Status.ToString());
-        Debug.Log("Response Message: " + response.Message);
+        Debug.Log("[PlayerManager] GetUserData - response.status: " + response.Status.ToString());
+        Debug.Log("[PlayerManager] GetUserData - response.message: " + response.Message);
 
         if(response.Status == NetworkRequestStatus.Success)
         {
@@ -45,15 +44,25 @@ public class PlayerManager : MonoBehaviour, IManager
             if(User.Player_ID == -1)
             {
                 Messenger.Broadcast("OnDeviceIdNotRegistered");
+                // TODO: Popup with Register or Quit Options
             }
             else
             {
                 Messenger<string>.Broadcast("OnUserDataUpdate", User.Username);
+                GameController.Instance.NetworkManager.Started(OnNetworkManagerStarted);
             }
         }
         else
         {
             Messenger<string>.Broadcast("OnUserDataDownloadError", response.Message);
         }
+    }
+
+    private void OnNetworkManagerStarted()
+    {
+        // TODO: Guest Nickname if the device ID is already signed in (i.e)
+        //       STORE Online players in DB
+        //       IF Device ID already online, then add
+        PhotonNetwork.LocalPlayer.NickName = User.Username;
     }
 }

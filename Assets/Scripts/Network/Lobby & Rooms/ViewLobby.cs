@@ -7,15 +7,19 @@ using Photon.Realtime;
 
 public class ViewLobby : MonoBehaviour
 {
-    public GameObject RoomNamesAnchor;
-    public GameObject RoomCreatorsAnchor;
-    public GameObject RoomPlayersAnchor;
-    public GameObject RoomLockAnchor;
-    public GameObject RoomJoinAnchor;
+    public Transform RoomNamesAnchor;
+    public Transform RoomCreatorsAnchor;
+    public Transform RoomPlayersAnchor;
+    public Transform RoomLockAnchor;
+    public Transform RoomJoinAnchor;
 
     public GameObject RoomDetailsPrefab;
+    public GameObject RoomDetailsBackgroundPrefab;
     public GameObject RoomJoinPrefab;
     public GameObject RoomLockPrefab;
+
+    public Color DefaultBackgroundColour;
+    public Color AlternateBackgroundColour;
 
     [SerializeField]
     private JoinRoom _joinRoom;
@@ -23,15 +27,17 @@ public class ViewLobby : MonoBehaviour
     private List<GameObject> _spawnedRoomDetails = new List<GameObject>();
 
     #region UNITY API
-    public void OnEnable()
+    private void Start()
     {
-        GameController.Instance.NetworkManager.OnRoomCacheUpdate += OnRoomCacheUpdate;
-        OnRoomCacheUpdate(GameController.Instance.NetworkManager.CachedRooms);
+        GameController.Instance.NetworkManager.Started(OnNetworkManagerStarted);
     }
 
-    public void OnDisable()
+    private void OnDestroy()
     {
-        GameController.Instance.NetworkManager.OnRoomCacheUpdate -= OnRoomCacheUpdate;
+        if(GameController.Instance.NetworkManager.Status == ManagerStatus.Started)
+        {
+            GameController.Instance.NetworkManager.OnRoomCacheUpdate -= OnRoomCacheUpdate;
+        }
     }
     #endregion
 
@@ -39,53 +45,108 @@ public class ViewLobby : MonoBehaviour
     private void OnRoomCacheUpdate(List<RoomInfo> cachedRooms)
     {
         ClearRoomDetails();
+
+        int i = 0;
         foreach (var room in cachedRooms)
         {
-            UpdateRoomDetails(room);
+            UpdateRoomDetails(room, 
+                (
+                    i % 2 == 0 ? 
+                    DefaultBackgroundColour : 
+                    AlternateBackgroundColour
+                )
+            );
+
+            i++;
         }
     }
     #endregion
 
+    private void OnNetworkManagerStarted()
+    {
+        GameController.Instance.NetworkManager.OnRoomCacheUpdate += OnRoomCacheUpdate;
+        OnRoomCacheUpdate(GameController.Instance.NetworkManager.CachedRooms);
+    }
+
     private void ClearRoomDetails()
     {
         foreach (var go in _spawnedRoomDetails)
-            Destroy(go);
+        {
+            DestroyImmediate(go);
+        }
 
         _spawnedRoomDetails.Clear();
     }
 
-    private void UpdateRoomDetails(RoomInfo room)
+    private void UpdateRoomDetails(RoomInfo room, Color colour)
     {
-        Debug.Log("updateRoomDetails");
-        GameObject name = Instantiate(RoomDetailsPrefab, RoomNamesAnchor.transform);
-        name.GetComponent<Text>().text = (string)room.CustomProperties["room_name"];
+        string roomName = (string)room.CustomProperties["room_name"];
+        string roomHost = (string)room.CustomProperties["room_host"];
+        //string deviceID = (string)room.CustomProperties["room_host_device_id"];
 
-        _spawnedRoomDetails.Add(name);
 
-        GameObject user = Instantiate(RoomDetailsPrefab, RoomCreatorsAnchor.transform);
-        user.GetComponent<Text>().text = (string)room.CustomProperties["room_host"];
+        AddRoomName(AddBackground(colour, RoomNamesAnchor), roomName);
+        AddRoomCreator(AddBackground(colour, RoomCreatorsAnchor), roomHost);
+        AddPlayerCount(AddBackground(colour, RoomPlayersAnchor), room.PlayerCount, room.MaxPlayers);
 
-        _spawnedRoomDetails.Add(user);
-
-        GameObject playerCount = Instantiate(RoomDetailsPrefab, RoomPlayersAnchor.transform);
-        playerCount.GetComponent<Text>().text = room.PlayerCount.ToString() + "/" + room.MaxPlayers.ToString();
-
-        _spawnedRoomDetails.Add(playerCount);
-
-        GameObject joinButton = Instantiate(RoomJoinPrefab, RoomJoinAnchor.transform);
         if (room.CustomProperties.ContainsKey("room_pass"))
         {
-            joinButton.GetComponent<Button>().onClick.AddListener(
-                _joinRoom.RegisterForAuthentication(room.Name, (string)room.CustomProperties["room_pass"])
-            );
+            AddRoomPassword(AddBackground(colour, RoomLockAnchor));
+            AddJoinButton(AddBackground(colour, RoomJoinAnchor), room.Name, (string)room.CustomProperties["room_pass"]);
         }
         else
         {
-            joinButton.GetComponent<Button>().onClick.AddListener(
-                _joinRoom.RegisterForAuthentication(room.Name)
-            );
+            AddBackground(colour, RoomLockAnchor);
+            AddJoinButton(AddBackground(colour, RoomJoinAnchor), room.Name);
         }
+    }
 
-        _spawnedRoomDetails.Add(joinButton);
+    private void AddRoomName(Transform parent, string roomName)
+    {
+        GameObject name = Instantiate(RoomDetailsPrefab, parent);
+        name.GetComponent<Text>().text = roomName;
+    }
+
+    private void AddRoomCreator(Transform parent, string creator)
+    {
+        GameObject user = Instantiate(RoomDetailsPrefab, parent);
+        user.GetComponent<Text>().text = creator;
+    }
+
+    private void AddPlayerCount(Transform parent, int playersInRoom, int maxPlayers)
+    {
+        GameObject playerCount = Instantiate(RoomDetailsPrefab, parent);
+        playerCount.GetComponent<Text>().text = playersInRoom.ToString() + "/" + maxPlayers.ToString();
+    }
+
+    private void AddRoomPassword(Transform parent)
+    {
+        GameObject lockIcon = Instantiate(RoomLockPrefab, parent);
+    }
+
+    private void AddJoinButton(Transform parent, string roomName)
+    {
+        GameObject joinButton = Instantiate(RoomJoinPrefab, parent);
+        joinButton.GetComponent<Button>().onClick.AddListener(
+                _joinRoom.RegisterForAuthentication(roomName)
+            );
+    }
+
+    private void AddJoinButton(Transform parent, string roomName, string password)
+    {
+        GameObject joinButton = Instantiate(RoomJoinPrefab, parent);
+        joinButton.GetComponent<Button>().onClick.AddListener
+            (
+                _joinRoom.RegisterForAuthentication(roomName, password)
+            );
+    }
+
+    private Transform AddBackground(Color colour, Transform parent)
+    {
+        GameObject background = Instantiate(RoomDetailsBackgroundPrefab, parent);
+        background.GetComponent<Image>().color = colour;
+        _spawnedRoomDetails.Add(background);
+
+        return background.transform;
     }
 }

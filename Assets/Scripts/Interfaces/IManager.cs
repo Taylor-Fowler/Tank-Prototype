@@ -1,5 +1,5 @@
+using System;
 using Network;
-using UnityEngine;
 
 public interface IManager
 {

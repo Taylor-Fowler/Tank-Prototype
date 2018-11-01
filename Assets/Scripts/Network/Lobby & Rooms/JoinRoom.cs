@@ -53,21 +53,9 @@ public class JoinRoom : MonoBehaviour
     private JoinRoomAuthentication _authentication;
 
 
-    public UnityAction RegisterForAuthentication(string roomName, string roomPass = "")
+    public UnityAction RegisterForAuthentication(string roomName, string roomPass)
     {
-        if(_authentication == null)
-        {
-            _authentication = new JoinRoomAuthentication();
-            _authentication.Initialise();
-        }
-
-        if(roomPass == "")
-        {
-            return delegate 
-            {
-                Join(roomName);
-            };
-        }
+        InitialiseAuthentication();
 
         return delegate 
         {
@@ -78,6 +66,24 @@ public class JoinRoom : MonoBehaviour
                 }, 
                 roomPass);
         };
+    }
+
+    public UnityAction RegisterForAuthentication(string roomName)
+    {
+        InitialiseAuthentication();
+        return delegate
+        {
+            Join(roomName);
+        };
+    }
+
+    private void InitialiseAuthentication()
+    {
+        if (_authentication == null)
+        {
+            _authentication = new JoinRoomAuthentication();
+            _authentication.Initialise();
+        }
     }
 
     private void Join(string roomName)

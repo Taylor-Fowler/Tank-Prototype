@@ -3,8 +3,8 @@
 [System.Serializable]
 public class UserData
 {
-    public int Player_ID;
-    public string Username;
+    public int Player_ID = -1;
+    public string Username = "Guest";
     public string Device_ID;
     public int 
         Games_Played,

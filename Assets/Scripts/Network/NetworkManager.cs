@@ -17,11 +17,19 @@ namespace Network
         public delegate void RoomCacheUpdate(List<RoomInfo> rooms);
         public RoomCacheUpdate OnRoomCacheUpdate;
 
+        public delegate void NetworkManagerStarted();
+        private NetworkManagerStarted _onNetworkManagerStarted;
+
         #region PUN2 API
         public override void OnConnectedToMaster()
         {
             Debug.Log("[NetworkManager] OnConnectedToMaster");
             Status = ManagerStatus.Started;
+            
+            if(_onNetworkManagerStarted != null)
+            {
+                _onNetworkManagerStarted();
+            }
 
             PhotonNetwork.JoinLobby();
         }
@@ -60,21 +68,6 @@ namespace Network
                 OnRoomCacheUpdate(CachedRooms);
             }
         }
-
-        public override void OnCreatedRoom()
-        {
-            Debug.Log("[NetworkManager] OnCreatedRoom");
-        }
-
-        public override void OnJoinedRoom()
-        {
-            Debug.Log("[NetworkManager] OnJoinedRoom");
-        }
-
-        public override void OnLeftRoom()
-        {
-            Debug.Log("[NetworkManager] OnLeftRoom");
-        }
         #endregion
 
         public void Startup(NetworkService networkService)
@@ -86,6 +79,18 @@ namespace Network
             ConnectToServer();
         }
 
+        public void Started(NetworkManagerStarted callback)
+        {
+            if(Status != ManagerStatus.Started)
+            {
+                _onNetworkManagerStarted += callback;
+            }
+            else
+            {
+                callback();
+            }
+        }
+
         public void CreatePublicRoom(string roomName, int maxPlayers)
         {
             UserData callingUser = GameController.Instance.PlayerManager.User;
@@ -95,6 +100,7 @@ namespace Network
                 CustomRoomProperties = new PhotonHashtable()
                 {
                     { "room_host", callingUser.Username },
+                    //{ "room_host_device_id", callingUser.Device_ID },
                     { "room_name", roomName }
                 },
                 MaxPlayers = (byte)maxPlayers,
@@ -114,6 +120,7 @@ namespace Network
                 CustomRoomProperties = new PhotonHashtable()
                 {
                     { "room_host", callingUser.Username },
+                    //{ "room_host_device_id", callingUser.Device_ID },
                     { "room_name", roomName },
                     { "room_pass", roomPassword }
                 },
@@ -142,7 +149,6 @@ namespace Network
                 Debug.LogError("Error connecting to Server");
                 return false;
             }
-
             return true;
         }
     }
