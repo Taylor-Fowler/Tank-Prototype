@@ -14,7 +14,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public Vector3 Spawn = new Vector3(20f, 0.21f, 20f); // Dev purposes spawn only
 
     public bool TESTING = true; // toggle "true" means can test without Photon
-    [Header("Core Stats")] // Core Stats will be Customised by Children
+    [Header("Core Stats")] // Core Stats are Customised by Children
     public float BaseSpeedMax = 1f;
     public float BaseAccel = 1f;
     public float BaseTurnRate = 1f;
@@ -26,7 +26,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public int BaseShell = 1; // default Shell type, will be changed by Power up's
     public float BaseMass = 1;
 
-    [Header("Stat Modifiers")] // either to mod "Core Stats" at start ... and/or to apply Power Up goodies
+    [Header("Stat Modifiers")] // Changed by Power Up goodies
     public float ModSpeed = 1f;
     public float ModAccel = 1f;
     public float ModTurn = 1f;
@@ -116,11 +116,9 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         ControlFiring();
     }
 
-    // COMMENTED OUT, may revisit, saves a little time at the mo
-    // Update is called once per frame
-    //void Update () {
-	//	
-	//}
+    // Update() COMMENTED OUT, may revisit, saves a little time at the mo
+    //void Update () { }
+
 
     void ControlFiring()
     {
@@ -203,7 +201,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     //End of Interface ITakesPowerUps requirements
     /////////////////////////////////////////
 
-    void ControlWeaponToggles()
+    void ControlWeaponToggles() // For Development only
     {
         if (Input.GetKey("1")) { BaseShell = 1; Debug.Log("Standard Shells"); }
         if (Input.GetKey("2")) { BaseShell = 2; Debug.Log("Bouncy Shells"); }
@@ -245,15 +243,15 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         // Turret (and therefore camera Rotation)
         // N.B. Turret does NOT use Physics
         float TurrToGo = Input.mousePosition.x / Screen.width;
-        // tried various ... this seems to work best with a tapering "dead zone" in the middle
+        // tried various ... this seems to work best with a taper to a "dead zone" in the middle
         //  -------- A           D --------------
         //            \         /
         //              B --- C
         //
         float A = 0.46f;
         float B = 0.49f;
-        float C = 0.51f;
-        float D = 0.54f;
+        float C = 1f - B;
+        float D = 1f - A;
         float AB = B - A;
 
         if (TurrToGo <= A) { Turret.transform.Rotate(new Vector3(0, -C_TurrTurnRate * Time.deltaTime, 0)); }
