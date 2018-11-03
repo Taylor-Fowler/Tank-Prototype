@@ -11,7 +11,9 @@ public class MapController : MonoBehaviour {
     public Transform Wall1;
     public Transform Wall2;
     public Transform Wall3;
-    public Transform PU01;
+    public Transform PUHealth;
+    public Transform PUMove;
+    public Transform PUFire;
     public float PUUpValue = 0.2f;
     private Transform _FloorObjects;
     private Transform _WallObjects;
@@ -73,8 +75,16 @@ public class MapController : MonoBehaviour {
                         break;
                     // anything 11 - 19 = PowerUp Items
                     case 11:
-                        Transform myPU = (Transform)Instantiate(PU01, new Vector3(i, PUUpValue, j), Quaternion.identity);
-                        myPU.transform.parent = _PowerUpObjects;
+                        Transform myPU1 = (Transform)Instantiate(PUHealth, new Vector3(i, PUUpValue, j), Quaternion.identity);
+                        myPU1.transform.parent = _PowerUpObjects;
+                        break;
+                    case 12:
+                        Transform myPU2 = (Transform)Instantiate(PUFire, new Vector3(i, PUUpValue, j), Quaternion.identity);
+                        myPU2.transform.parent = _PowerUpObjects;
+                        break;
+                    case 13:
+                        Transform myPU3 = (Transform)Instantiate(PUMove, new Vector3(i, PUUpValue, j), Quaternion.identity);
+                        myPU3.transform.parent = _PowerUpObjects;
                         break;
                     case 99:
                         Transform mySP = (Transform)Instantiate(SpawnPoint, new Vector3(i, 0.5f, j), Quaternion.identity);
