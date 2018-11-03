@@ -1,7 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Assign this to a Blank Object (The Parent) which has multiple children.
+/// Upon Start() it populates arrays of these children's position and other details IN INSPECTOR ORDER
+/// Each Update(), movement of the Parent is established relative to World Space
+/// Each child is then appropriately Lerped towards the Start position of the next child in the chain
+/// </summary>
 public class TracksLeader : MonoBehaviour {
 
     private Transform _Parent;

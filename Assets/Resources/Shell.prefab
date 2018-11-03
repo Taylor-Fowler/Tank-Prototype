@@ -119,7 +119,7 @@ MonoBehaviour:
   color: {r: 0, g: 0, b: 0, a: 0}
   velocity: 0
   life: 0
-  bouncy: 1
+  bouncy: 0
   ArmingTime: 0.05
 --- !u!135 &135436184451500028
 SphereCollider:
