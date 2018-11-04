@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MapController : MonoBehaviour {
 
@@ -86,6 +84,7 @@ public class MapController : MonoBehaviour {
                         Transform myPU3 = (Transform)Instantiate(PUMove, new Vector3(i, PUUpValue, j), Quaternion.identity);
                         myPU3.transform.parent = _PowerUpObjects;
                         break;
+                    // 99 = SPAWN POINT
                     case 99:
                         Transform mySP = (Transform)Instantiate(SpawnPoint, new Vector3(i, 0.5f, j), Quaternion.identity);
                         mySP.transform.parent = _SpawnPoints;
@@ -103,6 +102,7 @@ public class MapController : MonoBehaviour {
         foreach (Transform child in _FloorObjects) GameObject.Destroy(child.gameObject);
         foreach (Transform child in _WallObjects) GameObject.Destroy(child.gameObject);
         foreach (Transform child in _PowerUpObjects) GameObject.Destroy(child.gameObject);
+        foreach (Transform child in _SpawnPoints) GameObject.Destroy(child.gameObject);
     }
 
 

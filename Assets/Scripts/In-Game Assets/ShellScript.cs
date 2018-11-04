@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ShellType { Standard, Bouncy, Triple } // Placeholder for "when" we go back to implement different shells
+
 public class ShellScript : MonoBehaviour
 {
 
@@ -92,7 +94,7 @@ public class ShellScript : MonoBehaviour
     // Collision Script
     void OnCollisionEnter(Collision col)
     {
-        //if (_armed) // actually redundant, as being armed enables Collision detection .... but we may want to toggle arming on/off and this serves that purpose.
+        //if (_armed) // Currently redundant, as being armed enables Collision detection .... but we may want to toggle arming on/off and this serves that purpose.
         //{
             IDamageable dam = col.gameObject.GetComponent<IDamageable>();
             if (dam != null)
