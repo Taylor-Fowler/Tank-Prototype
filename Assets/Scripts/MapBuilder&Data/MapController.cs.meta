@@ -10,8 +10,9 @@ MonoImporter:
   - Wall1: {fileID: 4728384880197588, guid: 27b2d141f8646ab41bb68fdc94fcf912, type: 2}
   - Wall2: {fileID: 4759440630400998, guid: f2c72cd896e91fd4285d7fd46a2eef87, type: 2}
   - Wall3: {fileID: 4461932386773890, guid: 49bfc07b79042f44b8040e80b137bc82, type: 2}
-  - Wall4: {fileID: 4900314261810044, guid: ff628189911da4e4ba2d134f7ba1febd, type: 2}
-  - PU01: {fileID: 4616015690493952, guid: 52bfa6991e3c3364c964413035afb60b, type: 2}
+  - PUHealth: {fileID: 4267186825757464, guid: 9bfb25348c545464496dd58aebb9da3f, type: 2}
+  - PUMove: {fileID: 4731804788695074, guid: a0ff1cb184831664e99e77649cda2417, type: 2}
+  - PUFire: {fileID: 4345936371468392, guid: e5bb70cda4c84e94f8536b33aabf5788, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

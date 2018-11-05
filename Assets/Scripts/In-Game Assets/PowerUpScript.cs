@@ -10,6 +10,7 @@ public class PowerUpScript : MonoBehaviour {
     private float _HideTime;
     private Renderer[] _Renderers;
     private Collider[] _Colliders;
+    public bool Hidden;
 
     void Start() 
     {
@@ -71,6 +72,7 @@ public class PowerUpScript : MonoBehaviour {
 
     void HideMe()
     {
+        Hidden = true;
         Debug.Log(type.ToString() + " hidden");
         foreach (Renderer r in _Renderers) r.enabled = false;
         foreach (Collider c in _Colliders) c.enabled = false;
@@ -81,6 +83,7 @@ public class PowerUpScript : MonoBehaviour {
         Debug.Log(type.ToString() + " revealed");
         foreach (Renderer r in _Renderers) r.enabled = true;
         foreach (Collider c in _Colliders) c.enabled = true;
+        Hidden = false;
     }
 
 	// Update is called once per frame
