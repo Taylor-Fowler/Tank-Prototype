@@ -827,6 +827,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4397632780065478}
+  - component: {fileID: 114123178471628252}
+  - component: {fileID: 114892831232235174}
   m_Layer: 0
   m_Name: Turret
   m_TagString: Untagged
@@ -8489,9 +8491,8 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: 114190309747772486}
-  - {fileID: 0}
   viewIdField: 0
-  InstantiationId: 1
+  InstantiationId: 2
   isRuntimeInstantiated: 0
 --- !u!114 &114006179867834078
 MonoBehaviour:
@@ -8524,6 +8525,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TracksForward: 1
+--- !u!114 &114123178471628252
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1379428623575022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 114892831232235174}
+  viewIdField: 0
+  InstantiationId: 1
+  isRuntimeInstantiated: 0
 --- !u!114 &114190309747772486
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -8567,7 +8589,6 @@ MonoBehaviour:
   Spawn: {x: 19, y: 0.21, z: 19}
   TESTING: 1
   BaseSpeedMax: 2
-  BaseReverseSpeedMax: -5
   BaseAccel: 20000
   BaseTurnRate: 30
   BaseTurrTurnRate: 20
@@ -8589,3 +8610,17 @@ MonoBehaviour:
   Cooldown: 0
   OwnTeamColor: {r: 0, g: 0, b: 0, a: 0}
   OpponentTeamColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &114892831232235174
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1379428623575022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0

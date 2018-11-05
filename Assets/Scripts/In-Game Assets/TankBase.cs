@@ -55,8 +55,9 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     private float Cooldown = 0;
 
     [Header("Player Options")]
-    public Color OwnTeamColor;       // defaults to Blue @ Start() if not set.
-    public Color OpponentTeamColor;  // defaults to Red @ Start() if not set.
+    // N.B. can't sent Colors over RPC ... but can sent Vect3, so these are colors
+    public Vector3 OwnTeamColor;       // defaults to Blue @ Start() if not set.
+    public Vector3 OpponentTeamColor;  // defaults to Red @ Start() if not set.
 
     private void Awake()
     {
@@ -69,48 +70,59 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     // Use this for initialization
     void Start () {
-        if (OwnTeamColor == null) OwnTeamColor = Color.blue; // becomes black?
-        if (OpponentTeamColor == null) OpponentTeamColor = Color.red;
+
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+
+        //if (OwnTeamColor == null) OwnTeamColor = Color.blue; // becomes black?
+        //if (OpponentTeamColor == null) OpponentTeamColor = Color.red;
+        // RANDOM COLOUR
+        OwnTeamColor = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
 
         CurrentSpeed = 0f;
 
-        if (!photonView.IsMine && !TESTING) return; // Not local Player ... don't bother
-
-        ChangeColor(OwnTeamColor);
-        transform.position = Spawn;
+        ChangeColor(OwnTeamColor); // that's the RPC bit
         RB = GetComponent<Rigidbody>();
+        if (RB == null) Debug.Log(" No RB found");
         RB.mass = C_Mass;
         Col = GetComponent<Collider>();
 
         // set the "settables"
         C_Health = BaseHealth* ModHealth;
 
+        FindASpawnPoint();
+        transform.position = Spawn;
     }
 
     [PunRPC]
-    void ChangeColor(Color color)
+    void ChangeColor(Vector3 color)
     {
-        Renderer[] RendList = GetComponentsInChildren<Renderer>();
-        foreach (Renderer Rend in RendList)
+       Color MyColor = new Color(color.x, color.y, color.z, 1f);
+       Renderer[] RendList = GetComponentsInChildren<Renderer>();
+       foreach (Renderer Rend in RendList)
+       {
+           if (Rend.tag == "Colourable")
+           {
+               Rend.material.color = MyColor;
+           }
+       }
+        if (photonView.IsMine == true && PhotonNetwork.IsConnected == true)
         {
-            if (Rend.tag == "Colourable")
-            {
-                Rend.material.color = color;
-            }
+            photonView.RPC("ChangeColor", RpcTarget.Others, color);
         }
-
-        if (photonView.IsMine && !TESTING)
-        {
-            // Photon Targets not available .. need to figure that shit out
-            // photonView.RPC("ChangeColor", PhotonTargets.OthersBuffered, color);
-        }
-
     }
 
     // Using FIXEDUPDATE for better Physics
     void FixedUpdate()
     {
-        if (!photonView.IsMine && !TESTING) return; // Not local Player ... don't bother
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
         ControlMovement();
         ControlWeaponToggles();
         ControlFiring();
@@ -132,13 +144,14 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         }
     }
 
-    void Fire(float dmg, Vector3 start, Quaternion direction, int type, Color color)
+    void Fire(float dmg, Vector3 start, Quaternion direction, int type, Vector3 color)
     {
         Transform shell = (Transform)Instantiate(Shell, start, direction);
         ShellScript ss = shell.GetComponent<ShellScript>();
         ss.dmg = dmg;
         ss.type = type;
-        ss.color = color;
+        Color MyColor = new Color(color.x, color.y, color.z, 1f);
+        ss.color = MyColor;
         // Get Shell to ignore Firing Units Collider
         // https://docs.unity3d.com/ScriptReference/Physics.IgnoreCollision.html (03 Nov 2018)
         Physics.IgnoreCollision(ss.GetComponent<Collider>(), Col);
@@ -201,6 +214,20 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     //End of Interface ITakesPowerUps requirements
     /////////////////////////////////////////
 
+    void FindASpawnPoint ()
+    {
+        GameObject[] Spawns = GameObject.FindGameObjectsWithTag("SpawnPoint");
+        if (Spawns.Length != 0)
+        {
+            Spawn = Spawns[Random.Range(0,Spawns.Length - 1)].transform.position;
+            Debug.Log("Random Spawn Found");
+        }
+        else
+        {
+            Debug.Log("SpawnPoints not populated : Defaulting");
+        }
+    }
+
     void ControlWeaponToggles() // For Development only
     {
         if (Input.GetKey("1")) { BaseShell = 1; Debug.Log("Standard Shells"); }
@@ -210,6 +237,12 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     void ControlMovement()
     {
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+
         // Tank Hull Forward / Backward input
         if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel);
         if (Input.GetKey("s")) RB.AddForce(-transform.forward * C_Accel);

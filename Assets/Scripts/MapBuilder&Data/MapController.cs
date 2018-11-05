@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
 public class MapController : MonoBehaviour {
 
@@ -12,12 +13,14 @@ public class MapController : MonoBehaviour {
     public Transform PUHealth;
     public Transform PUMove;
     public Transform PUFire;
+    public Transform ThirtiesTank;
     public float PUUpValue = 0.2f;
     private Transform _FloorObjects;
     private Transform _WallObjects;
     private Transform _PowerUpObjects;
     private Transform _SpawnPoints;
 
+    public UnityEvent MapReady;
 
     // Use this for initialization
     void Start () {
@@ -95,6 +98,8 @@ public class MapController : MonoBehaviour {
             }
         }
         Debug.Log("Time to Destroy old and build " + first.ToString() + "x" + second.ToString() + " Level = " + (Time.realtimeSinceStartup - Start).ToString() + " secs");
+        MapReady.Invoke();
+        SpawnTank();
     }
 
     public void DestroyLevel ()
@@ -105,6 +110,10 @@ public class MapController : MonoBehaviour {
         foreach (Transform child in _SpawnPoints) GameObject.Destroy(child.gameObject);
     }
 
+    private void SpawnTank()
+    {
+        Transform MyTank = (Transform)Instantiate(ThirtiesTank, transform.position, Quaternion.identity);
+    }
 
 	// Update is called once per frame
 	void Update () {
