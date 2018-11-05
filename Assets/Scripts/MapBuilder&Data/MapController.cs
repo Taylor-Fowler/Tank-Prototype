@@ -113,6 +113,7 @@ public class MapController : MonoBehaviour {
     private void SpawnTank()
     {
         Transform MyTank = (Transform)Instantiate(ThirtiesTank, transform.position, Quaternion.identity);
+        
     }
 
 	// Update is called once per frame
