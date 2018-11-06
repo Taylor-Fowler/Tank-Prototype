@@ -77,6 +77,9 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
             return;
         }
 
+        //Okies ... lets connect this Tank to the Player
+        LocalPlayer = GetComponentInParent<PlayerController>();
+
         //if (OwnTeamColor == null) OwnTeamColor = Color.blue; // becomes black?
         //if (OpponentTeamColor == null) OpponentTeamColor = Color.red;
         // RANDOM COLOUR
@@ -93,10 +96,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         // set the "settables"
         C_Health = BaseHealth* ModHealth;
 
-        FindASpawnPoint();
-        Spawn.y = 0.21f;
-        transform.position = Spawn;
-        transform.LookAt(new Vector3(25, 0.21f, 25));
+        // FindASpawnPoint();
+        // Spawn.y = 0.21f;
+        // transform.position = Spawn;
+        // transform.LookAt(new Vector3(25, 0.21f, 25));
     }
 
     [PunRPC]
@@ -301,5 +304,13 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
             Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime * mod, 0));
         }
         else if (TurrToGo >= D) { Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime, 0)); }
+
+        // Now to drag the Parent with me
+        // thanks to https://forum.unity.com/threads/child-parent-dragging-not-working.30927/ (06.11.2018)
+        Vector3 relPos = LocalPlayer.transform.position - transform.position;
+        LocalPlayer.transform.position = transform.position + relPos;
+        //LocalPlayer.transform.position = transform.position;
+
+
     }
 }

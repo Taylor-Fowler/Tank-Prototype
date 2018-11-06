@@ -6,17 +6,22 @@ public class PlayerController : MonoBehaviourPun
 {
     public static PlayerController LocalPlayer;
 
-    public Transform TankType1;
-    public Transform TankType2;
-    public int TankChoice;
-    private Vector3 _Vcolor;
-    private Color _color;
+    public GameObject TankType1;
+    public GameObject TankType2;
+    public int TankChoice = 1; // default
+    private Vector3 _Vcolor = new Vector3(255,0,0); // default
+    private Color _color = new Color(255,0,0); // default
     public int PlayerID;
-    public int Score;
-    public float Health;
-    private MapController _map;
+    public string PlayerNick;
+    public int Score = 0;
+    public float Health = 0;
     private Transform[] _Spawns;
     private PlayerController[] _Players;
+    private Vector3 _SpawnPos;
+    private Quaternion _SpawnRot;
+    private TankBase _myTankScript;
+    private GameObject _myTankBody;
+    public bool IsActive = false;
 
     [SerializeField]
     //private GameObject CameraPrefab;
@@ -43,9 +48,33 @@ public class PlayerController : MonoBehaviourPun
         }
 
         // Get Spawn Points
-        _map = 
+        // If more than one MapController in a scene ... we've done something wrong .....
+        MapController[] map = FindObjectsOfType(typeof(MapController)) as MapController[]; // there has to be a better way ....
+        _Spawns = map[0].ReportSpawns();
 
+        // Find Spawn
+        // Developer Note ... initial spawn will be based on "Player" ID ... 
+        // so MUST ensure enough Spawn Points on map to cover max number of players
+        // something to be considered for level design (maybe randomise after map creation?)
+        _SpawnPos = _Spawns[PlayerID].position;
+        _SpawnRot = Quaternion.LookRotation((new Vector3(25,_SpawnPos.y,25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
 
+        // let's make a tank
+        // Move Controller to Spawn
+        transform.position = _SpawnPos;
+        transform.rotation = _SpawnRot;
+        switch (TankChoice)
+        {
+            case 1: _myTankBody = Instantiate(TankType1, transform.position, _SpawnRot);
+                break;
+            case 2:
+                _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot);
+                break;
+        }
+        _myTankBody.transform.parent = transform;
+        _myTankScript = _myTankBody.GetComponent<TankBase>();
+
+        
     }
 
     private void Update()

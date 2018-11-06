@@ -13,7 +13,8 @@ public class MapController : MonoBehaviour {
     public Transform PUHealth;
     public Transform PUMove;
     public Transform PUFire;
-    public Transform ThirtiesTank;
+    public Transform ThirtiesTank; // dev test only
+    public Transform Player; // dev test only
     public float PUUpValue = 0.2f;
     private Transform _FloorObjects;
     private Transform _WallObjects;
@@ -89,7 +90,7 @@ public class MapController : MonoBehaviour {
                         break;
                     // 99 = SPAWN POINT
                     case 99:
-                        Transform mySP = (Transform)Instantiate(SpawnPoint, new Vector3(i, 0.5f, j), Quaternion.identity);
+                        Transform mySP = (Transform)Instantiate(SpawnPoint, new Vector3(i, 0.21f, j), Quaternion.identity); // MAGIC NUMBER ALERT ... 0.21f = ideal height for Tank to Spawn
                         mySP.transform.parent = _SpawnPoints;
                         break;
                     default:
@@ -99,7 +100,8 @@ public class MapController : MonoBehaviour {
         }
         Debug.Log("Time to Destroy old and build " + first.ToString() + "x" + second.ToString() + " Level = " + (Time.realtimeSinceStartup - Start).ToString() + " secs");
         MapReady.Invoke();
-        SpawnTank();
+        //SpawnTank();
+        SpawnPlayer();
     }
 
     public void DestroyLevel ()
@@ -125,11 +127,16 @@ public class MapController : MonoBehaviour {
     private void SpawnTank()
     {
         Transform MyTank = (Transform)Instantiate(ThirtiesTank, transform.position, Quaternion.identity);
-        
     }
 
-	// Update is called once per frame
-	void Update () {
+    private void SpawnPlayer()
+    {
+        Transform MyPlayer = (Transform)Instantiate(Player, transform.position, Quaternion.identity);
+        MyPlayer.GetComponent<PlayerController>().StartGame();
+    }
+
+    // Update is called once per frame
+    void Update () {
         // DEVELOPMENT PURPOSES ONLY
         if (Input.GetKeyDown("9")) DestroyLevel();
         if (Input.GetKeyDown("0")) MakeLevel();
