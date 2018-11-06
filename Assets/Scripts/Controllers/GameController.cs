@@ -61,7 +61,6 @@ public class GameController : MonoBehaviour {
         // Get Unique Device ID N.B. was attached to a "if null" condition .... fell over on the second run (I'm guessing it was internally saves as something)
         DeviceID = SystemInfo.deviceUniqueIdentifier;
         Debug.Log("DevID: " + DeviceID + " Length : " + DeviceID.Length + " Chars");
-
         InjectServices();
     }
 
