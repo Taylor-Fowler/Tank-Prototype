@@ -6,56 +6,55 @@ public class PlayerController : MonoBehaviourPun
 {
     public static PlayerController LocalPlayer;
 
+    public Transform TankType1;
+    public Transform TankType2;
+    public int TankChoice;
+    private Vector3 _Vcolor;
+    private Color _color;
+    public int PlayerID;
+    public int Score;
+    public float Health;
+    private MapController _map;
+    private Transform[] _Spawns;
+    private PlayerController[] _Players;
+
     [SerializeField]
-    private GameObject CameraPrefab;
-    [SerializeField]
-    private GameObject TurretObject;
+    //private GameObject CameraPrefab;
+    //private GameObject TurretObject;
 
     private void Awake()
     {
         if(photonView.IsMine)
         {
             LocalPlayer = this;
-            Instantiate(CameraPrefab, transform);
+            //Instantiate(CameraPrefab, transform);
         }
+    }
+
+    public void StartGame()
+    {
+        // Get other player references and sort by ID
+        // SERIOUSLY Unity?  Seriously?
+        PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
+        _Players = new PlayerController[TempPlayers.Length];
+        foreach (PlayerController pc in TempPlayers)
+        {
+            _Players[pc.PlayerID] = pc;
+        }
+
+        // Get Spawn Points
+        _map = 
+
+
     }
 
     private void Update()
     {
-        if (!photonView.IsMine) return;
-
-        float forward = 0;
-        float right = 0;
-
-        if (Input.GetKey(KeyCode.D))
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true) // IsConnected added to allow off-line testing
         {
-            right += 1;
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            right -= 1;
+            return;
         }
 
-        if (Input.GetKey(KeyCode.W))
-        {
-            forward += 1;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            forward -= 1;
-        }
-
-        transform.Translate(forward * Time.deltaTime * Vector3.forward);
-        transform.Rotate(right * Vector3.up);
-
-        var mousePosition = Input.mousePosition;
-        var tankPosition = Camera.main.WorldToScreenPoint(transform.position);
-        var forwardVector = mousePosition - tankPosition;
-
-        forwardVector.z = forwardVector.y;
-        forwardVector.y = 0f;
-        forwardVector.Normalize();
-
-        TurretObject.transform.localRotation = Quaternion.LookRotation(forwardVector);
     }
 }

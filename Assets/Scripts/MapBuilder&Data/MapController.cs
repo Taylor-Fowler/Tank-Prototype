@@ -110,6 +110,18 @@ public class MapController : MonoBehaviour {
         foreach (Transform child in _SpawnPoints) GameObject.Destroy(child.gameObject);
     }
 
+    public Transform[] ReportSpawns()
+    {
+        int x = _SpawnPoints.childCount;
+        if (x == 0) return null; // safety net
+        Transform[] report = new Transform[x];
+        for (int i = 0; i < x; i++)
+        {
+            report[i] = _SpawnPoints.GetChild(i);
+        }
+        return report;
+    }
+
     private void SpawnTank()
     {
         Transform MyTank = (Transform)Instantiate(ThirtiesTank, transform.position, Quaternion.identity);
