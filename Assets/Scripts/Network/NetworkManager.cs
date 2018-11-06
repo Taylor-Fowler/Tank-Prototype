@@ -76,6 +76,7 @@ namespace Network
 
             NetworkService = networkService;
             CachedRooms = new List<RoomInfo>();
+            PhotonNetwork.AutomaticallySyncScene = true;
             ConnectToServer();
         }
 

@@ -12,6 +12,7 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public Text ServerPlayerCountText;
     public Text ServerPlayersInRoomsCountText;
     public Text ServerPlayersOnMasterCountText;
+    public Button StartGameButton;
 
     public GameObject ViewRoomCanvas;
     public GameObject ViewLobbyCanvas;
@@ -65,28 +66,23 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     {
         Debug.Log("[MainMenuNav] OnJoinedRoom");
 
-        ViewRoomCanvas.SetActive(true);
-
-        foreach(var canvas in AllCanvases)
+        if(PhotonNetwork.LocalPlayer.IsMasterClient)
         {
-            if(canvas != ViewRoomCanvas)
-            {
-                canvas.SetActive(false);
-            }
+            StartGameButton.gameObject.SetActive(true);
+            StartGameButton.onClick.AddListener(GameController.Instance.NetworkManager.StartGame);
         }
+
+        ActivateCanvas(ViewRoomCanvas);
     }
 
     public override void OnLeftRoom()
     {
-        ViewLobbyCanvas.SetActive(true);
+        Debug.Log("[MainMenuNav] OnLeftRoom");
 
-        foreach (var canvas in AllCanvases)
-        {
-            if (canvas != ViewLobbyCanvas)
-            {
-                canvas.SetActive(false);
-            }
-        }
+        StartGameButton.gameObject.SetActive(false);
+        StartGameButton.onClick.RemoveListener(GameController.Instance.NetworkManager.StartGame);
+
+        ActivateCanvas(ViewLobbyCanvas);
     }
     #endregion
 
@@ -117,6 +113,19 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public void QuitApplication()
     {
         Application.Quit();
+    }
+
+    private void ActivateCanvas(GameObject canvas)
+    {
+        canvas.SetActive(true);
+
+        foreach(var otherCanvas in AllCanvases)
+        {
+            if(otherCanvas != canvas)
+            {
+                otherCanvas.SetActive(false);
+            }
+        }
     }
 
     private void UpdateOnlinePlayerStatistics()
