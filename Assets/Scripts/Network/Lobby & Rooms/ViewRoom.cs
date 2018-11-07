@@ -49,6 +49,7 @@ public class ViewRoom : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
+        Debug.Log("[ViewRoom] OnPlayerLeftRoom");
         Destroy(_playerObjects[otherPlayer.ActorNumber]);
         _playerObjects.Remove(otherPlayer.ActorNumber);
     }
@@ -56,7 +57,7 @@ public class ViewRoom : MonoBehaviourPunCallbacks
 
     private void ChangeRoomName()
     {
-        RoomName.text = PhotonNetwork.CurrentRoom.CustomProperties["room_name"].ToString();
+        RoomName.text = Network.NetworkManager.RoomName(PhotonNetwork.CurrentRoom);
     }
 
     private void AddPlayer(Player player)

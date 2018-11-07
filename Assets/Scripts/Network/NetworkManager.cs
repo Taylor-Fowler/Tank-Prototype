@@ -9,8 +9,20 @@ namespace Network
 {
     public class NetworkManager : MonoBehaviourPunCallbacks, IManager
     {
+        #region IMANAGER IMPLEMENTATION
         public NetworkService NetworkService { get; private set; }
         public ManagerStatus Status { get; private set; }
+
+        public void Startup(NetworkService networkService)
+        {
+            Debug.Log("[NetworkManager] Startup");
+            Status = ManagerStatus.Initializing;
+
+            NetworkService = networkService;
+            CachedRooms = new List<RoomInfo>();
+            ConnectToServer();
+        }
+        #endregion
 
         public List<RoomInfo> CachedRooms { get; private set; }
 
@@ -20,18 +32,28 @@ namespace Network
         public delegate void NetworkManagerStarted();
         private NetworkManagerStarted _onNetworkManagerStarted;
 
+
         #region PUN2 API
         public override void OnConnectedToMaster()
         {
             Debug.Log("[NetworkManager] OnConnectedToMaster");
+
             Status = ManagerStatus.Started;
             
             if(_onNetworkManagerStarted != null)
             {
                 _onNetworkManagerStarted();
+                _onNetworkManagerStarted = null;
             }
 
             PhotonNetwork.JoinLobby();
+        }
+
+        public override void OnJoinedLobby()
+        {
+            Debug.Log("[NetworkManager] OnJoinedLobby");
+            PhotonNetwork.AutomaticallySyncScene = true;
+            //PhotonNetwork.JoinOrCreateRoom("room", new RoomOptions(), PhotonNetwork.CurrentLobby);
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -70,15 +92,16 @@ namespace Network
         }
         #endregion
 
-        public void Startup(NetworkService networkService)
-        {
-            Status = ManagerStatus.Initializing;
-
-            NetworkService = networkService;
-            CachedRooms = new List<RoomInfo>();
-            PhotonNetwork.AutomaticallySyncScene = true;
-            ConnectToServer();
+        #region
+        public static string RoomName(RoomInfo room)
+        { 
+            if(room.CustomProperties.ContainsKey("room_name"))
+            {
+                return (string)room.CustomProperties["room_name"];
+            }
+            return "";
         }
+        #endregion  
 
         public void Started(NetworkManagerStarted callback)
         {
@@ -104,6 +127,7 @@ namespace Network
                     //{ "room_host_device_id", callingUser.Device_ID },
                     { "room_name", roomName }
                 },
+                PublishUserId = true,
                 MaxPlayers = (byte)maxPlayers,
                 IsVisible = true,
                 IsOpen = true
@@ -125,6 +149,7 @@ namespace Network
                     { "room_name", roomName },
                     { "room_pass", roomPassword }
                 },
+                PublishUserId = true,
                 MaxPlayers = (byte)maxPlayers,
                 IsVisible = true,
                 IsOpen = true
@@ -145,6 +170,8 @@ namespace Network
         
         private static bool ConnectToServer()
         {
+            Debug.Log("[NetworkManager] ConnectToServer");
+
             if (!PhotonNetwork.ConnectUsingSettings())
             {
                 Debug.LogError("Error connecting to Server");

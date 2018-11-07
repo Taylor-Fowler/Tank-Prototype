@@ -599,9 +599,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd5b75b02c29594f9b2418e655c73c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraPrefab: {fileID: 1631922881454182, guid: b1cee7dbaec5c3144a78e389c273cd4c,
-    type: 2}
-  TurretObject: {fileID: 1280997032275286}
+  TankType1: {fileID: 0}
+  TankType2: {fileID: 0}
+  TankChoice: 1
+  PlayerID: 0
+  PlayerNick: 
+  Score: 0
+  Health: 0
+  IsActive: 0
 --- !u!114 &114955619935802962
 MonoBehaviour:
   m_ObjectHideFlags: 1

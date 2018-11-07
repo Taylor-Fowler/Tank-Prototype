@@ -1,8 +1,10 @@
-﻿using Network;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Network;
 
-public class GameController : MonoBehaviour {
+public class GameController : MonoBehaviourPun
+{
 
     // TBA variables placeholders
     [Header("Necessary Tranforms, Cameras and Objects")]
@@ -34,6 +36,7 @@ public class GameController : MonoBehaviour {
     
     void Awake()
     {
+        Debug.Log("[GameController] Awake");
         if (instance)
         {
             Debug.Log("Already a GameController running - going to die now .....");
@@ -41,7 +44,6 @@ public class GameController : MonoBehaviour {
             return;
         }
         instance = this;
-        DontDestroyOnLoad(gameObject);
 
         // add Comms
         Comms = gameObject.AddComponent<CommsManager>();
@@ -57,7 +59,10 @@ public class GameController : MonoBehaviour {
     // --------------------------//
 
     // Doesn't do much at the mo ... probably will configure via a Plug-in eventually
-    void Start () {
+    void Start ()
+    {
+        Debug.Log("[GameController] Start");
+        DontDestroyOnLoad(this);
         // Get Unique Device ID N.B. was attached to a "if null" condition .... fell over on the second run (I'm guessing it was internally saves as something)
         DeviceID = SystemInfo.deviceUniqueIdentifier;
         Debug.Log("DevID: " + DeviceID + " Length : " + DeviceID.Length + " Chars");

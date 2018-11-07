@@ -195,7 +195,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
         // TODO: Guest Nickname if the device ID is already signed in (i.e)
         //       STORE Online players in DB
         //       IF Device ID already online, then add
-        PhotonNetwork.LocalPlayer.NickName = User.Username;
+        PhotonNetwork.NickName = User.Username;
     }
     #endregion
 }
