@@ -7,6 +7,8 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 {
     public static PlayerController LocalPlayer; // what is this magic ??
 
+    public GameObject CameraPrefab;
+    public Transform CameraAnchor;
     public GameObject Turret;
     public Transform _firePos;
     public Transform Shell;
@@ -79,6 +81,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
         //Okies ... lets connect this Tank to the Player
         LocalPlayer = GetComponentInParent<PlayerController>();
+        Instantiate(CameraPrefab, CameraAnchor);
 
         //if (OwnTeamColor == null) OwnTeamColor = Color.blue; // becomes black?
         //if (OpponentTeamColor == null) OpponentTeamColor = Color.red;

@@ -30,32 +30,45 @@ public class PlayerController : MonoBehaviourPun
     public Vector3 myTurrPos;
     public Quaternion myTurrRot;
 
-
-    [SerializeField]
+    //[SerializeField]
     //private GameObject CameraPrefab;
     //private GameObject TurretObject;
 
+    #region UNITY API
     private void Awake()
     {
         if(photonView.IsMine)
         {
             LocalPlayer = this;
-            MyManager = FindObjectOfType<PlayerManager>();
             //Instantiate(CameraPrefab, transform);
+            // NOTE:
+            //       Moved // MyManager = FindObjectOfType(typeof(PlayerManager)) as PlayerManager;
+            //       It now resides in PlayerManager.Startup
         }
+
         GameController.Instance.Event_OnGameSceneInitialised += StartGame;
+        PlayerID = PlayerManager.PlayerID(photonView.Owner);
+        _color = PlayerManager.PlayerColour(photonView.Owner);
     }
 
-    public void StartGame()
+    private void Update()
     {
         // Only For Active Player
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true) // IsConnected added to allow off-line testing
         {
             return;
         }
+    }
+    #endregion
 
+    public void StartGame()
+    {
         // Get other player references and sort by ID
         // SERIOUSLY Unity?  Seriously?
+
+        // NOTE: 
+        //       Maybe in this method, each player controller adds
+        //       themselves to the "LocalPlayer" array of player controllers?
         PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
         _Players = new PlayerController[TempPlayers.Length];
         foreach (PlayerController pc in TempPlayers)
@@ -74,31 +87,62 @@ public class PlayerController : MonoBehaviourPun
         // something to be considered for level design (maybe randomise after map creation?)
         _SpawnPos = _Spawns[PlayerID].position;
         _SpawnRot = Quaternion.LookRotation((new Vector3(25,_SpawnPos.y,25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
-
-        // let's make a tank
-        // Move Controller to Spawn
         transform.position = _SpawnPos;
         transform.rotation = _SpawnRot;
-        switch (TankChoice)
-        {
-            case 1: _myTankBody = Instantiate(TankType1, transform.position, _SpawnRot, transform);
-                break;
-            case 2:
-                _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot, transform);
-                break;
-        }
-        _myTankBody.transform.parent = transform;
-        _myTankScript = _myTankBody.GetComponent<TankBase>();
 
+        if(photonView.IsMine)
+        {
+            Spawn();
+        }
     }
 
-    private void Update()
+    public void ChangeTank(int type)
     {
-        // Only For Active Player
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true) // IsConnected added to allow off-line testing
+        if (photonView.IsMine)
         {
-            return;
+            photonView.RPC("RpcChangeTank", RpcTarget.AllBuffered, type);
+        }
+    }
+
+    /// <summary>
+    /// Should only be called from the local client, instantiates the chosen tank body across the network
+    /// and then executes an RPC to inform the instance of this script (on other clients) that the tank body
+    /// has been created with the given PhotonView.ViewID
+    /// </summary>
+    private void Spawn()
+    {
+        // let's make a tank
+        // Move Controller to Spawn
+
+        switch (TankChoice)
+        {
+            case 1:
+                _myTankBody = PhotonNetwork.Instantiate(TankType1.name, transform.position, _SpawnRot);
+                break;
+            case 2:
+                _myTankBody = PhotonNetwork.Instantiate(TankType2.name, transform.position, _SpawnRot);
+                break;
+        }
+        
+        photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
+    }
+
+
+    [PunRPC]
+    private void RpcChangeTank(int type)
+    {
+        TankChoice = type;
+    }
+
+    [PunRPC]
+    private void RpcSetTankBody(int viewID)
+    {
+        if(!photonView.IsMine)
+        {
+            _myTankBody = PhotonView.Find(viewID).gameObject;
         }
 
+        _myTankBody.transform.parent = transform;
+        _myTankScript = _myTankBody.GetComponent<TankBase>();
     }
 }
