@@ -102,9 +102,15 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         // transform.LookAt(new Vector3(25, 0.21f, 25));
     }
 
-    [PunRPC]
+   // [PunRPC]
     void ChangeColor(Vector3 color)
     {
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+
        Color MyColor = new Color(color.x, color.y, color.z, 1f);
        Renderer[] RendList = GetComponentsInChildren<Renderer>();
        foreach (Renderer Rend in RendList)
@@ -114,10 +120,11 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
                Rend.material.color = MyColor;
            }
        }
-        if (photonView.IsMine == true && PhotonNetwork.IsConnected == true)
-        {
-            photonView.RPC("ChangeColor", RpcTarget.Others, color);
-        }
+        //if (photonView.IsMine == true && PhotonNetwork.IsConnected == true)
+       // {
+       //     photonView.RPC("ChangeColor", RpcTarget.Others, color);
+       // }
+
     }
 
     // Using FIXEDUPDATE for better Physics
@@ -242,11 +249,11 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     void ControlMovement()
     {
-        // Only For Active Player
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-        {
-            return;
-        }
+        // Only For Active Player ... ONLY called by active player .....
+       // if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+       // {
+       //     return;
+       // }
 
         // Tank Hull Forward / Backward input
         if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel);

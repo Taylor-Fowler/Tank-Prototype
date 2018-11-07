@@ -24,8 +24,7 @@ public class PlayerController : MonoBehaviourPun
     private TankBase _myTankScript;
     private GameObject _myTankBody;
     public bool IsActive = false;
-    // public Transform myHull;
-    // public Transform myTurret;
+
     public Vector3 myHullPos;
     public Quaternion myHullRot;
     public Vector3 myTurrPos;
@@ -41,6 +40,7 @@ public class PlayerController : MonoBehaviourPun
         if(photonView.IsMine)
         {
             LocalPlayer = this;
+            MyManager = FindObjectOfType<PlayerManager>();
             //Instantiate(CameraPrefab, transform);
         }
         GameController.Instance.Event_OnGameSceneInitialised += StartGame;
@@ -48,6 +48,12 @@ public class PlayerController : MonoBehaviourPun
 
     public void StartGame()
     {
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+
         // Get other player references and sort by ID
         // SERIOUSLY Unity?  Seriously?
         PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
