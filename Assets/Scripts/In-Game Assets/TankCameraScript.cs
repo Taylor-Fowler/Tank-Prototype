@@ -13,13 +13,18 @@ public class TankCameraScript : MonoBehaviour {
     public float ScrollSense = 0.5f;
     [SerializeField] private float _Lerp = 0;
 
-	// Use this for initialization
-	void Start () {
+	// Use this for initialization // USING Remotely called Activate instead.
+	//void Start () {
+
+   // }
+	
+    public void Activate()
+    {
         transform.localPosition = LowerPoint.localPosition;
         tag = "MainCamera";
         UpdateCameraZoom();
     }
-	
+
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetAxis("Mouse ScrollWheel") != 0)

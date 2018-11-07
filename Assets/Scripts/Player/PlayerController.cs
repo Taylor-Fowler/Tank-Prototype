@@ -79,17 +79,29 @@ public class PlayerController : MonoBehaviourPun
         // Move Controller to Spawn
         transform.position = _SpawnPos;
         transform.rotation = _SpawnRot;
-        switch (TankChoice)
-        {
-            case 1: _myTankBody = Instantiate(TankType1, transform.position, _SpawnRot, transform);
-                break;
-            case 2:
-                _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot, transform);
-                break;
-        }
-        _myTankBody.transform.parent = transform;
-        _myTankScript = _myTankBody.GetComponent<TankBase>();
 
+        AttatchTank(TankChoice, _SpawnPos, _SpawnRot);
+
+    }
+
+    [PunRPC]
+    public void AttatchTank (int type, Vector3 Position, Quaternion Rotation)
+    {
+        if (photonView.IsMine)
+        {
+            switch (TankChoice)
+            {
+                case 1:
+                    _myTankBody = PhotonNetwork.Instantiate("1930Tank", transform.position, _SpawnRot);
+                    break;
+                case 2:
+                    _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot, transform);
+                    break;
+            }
+            _myTankBody.transform.parent = transform;
+            _myTankScript = _myTankBody.GetComponent<TankBase>();
+            GetComponentsInChildren<TankCameraScript>()[0].Activate(); // Activate camera
+        }
     }
 
     private void Update()
