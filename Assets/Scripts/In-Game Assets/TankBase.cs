@@ -309,6 +309,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         // thanks to https://forum.unity.com/threads/child-parent-dragging-not-working.30927/ (06.11.2018)
         Vector3 relPos = LocalPlayer.transform.position - transform.position;
         LocalPlayer.transform.position = transform.position + relPos;
+        LocalPlayer.myHullPos = transform.position;
+        LocalPlayer.myHullRot = transform.rotation;
+        LocalPlayer.myTurrPos = Turret.transform.position;
+        LocalPlayer.myTurrRot = Turret.transform.rotation;
         //LocalPlayer.transform.position = transform.position;
 
 

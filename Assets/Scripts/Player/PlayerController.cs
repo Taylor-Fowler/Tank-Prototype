@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
+using System.Collections;
 using UnityEngine.Networking;
 using Photon.Pun;
 
 public class PlayerController : MonoBehaviourPun
 {
     public static PlayerController LocalPlayer;
+    public static PlayerManager MyManager;
 
     public GameObject TankType1;
     public GameObject TankType2;
@@ -22,6 +24,13 @@ public class PlayerController : MonoBehaviourPun
     private TankBase _myTankScript;
     private GameObject _myTankBody;
     public bool IsActive = false;
+    // public Transform myHull;
+    // public Transform myTurret;
+    public Vector3 myHullPos;
+    public Quaternion myHullRot;
+    public Vector3 myTurrPos;
+    public Quaternion myTurrRot;
+
 
     [SerializeField]
     //private GameObject CameraPrefab;
@@ -34,6 +43,17 @@ public class PlayerController : MonoBehaviourPun
             LocalPlayer = this;
             //Instantiate(CameraPrefab, transform);
         }
+    }
+
+    public void DelayStartGame()
+    {
+        PauseStart(2f);
+    }
+
+    IEnumerator PauseStart(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        StartGame();
     }
 
     public void StartGame()
@@ -74,7 +94,6 @@ public class PlayerController : MonoBehaviourPun
         _myTankBody.transform.parent = transform;
         _myTankScript = _myTankBody.GetComponent<TankBase>();
 
-        
     }
 
     private void Update()

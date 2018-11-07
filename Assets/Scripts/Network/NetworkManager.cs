@@ -32,6 +32,8 @@ namespace Network
         public delegate void NetworkManagerStarted();
         private NetworkManagerStarted _onNetworkManagerStarted;
 
+        public PlayerController PlayerPreFab;
+
 
         #region PUN2 API
         public override void OnConnectedToMaster()
@@ -165,7 +167,12 @@ namespace Network
 
         public void StartGame()
         {
-            PhotonNetwork.LoadLevel(1);
+            //PhotonNetwork.LoadLevel(1);
+            PhotonNetwork.LoadLevel("Map for 2");
+            PlayerPreFab = Resources.Load("Assets/Resources/Player.prefab") as PlayerController;
+            PlayerController DaPlayer =  (PlayerController)Instantiate(PlayerPreFab, Vector3.zero, Quaternion.identity);
+            DaPlayer.DelayStartGame();
+            //DaPlayer.GetComponent<PlayerController>().DelayStartGame();
         }
         
         private static bool ConnectToServer()

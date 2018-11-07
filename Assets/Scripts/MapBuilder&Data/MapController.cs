@@ -101,7 +101,7 @@ public class MapController : MonoBehaviour {
         Debug.Log("Time to Destroy old and build " + first.ToString() + "x" + second.ToString() + " Level = " + (Time.realtimeSinceStartup - Start).ToString() + " secs");
         MapReady.Invoke();
         //SpawnTank();
-        SpawnPlayer();
+        //SpawnPlayer();
     }
 
     public void DestroyLevel ()
