@@ -23,6 +23,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
     {
         Status = ManagerStatus.Initializing;
 
+        PlayerController.MyManager = this;
         NetworkService = networkService;
         StartCoroutine(NetworkService.DownloadUserData(GameController.Instance.DeviceID, GetUserData));
         Messenger<Color, int>.AddListener("OnChangePlayerColour", OnChangePlayerColour);
