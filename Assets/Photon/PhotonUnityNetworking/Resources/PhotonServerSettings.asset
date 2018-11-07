@@ -34,5 +34,10 @@ MonoBehaviour:
   - Fire
   - RespawnSpaceship
   - ChangeColor
+<<<<<<< HEAD
   - AttatchTank
+=======
+  - RpcChangeTank
+  - RpcSetTankBody
+>>>>>>> Taylor
   DisableAutoOpenWizard: 1
