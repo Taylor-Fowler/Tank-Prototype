@@ -5327,6 +5327,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerCamera: {fileID: 901058327}
+  PlayerController: {fileID: 1379102525601468, guid: 65c450d661ed8ab408bc31c2776ed79a,
+    type: 2}
   PlayerCount: 0
   Comms: {fileID: 0}
 --- !u!4 &959058080

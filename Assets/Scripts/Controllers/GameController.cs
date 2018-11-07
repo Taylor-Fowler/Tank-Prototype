@@ -1,14 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 using Photon.Pun;
+
 using Network;
 
 public class GameController : MonoBehaviourPun
 {
-
     // TBA variables placeholders
     [Header("Necessary Tranforms, Cameras and Objects")]
     public Camera PlayerCamera;
+    public GameObject PlayerController;
 
     [Header("Master Game Variables")]
     public int PlayerCount = 0;
@@ -16,8 +22,11 @@ public class GameController : MonoBehaviourPun
     public NetworkManager NetworkManager { get; private set; }
     public PlayerManager PlayerManager { get; private set; }
 
+    public delegate void GameSceneInitialised();
+    public GameSceneInitialised Event_OnGameSceneInitialised;
+
     [Header("Serialized Fields - for debug reference only")]
-    [SerializeField] CommsManager Comms;
+    [SerializeField] private CommsManager Comms;
 
     private List<IManager> _managers;
     private NetworkService _networkService;
@@ -33,8 +42,9 @@ public class GameController : MonoBehaviourPun
         }
     }
     private static GameController instance = null;
-    
-    void Awake()
+
+    #region UNITY API
+    private void Awake()
     {
         Debug.Log("[GameController] Awake");
         if (instance)
@@ -44,6 +54,7 @@ public class GameController : MonoBehaviourPun
             return;
         }
         instance = this;
+        DontDestroyOnLoad(this);
 
         // add Comms
         Comms = gameObject.AddComponent<CommsManager>();
@@ -54,22 +65,44 @@ public class GameController : MonoBehaviourPun
         _managers.Add(NetworkManager);
         _managers.Add(PlayerManager);
     }
+
     //---------------------------//
     // Finished Singleton set up //
     // --------------------------//
 
     // Doesn't do much at the mo ... probably will configure via a Plug-in eventually
-    void Start ()
+    private void Start ()
     {
         Debug.Log("[GameController] Start");
-        DontDestroyOnLoad(this);
+
         // Get Unique Device ID N.B. was attached to a "if null" condition .... fell over on the second run (I'm guessing it was internally saves as something)
         DeviceID = SystemInfo.deviceUniqueIdentifier;
         Debug.Log("DevID: " + DeviceID + " Length : " + DeviceID.Length + " Chars");
+
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
         InjectServices();
     }
 
-    void InjectServices()
+    #endregion
+
+    private void SceneManager_sceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
+    {
+        if(loadedScene.buildIndex != 0)
+        {
+            GameObject player = PhotonNetwork.Instantiate(PlayerController.name, Vector3.zero, Quaternion.identity);
+            StartCoroutine(Delay(2f, OnGameSceneInitialised));
+        }
+    }
+
+    private void OnGameSceneInitialised()
+    {
+        if(Event_OnGameSceneInitialised != null)
+        {
+            Event_OnGameSceneInitialised();
+        }
+    }
+
+    private void InjectServices()
     {
         _networkService = new NetworkService();
         
@@ -78,4 +111,14 @@ public class GameController : MonoBehaviourPun
             manager.Startup(_networkService);
         }
     }
+
+
+
+    public static IEnumerator Delay(float delay, Action callback)
+    {
+        yield return new WaitForSeconds(delay);
+        callback();
+    }
+
+
 }

@@ -169,10 +169,6 @@ namespace Network
         {
             //PhotonNetwork.LoadLevel(1);
             PhotonNetwork.LoadLevel("Map for 2");
-            PlayerPreFab = Resources.Load("Assets/Resources/Player.prefab") as PlayerController;
-            PlayerController DaPlayer =  (PlayerController)Instantiate(PlayerPreFab, Vector3.zero, Quaternion.identity);
-            DaPlayer.DelayStartGame();
-            //DaPlayer.GetComponent<PlayerController>().DelayStartGame();
         }
         
         private static bool ConnectToServer()

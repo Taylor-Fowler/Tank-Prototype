@@ -20,6 +20,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4804090638962038}
   - component: {fileID: 114697058648964242}
+  - component: {fileID: 114019933757227800}
+  - component: {fileID: 114687890233819372}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -40,6 +42,41 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114019933757227800
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1379102525601468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 114687890233819372}
+  viewIdField: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &114687890233819372
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1379102525601468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
 --- !u!114 &114697058648964242
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -59,3 +96,7 @@ MonoBehaviour:
   Score: 0
   Health: 0
   IsActive: 0
+  myHullPos: {x: 0, y: 0, z: 0}
+  myHullRot: {x: 0, y: 0, z: 0, w: 0}
+  myTurrPos: {x: 0, y: 0, z: 0}
+  myTurrRot: {x: 0, y: 0, z: 0, w: 0}

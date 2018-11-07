@@ -43,17 +43,7 @@ public class PlayerController : MonoBehaviourPun
             LocalPlayer = this;
             //Instantiate(CameraPrefab, transform);
         }
-    }
-
-    public void DelayStartGame()
-    {
-        PauseStart(2f);
-    }
-
-    IEnumerator PauseStart(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        StartGame();
+        GameController.Instance.Event_OnGameSceneInitialised += StartGame;
     }
 
     public void StartGame()
@@ -85,10 +75,10 @@ public class PlayerController : MonoBehaviourPun
         transform.rotation = _SpawnRot;
         switch (TankChoice)
         {
-            case 1: _myTankBody = Instantiate(TankType1, transform.position, _SpawnRot);
+            case 1: _myTankBody = Instantiate(TankType1, transform.position, _SpawnRot, transform);
                 break;
             case 2:
-                _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot);
+                _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot, transform);
                 break;
         }
         _myTankBody.transform.parent = transform;
