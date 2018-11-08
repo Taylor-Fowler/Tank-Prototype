@@ -99,10 +99,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         // set the "settables"
         C_Health = BaseHealth* ModHealth;
 
-        // FindASpawnPoint();
-        // Spawn.y = 0.21f;
-        // transform.position = Spawn;
-        // transform.LookAt(new Vector3(25, 0.21f, 25));
     }
 
    // [PunRPC]

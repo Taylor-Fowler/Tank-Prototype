@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviourPun
     public static PlayerController LocalPlayer;
     public static PlayerManager MyManager;
 
+    private TankHelpers Help; // A function Utility Class
+
     public GameObject TankType1;
     public GameObject TankType2;
     public int TankChoice = 1; // default
@@ -49,6 +51,7 @@ public class PlayerController : MonoBehaviourPun
         GameController.Instance.Event_OnGameSceneInitialised += StartGame;
         PlayerID = PlayerManager.PlayerID(photonView.Owner);
         _color = PlayerManager.PlayerColour(photonView.Owner);
+        _Vcolor = Help.ColorToV3(_color);
     }
 
     private void Update()
