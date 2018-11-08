@@ -15,7 +15,7 @@ MonoBehaviour:
     AppIdRealtime: def2647d-a5a9-4476-8e7b-d61f58fa361a
     AppIdChat: 
     AppIdVoice: 
-    AppVersion: 1.0
+    AppVersion: 
     UseNameServer: 1
     FixedRegion: 
     Server: 
@@ -33,11 +33,6 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
-  - ChangeColor
-<<<<<<< HEAD
-  - AttatchTank
-=======
   - RpcChangeTank
   - RpcSetTankBody
->>>>>>> Taylor
   DisableAutoOpenWizard: 1
