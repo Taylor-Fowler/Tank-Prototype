@@ -35,4 +35,5 @@ MonoBehaviour:
   - RespawnSpaceship
   - RpcChangeTank
   - RpcSetTankBody
+  - RpcFire
   DisableAutoOpenWizard: 1

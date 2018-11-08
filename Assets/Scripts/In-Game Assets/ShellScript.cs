@@ -10,6 +10,7 @@ public class ShellScript : MonoBehaviour
     // Fired with
     // void Fire (float dmg, Vector3 start, Vector3 direction, int type, Color color)
 
+    public int OwnerID;
     public float dmg;
     public Vector3 start;
     public Quaternion direction;
@@ -88,11 +89,10 @@ public class ShellScript : MonoBehaviour
                 break;
         }       
         RB.velocity = transform.forward * velocity;
-
     }
 
     // Collision Script
-    void OnCollisionEnter(Collision col)
+    void OnTriggerEnter(Collision col)
     {
         //if (_armed) // Currently redundant, as being armed enables Collision detection .... but we may want to toggle arming on/off and this serves that purpose.
         //{

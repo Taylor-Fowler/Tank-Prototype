@@ -13,7 +13,8 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public Transform _firePos;
     public Transform Shell;
 
-    public Vector3 Spawn = new Vector3(20f, 0.21f, 20f); // Dev purposes spawn only
+    //public Vector3 Spawn = new Vector3(20f, 0.21f, 20f); // Dev purposes spawn only
+    private TankHelpers Help = new TankHelpers();
 
     public bool TESTING = true; // toggle "true" means can test without Photon
     [Header("Core Stats")] // Core Stats are Customised by Children
@@ -50,7 +51,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     float C_Mass { get { return BaseMass * ModMass; } }
     public float CurrentSpeed { get; private set; }
     private Rigidbody RB;
-    private Collider Col; // reference for own shells to ignore
+    public Collider Col; // reference for own shells to ignore .. public so Photon can use it?
 
 
     [SerializeField]
@@ -66,7 +67,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         if (photonView.IsMine)
         {
             //LocalPlayer = this;
-
         }
     }
 
@@ -82,35 +82,20 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         //Okies ... lets connect this Tank to the Player
         LocalPlayer = GetComponentInParent<PlayerController>();
         Instantiate(CameraPrefab, CameraAnchor);
-
-        //if (OwnTeamColor == null) OwnTeamColor = Color.blue; // becomes black?
-        //if (OpponentTeamColor == null) OpponentTeamColor = Color.red;
-        // RANDOM COLOUR
-        OwnTeamColor = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-
         CurrentSpeed = 0f;
-
-        ChangeColor(OwnTeamColor); // that's the RPC bit
         RB = GetComponent<Rigidbody>();
         if (RB == null) Debug.Log(" No RB found");
         RB.mass = C_Mass;
-        Col = GetComponent<Collider>();
+        //Col = GetComponent<Collider>();
 
         // set the "settables"
         C_Health = BaseHealth* ModHealth;
 
     }
 
-   // [PunRPC]
-    void ChangeColor(Vector3 color)
+    public void ChangeColor()
     {
-        // Only For Active Player
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-        {
-            return;
-        }
-
-       Color MyColor = new Color(color.x, color.y, color.z, 1f);
+       Color MyColor = Help.V3ToColor(OwnTeamColor);
        Renderer[] RendList = GetComponentsInChildren<Renderer>();
        foreach (Renderer Rend in RendList)
        {
@@ -119,11 +104,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
                Rend.material.color = MyColor;
            }
        }
-        //if (photonView.IsMine == true && PhotonNetwork.IsConnected == true)
-       // {
-       //     photonView.RPC("ChangeColor", RpcTarget.Others, color);
-       // }
-
     }
 
     // Using FIXEDUPDATE for better Physics
@@ -147,21 +127,22 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         // Reduce cooldown
         Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
-        //if (Cooldown <=0) // Auto fire for testing
-        if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
+        if (Cooldown <=0) // Auto fire for testing
+        //if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
         {
-            Fire(C_Damage, _firePos.transform.position, _firePos.transform.rotation, BaseShell, OwnTeamColor);
+            LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
             Cooldown = C_FireRate;
         }
     }
 
-    void Fire(float dmg, Vector3 start, Quaternion direction, int type, Vector3 color)
+    public void Fire()
     {
-        Transform shell = (Transform)Instantiate(Shell, start, direction);
+        Transform shell = (Transform)Instantiate(Shell, _firePos.transform.position, _firePos.transform.rotation);
         ShellScript ss = shell.GetComponent<ShellScript>();
-        ss.dmg = dmg;
-        ss.type = type;
-        Color MyColor = new Color(color.x, color.y, color.z, 1f);
+        ss.OwnerID = LocalPlayer.PlayerID;
+        ss.dmg = C_Damage;
+        ss.type = BaseShell;
+        Color MyColor = Help.V3ToColor(LocalPlayer._Vcolor);
         ss.color = MyColor;
         // Get Shell to ignore Firing Units Collider
         // https://docs.unity3d.com/ScriptReference/Physics.IgnoreCollision.html (03 Nov 2018)
@@ -225,19 +206,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     //End of Interface ITakesPowerUps requirements
     /////////////////////////////////////////
 
-    void FindASpawnPoint ()
-    {
-        GameObject[] Spawns = GameObject.FindGameObjectsWithTag("SpawnPoint");
-        if (Spawns.Length != 0)
-        {
-            Spawn = Spawns[Random.Range(0,Spawns.Length - 1)].transform.position;
-            Debug.Log("Random Spawn Found");
-        }
-        else
-        {
-            Debug.Log("SpawnPoints not populated : Defaulting");
-        }
-    }
+
 
     void ControlWeaponToggles() // For Development only
     {
@@ -313,12 +282,12 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
         // Now to drag the Parent with me
         // thanks to https://forum.unity.com/threads/child-parent-dragging-not-working.30927/ (06.11.2018)
-        Vector3 relPos = LocalPlayer.transform.position - transform.position;
-        LocalPlayer.transform.position = transform.position + relPos;
-        LocalPlayer.myHullPos = transform.position;
-        LocalPlayer.myHullRot = transform.rotation;
-        LocalPlayer.myTurrPos = Turret.transform.position;
-        LocalPlayer.myTurrRot = Turret.transform.rotation;
+        //Vector3 relPos = LocalPlayer.transform.position - transform.position;
+        //LocalPlayer.transform.position = transform.position + relPos;
+        //LocalPlayer.myHullPos = transform.position;
+        //LocalPlayer.myHullRot = transform.rotation;
+        //LocalPlayer.myTurrPos = Turret.transform.position;
+        //LocalPlayer.myTurrRot = Turret.transform.rotation;
         //LocalPlayer.transform.position = transform.position;
 
 

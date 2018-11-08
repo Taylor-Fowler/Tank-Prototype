@@ -34,6 +34,8 @@ namespace Network
 
         public PlayerController PlayerPreFab;
 
+        public bool DevAutoJoin = true;
+
 
         #region PUN2 API
         public override void OnConnectedToMaster()
@@ -41,14 +43,31 @@ namespace Network
             Debug.Log("[NetworkManager] OnConnectedToMaster");
 
             Status = ManagerStatus.Started;
-            
-            if(_onNetworkManagerStarted != null)
+
+            if (_onNetworkManagerStarted != null)
             {
                 _onNetworkManagerStarted();
                 _onNetworkManagerStarted = null;
             }
 
-            PhotonNetwork.JoinLobby();
+            if (DevAutoJoin)
+            {
+                Debug.Log("[Network Manager] Trying to Join Random Room");
+                PhotonNetwork.AutomaticallySyncScene = true;
+                PhotonNetwork.JoinRandomRoom(); // failure will call OnJoinRandomFailed() ... where we will create one
+            }
+            else
+            {
+                Debug.Log("[Network Manager] Trying to Join Lobby");
+                PhotonNetwork.JoinLobby();
+            }
+        }
+
+        public override void OnJoinRandomFailed(short returnCode, string message)
+        {
+            Debug.Log("[Network Manager] No random room: so ... \nCalling: CreatePublicRoom()");
+            // tried to create room ... failed so make one 
+            CreatePublicRoom("Dev for 2", 2);
         }
 
         public override void OnJoinedLobby()

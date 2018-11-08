@@ -8,29 +8,30 @@ public class PlayerController : MonoBehaviourPun
     public static PlayerController LocalPlayer;
     public static PlayerManager MyManager;
 
-    private TankHelpers Help; // A function Utility Class
+    private TankHelpers Help = new TankHelpers(); // A function Utility Class
 
     public GameObject TankType1;
     public GameObject TankType2;
     public int TankChoice = 1; // default
-    private Vector3 _Vcolor = new Vector3(255, 0, 0); // default
+    public Vector3 _Vcolor = new Vector3(255, 0, 0); // default // public required for TankBase
     private Color _color = new Color(255, 0, 0); // default
     public int PlayerID;
     public string PlayerNick;
     public int Score = 0;
     public float Health = 0;
-    private Transform[] _Spawns;
-    private PlayerController[] _Players;
-    private Vector3 _SpawnPos;
-    private Quaternion _SpawnRot;
+    [SerializeField] private Transform[] _Spawns;
+    [SerializeField] private PlayerController[] _Players;
+    [SerializeField] private Vector3 _SpawnPos;
+    [SerializeField] private Quaternion _SpawnRot;
     private TankBase _myTankScript;
     private GameObject _myTankBody;
     public bool IsActive = false;
 
-    public Vector3 myHullPos;
-    public Quaternion myHullRot;
-    public Vector3 myTurrPos;
-    public Quaternion myTurrRot;
+    // Will re-visit synching this way if Transform view continued to be laggy
+    //public Vector3 myHullPos;
+    //public Quaternion myHullRot;
+    //public Vector3 myTurrPos;
+    //public Quaternion myTurrRot;
 
     //[SerializeField]
     //private GameObject CameraPrefab;
@@ -116,7 +117,6 @@ public class PlayerController : MonoBehaviourPun
     {
         // let's make a tank
         // Move Controller to Spawn
-
         switch (TankChoice)
         {
             case 1:
@@ -144,8 +144,28 @@ public class PlayerController : MonoBehaviourPun
         {
             _myTankBody = PhotonView.Find(viewID).gameObject;
         }
-
         _myTankBody.transform.parent = transform;
         _myTankScript = _myTankBody.GetComponent<TankBase>();
+        _myTankScript.OwnTeamColor = _Vcolor;
+        _myTankScript.ChangeColor();
     }
+
+    public void Fire()
+    {
+        photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
+    }
+
+    [PunRPC]
+    private void RpcFire(int viewID)
+    {
+        if (!photonView.IsMine)
+        {
+            _myTankBody = PhotonView.Find(viewID).gameObject;
+        }
+        _myTankScript = _myTankBody.GetComponent<TankBase>();
+        _myTankScript.Fire();
+    }
+
+
+
 }
