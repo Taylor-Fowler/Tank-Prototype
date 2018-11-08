@@ -11,8 +11,8 @@ public class PlayerController : MonoBehaviourPun
     public GameObject TankType1;
     public GameObject TankType2;
     public int TankChoice = 1; // default
-    private Vector3 _Vcolor = new Vector3(255,0,0); // default
-    private Color _color = new Color(255,0,0); // default
+    private Vector3 _Vcolor = new Vector3(255, 0, 0); // default
+    private Color _color = new Color(255, 0, 0); // default
     public int PlayerID;
     public string PlayerNick;
     public int Score = 0;
@@ -37,7 +37,7 @@ public class PlayerController : MonoBehaviourPun
     #region UNITY API
     private void Awake()
     {
-        if(photonView.IsMine)
+        if (photonView.IsMine)
         {
             LocalPlayer = this;
             //Instantiate(CameraPrefab, transform);
@@ -86,11 +86,11 @@ public class PlayerController : MonoBehaviourPun
         // so MUST ensure enough Spawn Points on map to cover max number of players
         // something to be considered for level design (maybe randomise after map creation?)
         _SpawnPos = _Spawns[PlayerID].position;
-        _SpawnRot = Quaternion.LookRotation((new Vector3(25,_SpawnPos.y,25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
+        _SpawnRot = Quaternion.LookRotation((new Vector3(25, _SpawnPos.y, 25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
         transform.position = _SpawnPos;
         transform.rotation = _SpawnRot;
 
-        if(photonView.IsMine)
+        if (photonView.IsMine)
         {
             Spawn();
         }
@@ -113,33 +113,6 @@ public class PlayerController : MonoBehaviourPun
     {
         // let's make a tank
         // Move Controller to Spawn
-<<<<<<< HEAD
-        transform.position = _SpawnPos;
-        transform.rotation = _SpawnRot;
-
-        AttatchTank(TankChoice, _SpawnPos, _SpawnRot);
-
-    }
-
-    [PunRPC]
-    public void AttatchTank (int type, Vector3 Position, Quaternion Rotation)
-    {
-        if (photonView.IsMine)
-        {
-            switch (TankChoice)
-            {
-                case 1:
-                    _myTankBody = PhotonNetwork.Instantiate("1930Tank", transform.position, _SpawnRot);
-                    break;
-                case 2:
-                    _myTankBody = Instantiate(TankType2, transform.position, _SpawnRot, transform);
-                    break;
-            }
-            _myTankBody.transform.parent = transform;
-            _myTankScript = _myTankBody.GetComponent<TankBase>();
-            GetComponentsInChildren<TankCameraScript>()[0].Activate(); // Activate camera
-        }
-=======
 
         switch (TankChoice)
         {
@@ -150,7 +123,7 @@ public class PlayerController : MonoBehaviourPun
                 _myTankBody = PhotonNetwork.Instantiate(TankType2.name, transform.position, _SpawnRot);
                 break;
         }
-        
+
         photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
     }
 
@@ -159,13 +132,12 @@ public class PlayerController : MonoBehaviourPun
     private void RpcChangeTank(int type)
     {
         TankChoice = type;
->>>>>>> Taylor
     }
 
     [PunRPC]
     private void RpcSetTankBody(int viewID)
     {
-        if(!photonView.IsMine)
+        if (!photonView.IsMine)
         {
             _myTankBody = PhotonView.Find(viewID).gameObject;
         }
