@@ -52,7 +52,7 @@ namespace Network
 
             if (DevAutoJoin)
             {
-                Debug.Log("[Network Manager] Trying to Join Random Room");
+                Debug.Log("[Network Manager] AUTOJOIN: Trying to Join Random Room");
                 PhotonNetwork.AutomaticallySyncScene = true;
                 PhotonNetwork.JoinRandomRoom(); // failure will call OnJoinRandomFailed() ... where we will create one
             }
@@ -65,7 +65,7 @@ namespace Network
 
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
-            Debug.Log("[Network Manager] No random room: so ... \nCalling: CreatePublicRoom()");
+            Debug.Log("[Network Manager] AUTOJOIN: No random room: so ... \nCalling: CreatePublicRoom()");
             // tried to create room ... failed so make one 
             CreatePublicRoom("Dev for 2", 2);
         }

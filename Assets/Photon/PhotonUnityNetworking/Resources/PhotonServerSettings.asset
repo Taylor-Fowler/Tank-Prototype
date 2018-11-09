@@ -36,4 +36,6 @@ MonoBehaviour:
   - RpcChangeTank
   - RpcSetTankBody
   - RpcFire
+  - RpcTakeDamage
+  - RpcUpdateScore
   DisableAutoOpenWizard: 1

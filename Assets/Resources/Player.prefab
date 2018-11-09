@@ -95,7 +95,8 @@ MonoBehaviour:
   PlayerID: 0
   PlayerNick: 
   Score: 0
-  Health: 0
+  Curr_Health: 0
+  Max_Health: 0
   _Spawns: []
   _Players: []
   _SpawnPos: {x: 0, y: 0, z: 0}

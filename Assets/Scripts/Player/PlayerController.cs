@@ -18,7 +18,8 @@ public class PlayerController : MonoBehaviourPun
     public int PlayerID;
     public string PlayerNick;
     public int Score = 0;
-    public float Health = 0;
+    public float Curr_Health = 0;
+    public float Max_Health = 0;
     [SerializeField] private Transform[] _Spawns;
     [SerializeField] private PlayerController[] _Players;
     [SerializeField] private Vector3 _SpawnPos;
@@ -52,7 +53,9 @@ public class PlayerController : MonoBehaviourPun
         GameController.Instance.Event_OnGameSceneInitialised += StartGame;
         PlayerID = PlayerManager.PlayerID(photonView.Owner);
         _color = PlayerManager.PlayerColour(photonView.Owner);
-        _Vcolor = Help.ColorToV3(_color);
+        _Vcolor = Help.ColorToV3(_color);       
+        PlayerNick = PlayerManager.PlayerNick(photonView.Owner);
+
     }
 
     private void Update()
@@ -148,6 +151,7 @@ public class PlayerController : MonoBehaviourPun
         _myTankScript = _myTankBody.GetComponent<TankBase>();
         _myTankScript.OwnTeamColor = _Vcolor;
         _myTankScript.ChangeColor();
+        Max_Health = _myTankScript.GetHealth();
     }
 
     public void Fire()
@@ -164,6 +168,38 @@ public class PlayerController : MonoBehaviourPun
         }
         _myTankScript = _myTankBody.GetComponent<TankBase>();
         _myTankScript.Fire();
+    }
+
+    public void TakeDamage(int OwnerID, float damage)
+    {
+        photonView.RPC("RpcTakeDamage", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID,damage);
+    }
+
+    [PunRPC]
+    private void RpcTakeDamage (int OwnerID, float damage)
+    {
+        if (!photonView.IsMine)
+        {
+            // do nothing
+        }
+        Curr_Health -= damage;
+        if (Curr_Health <= 0)
+        {
+            // add death script ... for Dev purposes will throw a cube into the game
+            Debug.Log("[PlayerController] PlayerID " + PlayerID + " DIED !!");
+            photonView.RPC("RpCUpdateScore", RpcTarget.AllBuffered, OwnerID);
+        }
+
+    }
+
+    [PunRPC]
+    private void RpcUpdateScore (int OwnerID)
+    {
+        if (OwnerID == GetComponent<PhotonView>().ViewID)
+        {
+            Debug.Log("[PlayerController] Player " + OwnerID + " SCORES");
+            Score++;
+        }
     }
 
 

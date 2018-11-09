@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
-
+/// <summary>
+/// Utility Class (or Library), just to store multi-class usable functions
+/// </summary>
     class TankHelpers
     { 
         public Vector3 ColorToV3(Color color)

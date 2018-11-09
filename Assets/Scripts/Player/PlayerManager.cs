@@ -61,6 +61,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
         return (int)player.CustomProperties["NumberID"];
     }
 
+    public static string PlayerNick(Player player)
+    {
+        return PhotonNetwork.NickName;
+    }
+
     public static int PlayerColourIndex()
     {
         if(!PhotonNetwork.InRoom)

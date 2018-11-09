@@ -13,7 +13,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public Transform _firePos;
     public Transform Shell;
 
-    //public Vector3 Spawn = new Vector3(20f, 0.21f, 20f); // Dev purposes spawn only
     private TankHelpers Help = new TankHelpers();
 
     public bool TESTING = true; // toggle "true" means can test without Photon
@@ -122,6 +121,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     // Update() COMMENTED OUT, may revisit, saves a little time at the mo
     //void Update () { }
 
+    public float GetHealth()
+    {
+        return C_Health;
+    }
 
     void ControlFiring()
     {
@@ -149,28 +152,31 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         Physics.IgnoreCollision(ss.GetComponent<Collider>(), Col);
     }
 
-    /////////////////////////////////////////
-    // Interface IDamageable requirement
-    public void TakeDamage(float damage)
+
+    #region Interface IDamageable Implementation
+    public void TakeDamage(int OwnerID, float damage)
     {
+        ///
+        ///
+
         float pen = damage - C_Armour;
         if (pen > 0)
         {
-            C_Health -= pen;
+            LocalPlayer.TakeDamage(OwnerID, damage);
+            //C_Health -= pen;
         }
         // death check
-        if (C_Health <= 0)
-        {
-            StopAllCoroutines();
-            // DEATH SCRIPT
-            Debug.Log("You got me !!");
-        }
+        //if (C_Health <= 0)
+        //{
+         //   StopAllCoroutines();
+         //   // DEATH SCRIPT
+         //   Debug.Log("You got me !!");
+        //}
     }
-    // End of Interface IDamageable requirement
-    /////////////////////////////////////////
+    #endregion
 
-    /////////////////////////////////////////
-    //Interface ITakesPowerUps requirements
+
+    #region  Interface ITakesPowerUps Implementation
     public void FireRatePlus(float factor, float time)
     {
         ModFireRate *= factor;
@@ -203,8 +209,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         C_Health = Mathf.Clamp(C_Health + gain, 0, BaseHealth * ModHealth);
     }
-    //End of Interface ITakesPowerUps requirements
-    /////////////////////////////////////////
+    #endregion
 
 
 
@@ -218,10 +223,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     void ControlMovement()
     {
         // Only For Active Player ... ONLY called by active player .....
-       // if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-       // {
-       //     return;
-       // }
+       if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+       {
+            return;
+       }
 
         // Tank Hull Forward / Backward input
         if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel);

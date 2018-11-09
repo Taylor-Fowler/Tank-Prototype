@@ -92,14 +92,14 @@ public class ShellScript : MonoBehaviour
     }
 
     // Collision Script
-    void OnTriggerEnter(Collision col)
+    void OnTriggerEnter(Collider col)
     {
         //if (_armed) // Currently redundant, as being armed enables Collision detection .... but we may want to toggle arming on/off and this serves that purpose.
         //{
             IDamageable dam = col.gameObject.GetComponent<IDamageable>();
             if (dam != null)
             {
-                dam.TakeDamage(dmg);
+                dam.TakeDamage(OwnerID, dmg);
                 Debug.Log("Shell Injecting damage");
                 Destroy(gameObject); // Add Explosion animation here too
             }
