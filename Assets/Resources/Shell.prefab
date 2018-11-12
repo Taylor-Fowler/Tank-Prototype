@@ -114,14 +114,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OwnerID: 0
   dmg: 0
-  start: {x: 0, y: 0, z: 0}
-  direction: {x: 0, y: 0, z: 0, w: 0}
   type: 0
   color: {r: 0, g: 0, b: 0, a: 0}
+  start: {x: 0, y: 0, z: 0}
+  direction: {x: 0, y: 0, z: 0, w: 0}
   velocity: 0
   life: 0
   bouncy: 0
-  ArmingTime: 0.05
+  ExpPreFab: {fileID: 1871445376668862, guid: dc2a0649c0df88f44b8b1245ed152aec, type: 2}
 --- !u!135 &135436184451500028
 SphereCollider:
   m_ObjectHideFlags: 1

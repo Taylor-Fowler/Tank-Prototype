@@ -3,6 +3,17 @@ using System.Collections;
 using UnityEngine.Networking;
 using Photon.Pun;
 
+public struct InGameVariables
+{
+    public int PlayerID;
+    public string PlayerName;
+    public Vector3 Color;
+    public PlayerController Controller;
+    public float Max_Health;
+    public float Curr_Health;
+    public int Score;
+}
+
 public class PlayerController : MonoBehaviourPun
 {
     public static PlayerController LocalPlayer;
@@ -15,28 +26,27 @@ public class PlayerController : MonoBehaviourPun
     public int TankChoice = 1; // default
     public Vector3 _Vcolor = new Vector3(255, 0, 0); // default // public required for TankBase
     private Color _color = new Color(255, 0, 0); // default
-    public int PlayerID;
-    public string PlayerNick;
-    public int Score = 0;
-    public float Curr_Health = 0;
-    public float Max_Health = 0;
     [SerializeField] private Transform[] _Spawns;
-    [SerializeField] private PlayerController[] _Players;
+    public InGameVariables OwnStats;
+    [SerializeField] public InGameVariables[] _Players;
     [SerializeField] private Vector3 _SpawnPos;
     [SerializeField] private Quaternion _SpawnRot;
     private TankBase _myTankScript;
     private GameObject _myTankBody;
     public bool IsActive = false;
+    [Header("OwnStats Reporting")] // can delete once debugged and working
+    [SerializeField] private int PlayerID;
+    [SerializeField] private string Name;
+    [SerializeField] private float Max_Health;
+    [SerializeField]  private float Curr_Health;
+    [SerializeField]  private int Score;
+
 
     // Will re-visit synching this way if Transform view continued to be laggy
     //public Vector3 myHullPos;
     //public Quaternion myHullRot;
     //public Vector3 myTurrPos;
     //public Quaternion myTurrRot;
-
-    //[SerializeField]
-    //private GameObject CameraPrefab;
-    //private GameObject TurretObject;
 
     #region UNITY API
     private void Awake()
@@ -51,10 +61,19 @@ public class PlayerController : MonoBehaviourPun
         }
 
         GameController.Instance.Event_OnGameSceneInitialised += StartGame;
-        PlayerID = PlayerManager.PlayerID(photonView.Owner);
-        _color = PlayerManager.PlayerColour(photonView.Owner);
-        _Vcolor = Help.ColorToV3(_color);       
-        PlayerNick = PlayerManager.PlayerNick(photonView.Owner);
+        // Populate "OwnStats"
+        OwnStats.PlayerID = PlayerManager.PlayerID(photonView.Owner);
+        OwnStats.PlayerName = PlayerManager.PlayerNick(photonView.Owner);
+        OwnStats.Color = Help.ColorToV3(PlayerManager.PlayerColour(photonView.Owner));
+        OwnStats.Controller = this;
+        OwnStats.Score = 0;
+            // configured when Tank body added
+        OwnStats.Max_Health = 0; 
+        OwnStats.Curr_Health = 0;
+
+        // For Debugging ...
+        PlayerID = OwnStats.PlayerID;
+        Name = OwnStats.PlayerName;
 
     }
 
@@ -65,22 +84,26 @@ public class PlayerController : MonoBehaviourPun
         {
             return;
         }
+        UpdateInspectorOwnStats(); // required as can't readily "see" an Struct in the Inspector
     }
-    #endregion
+
+    private void UpdateInspectorOwnStats()
+    {
+        Max_Health = OwnStats.Max_Health;
+        Curr_Health = OwnStats.Curr_Health;
+        Score = OwnStats.Score;
+    }
 
     public void StartGame()
     {
-        // Get other player references and sort by ID
-        // SERIOUSLY Unity?  Seriously?
-
         // NOTE: 
         //       Maybe in this method, each player controller adds
         //       themselves to the "LocalPlayer" array of player controllers?
         PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
-        _Players = new PlayerController[TempPlayers.Length];
+        _Players = new InGameVariables[TempPlayers.Length];
         foreach (PlayerController pc in TempPlayers)
         {
-            _Players[pc.PlayerID] = pc;
+            _Players[pc.OwnStats.PlayerID] = pc.OwnStats;
         }
 
         // Get Spawn Points
@@ -92,7 +115,7 @@ public class PlayerController : MonoBehaviourPun
         // Developer Note ... initial spawn will be based on "Player" ID ... 
         // so MUST ensure enough Spawn Points on map to cover max number of players
         // something to be considered for level design (maybe randomise after map creation?)
-        _SpawnPos = _Spawns[PlayerID].position;
+        _SpawnPos = _Spawns[OwnStats.PlayerID].position;
         _SpawnRot = Quaternion.LookRotation((new Vector3(25, _SpawnPos.y, 25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
         transform.position = _SpawnPos;
         transform.rotation = _SpawnRot;
@@ -100,6 +123,25 @@ public class PlayerController : MonoBehaviourPun
         if (photonView.IsMine)
         {
             Spawn();
+        }
+    }
+    #endregion
+
+
+    public int ReportID()
+    {
+        return OwnStats.PlayerID;
+    }
+
+    public void  RecieveBaseHealth( float C_Health)
+    {
+        OwnStats.Curr_Health = OwnStats.Max_Health = C_Health;
+        if (photonView.IsMine)
+        {
+            foreach (InGameVariables GV in _Players)
+            {
+                // maybe do something
+            }
         }
     }
 
@@ -134,6 +176,8 @@ public class PlayerController : MonoBehaviourPun
     }
 
 
+
+
     [PunRPC]
     private void RpcChangeTank(int type)
     {
@@ -149,14 +193,14 @@ public class PlayerController : MonoBehaviourPun
         }
         _myTankBody.transform.parent = transform;
         _myTankScript = _myTankBody.GetComponent<TankBase>();
-        _myTankScript.OwnTeamColor = _Vcolor;
+        _myTankScript.MyV3Color = OwnStats.Color;
         _myTankScript.ChangeColor();
-        Max_Health = _myTankScript.GetHealth();
     }
 
     public void Fire()
     {
-        photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
+        //photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
+        photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID); // do we need the view ID ?
     }
 
     [PunRPC]
@@ -170,38 +214,35 @@ public class PlayerController : MonoBehaviourPun
         _myTankScript.Fire();
     }
 
-    public void TakeDamage(int OwnerID, float damage)
+    public void TakeDamage(int ShellOwnerID, float damage, int TankHitPlayerID)
     {
-        photonView.RPC("RpcTakeDamage", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID,damage);
+        photonView.RPC("RpcTakeDamage", RpcTarget.AllBuffered,ShellOwnerID,damage,TankHitPlayerID);
     }
 
     [PunRPC]
-    private void RpcTakeDamage (int OwnerID, float damage)
+    private void RpcTakeDamage (int ShellOwnerID, float damage, int TankHitPlayerID)
     {
         if (!photonView.IsMine)
         {
             // do nothing
         }
-        Curr_Health -= damage;
-        if (Curr_Health <= 0)
+        _Players[TankHitPlayerID].Curr_Health -= damage;
+        if (OwnStats.Curr_Health <= 0)
         {
             // add death script ... for Dev purposes will throw a cube into the game
-            Debug.Log("[PlayerController] PlayerID " + PlayerID + " DIED !!");
-            photonView.RPC("RpCUpdateScore", RpcTarget.AllBuffered, OwnerID);
+            Debug.Log("[PlayerController] PlayerID " + OwnStats.PlayerID + " ("+ OwnStats.PlayerName+ ") DIED !!");
+            photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
         }
-
     }
 
     [PunRPC]
     private void RpcUpdateScore (int OwnerID)
     {
-        if (OwnerID == GetComponent<PhotonView>().ViewID)
-        {
-            Debug.Log("[PlayerController] Player " + OwnerID + " SCORES");
-            Score++;
-        }
+       if (!photonView.IsMine)
+       {
+            // do nothing
+       }
+        _Players[OwnerID].Score++;
+        Debug.Log("[PlayerController] PlayerID " + OwnStats.PlayerID + " (" + OwnStats.PlayerName + ") SCORES");
     }
-
-
-
 }

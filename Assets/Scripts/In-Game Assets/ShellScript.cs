@@ -6,43 +6,28 @@ public enum ShellType { Standard, Bouncy, Triple } // Placeholder for "when" we 
 
 public class ShellScript : MonoBehaviour
 {
-
-    // Fired with
-    // void Fire (float dmg, Vector3 start, Vector3 direction, int type, Color color)
-
-    public int OwnerID;
-    public float dmg;
-    public Vector3 start;
-    public Quaternion direction;
-    public int type;
-    public Color color;
-    public float velocity;
+    // Instantiated by void Fire() (in TankBase) those marked *by TB* are configured there
+      // *by TB*
+    public int OwnerID;          
+    public float dmg;           
+    public ShellType type;            
+    public Color color;  
+      // For future "DeathCam" use          
+    public Vector3 start;   
+    public Quaternion direction; 
+      // set in Configure()   
+    public float velocity;    
     public float life;
     public bool bouncy;
-    private Rigidbody RB;
-    public float ArmingTime = 0.05f; // required to prevent hitting own collider (or could eventually use an owner ID .. but that would prevent "accidental" bounce self kills)
-    private bool _armed = false;
+    private Rigidbody _RB;
+
+    public GameObject ExpPreFab;
 
 	// Use this for initialization
 	void Start () {
-        RB = GetComponent<Rigidbody>();
+        _RB = GetComponent<Rigidbody>();
         Configure();
         Destroy(gameObject, life); // REMEMBER to set life span in Configure()
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        // Check Shell arming
-        if (!_armed)
-        {
-            ArmingTime -= Time.deltaTime;
-            if (ArmingTime <= 0)
-            {
-                ArmingTime = 0;
-                _armed = true;
-                RB.detectCollisions = true;
-            }
-        }
 	}
 
     void Configure ()
@@ -63,22 +48,21 @@ public class ShellScript : MonoBehaviour
         // "Default" // maybe changed for different shells
         life = 2f;
         velocity = 10f;
-        RB.detectCollisions = false; // needs to be armed
         // Switch for "Others" inc bouncy and further customising
         switch (type)
         {
-            case 1: // basic Default Shell
+            case ShellType.Standard: // basic Default Shell
                 bouncy = false;
                 break;
-            case 2: // Bouncy Shell // BUGGED DO NOT USE
+            case ShellType.Bouncy: // Bouncy Shell // BUGGED DO NOT USE
                 bouncy = true;
                 break;
-            case 3: // Triple Shot // BUGGED DO NOT USE
+            case ShellType.Triple: // Triple Shot // BUGGED DO NOT USE
                 bouncy = false;
                 for (int i = -1; i <= 1; i +=2)
                 { 
                     GameObject clone = Instantiate(gameObject);
-                    clone.GetComponent<ShellScript>().type = 1;
+                    clone.GetComponent<ShellScript>().type = ShellType.Standard;
                     // Care of https://answers.unity.com/questions/316918/local-forward.html (27 Oct 2018)
                     //clone.transform.Translate(clone.transform.worldToLocalMatrix.MultiplyVector(clone.transform.forward) * 0.1f * i);
                     clone.transform.Rotate(clone.transform.up, 4 * i);
@@ -88,27 +72,28 @@ public class ShellScript : MonoBehaviour
             default:
                 break;
         }       
-        RB.velocity = transform.forward * velocity;
+        _RB.velocity = transform.forward * velocity;
     }
 
     // Collision Script
     void OnTriggerEnter(Collider col)
     {
-        //if (_armed) // Currently redundant, as being armed enables Collision detection .... but we may want to toggle arming on/off and this serves that purpose.
-        //{
             IDamageable dam = col.gameObject.GetComponent<IDamageable>();
             if (dam != null)
             {
                 dam.TakeDamage(OwnerID, dmg);
-                Debug.Log("Shell Injecting damage");
-                Destroy(gameObject); // Add Explosion animation here too
+
+                // Explosion animation here too
+                GameObject boom = Instantiate(ExpPreFab, transform.position , Quaternion.identity) as GameObject;
+                boom.transform.LookAt(start);
+                Destroy(boom, 1);
+
+                Destroy(gameObject); 
             }
             else if (!bouncy)
             {
-                Debug.Log("Shell hits something not IDamageable and dies");
                 Destroy(gameObject);
             }
-        //}
     }
 
 }

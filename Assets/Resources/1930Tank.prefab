@@ -8425,9 +8425,9 @@ MonoBehaviour:
   ModFireRate: 1
   ModMass: 1
   Col: {fileID: 65262282814355578}
+  PlayerID: 0
+  MyV3Color: {x: 0, y: 0, z: 0}
   Cooldown: 0
-  OwnTeamColor: {x: 0, y: 0, z: 0}
-  OpponentTeamColor: {x: 0, y: 0, z: 0}
 --- !u!114 &114892831232235174
 MonoBehaviour:
   m_ObjectHideFlags: 1

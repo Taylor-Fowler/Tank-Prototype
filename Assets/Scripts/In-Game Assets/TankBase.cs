@@ -52,14 +52,15 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     private Rigidbody RB;
     public Collider Col; // reference for own shells to ignore .. public so Photon can use it?
 
+    private bool _turretlock = false;
+    [SerializeField]
+    private int PlayerID = -1; // default
+    public Vector3 MyV3Color;
+    //public Color MyColor;
 
     [SerializeField]
     private float Cooldown = 0;
 
-    [Header("Player Options")]
-    // N.B. can't sent Colors over RPC ... but can sent Vect3, so these are colors
-    public Vector3 OwnTeamColor;       // defaults to Blue @ Start() if not set.
-    public Vector3 OpponentTeamColor;  // defaults to Red @ Start() if not set.
 
     private void Awake()
     {
@@ -80,21 +81,23 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
         //Okies ... lets connect this Tank to the Player
         LocalPlayer = GetComponentInParent<PlayerController>();
+        PlayerID = LocalPlayer.ReportID();
         Instantiate(CameraPrefab, CameraAnchor);
         CurrentSpeed = 0f;
         RB = GetComponent<Rigidbody>();
         if (RB == null) Debug.Log(" No RB found");
         RB.mass = C_Mass;
-        //Col = GetComponent<Collider>();
+        Col = GetComponent<Collider>();
 
-        // set the "settables"
+        // set the "settables" & report them
         C_Health = BaseHealth* ModHealth;
+        LocalPlayer.RecieveBaseHealth(C_Health);
 
     }
 
     public void ChangeColor()
     {
-       Color MyColor = Help.V3ToColor(OwnTeamColor);
+       Color MyColor = Help.V3ToColor(MyV3Color);
        Renderer[] RendList = GetComponentsInChildren<Renderer>();
        foreach (Renderer Rend in RendList)
        {
@@ -105,8 +108,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
        }
     }
 
-    // Using FIXEDUPDATE for better Physics
-    void FixedUpdate()
+    void Update()
     {
         // Only For Active Player
         if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
@@ -116,14 +118,17 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         ControlMovement();
         ControlWeaponToggles();
         ControlFiring();
+        CheckTurretLock();
     }
-
-    // Update() COMMENTED OUT, may revisit, saves a little time at the mo
-    //void Update () { }
 
     public float GetHealth()
     {
         return C_Health;
+    }
+
+    void CheckTurretLock()
+    {
+        if (Input.GetKeyDown("space")) _turretlock = !_turretlock;
     }
 
     void ControlFiring()
@@ -142,10 +147,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         Transform shell = (Transform)Instantiate(Shell, _firePos.transform.position, _firePos.transform.rotation);
         ShellScript ss = shell.GetComponent<ShellScript>();
-        ss.OwnerID = LocalPlayer.PlayerID;
+        ss.OwnerID = PlayerID;
         ss.dmg = C_Damage;
-        ss.type = BaseShell;
-        Color MyColor = Help.V3ToColor(LocalPlayer._Vcolor);
+        ss.type = ShellType.Standard;
+        Color MyColor = Help.V3ToColor(MyV3Color);
         ss.color = MyColor;
         // Get Shell to ignore Firing Units Collider
         // https://docs.unity3d.com/ScriptReference/Physics.IgnoreCollision.html (03 Nov 2018)
@@ -156,22 +161,11 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     #region Interface IDamageable Implementation
     public void TakeDamage(int OwnerID, float damage)
     {
-        ///
-        ///
-
         float pen = damage - C_Armour;
         if (pen > 0)
         {
-            LocalPlayer.TakeDamage(OwnerID, damage);
-            //C_Health -= pen;
+            LocalPlayer.TakeDamage(OwnerID, damage, PlayerID);
         }
-        // death check
-        //if (C_Health <= 0)
-        //{
-         //   StopAllCoroutines();
-         //   // DEATH SCRIPT
-         //   Debug.Log("You got me !!");
-        //}
     }
     #endregion
 
@@ -223,10 +217,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     void ControlMovement()
     {
         // Only For Active Player ... ONLY called by active player .....
-       if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-       {
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
             return;
-       }
+        }
 
         // Tank Hull Forward / Backward input
         if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel);
@@ -260,41 +254,44 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
         // Turret (and therefore camera Rotation)
         // N.B. Turret does NOT use Physics
-        float TurrToGo = Input.mousePosition.x / Screen.width;
-        // tried various ... this seems to work best with a taper to a "dead zone" in the middle
-        //  -------- A           D --------------
-        //            \         /
-        //              B --- C
-        //
-        float A = 0.46f;
-        float B = 0.49f;
-        float C = 1f - B;
-        float D = 1f - A;
-        float AB = B - A;
-
-        if (TurrToGo <= A) { Turret.transform.Rotate(new Vector3(0, -C_TurrTurnRate * Time.deltaTime, 0)); }
-        else if (TurrToGo < B)
+        if (!_turretlock)
         {
-            float mod = (B - TurrToGo) / AB;
-            Turret.transform.Rotate(new Vector3(0, -C_TurrTurnRate * Time.deltaTime * mod, 0));
-        }
-        else if (TurrToGo > C && TurrToGo < D)
-        {
-            float mod = (TurrToGo - C) / AB;
-            Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime * mod, 0));
-        }
-        else if (TurrToGo >= D) { Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime, 0)); }
+            float TurrToGo = Input.mousePosition.x / Screen.width;
+            // tried various ... this seems to work best with a taper to a "dead zone" in the middle
+            //  -------- A           D --------------
+            //            \         /
+            //              B --- C
+            //
+            float A = 0.46f;
+            float B = 0.49f;
+            float C = 1f - B;
+            float D = 1f - A;
+            float AB = B - A;
 
-        // Now to drag the Parent with me
-        // thanks to https://forum.unity.com/threads/child-parent-dragging-not-working.30927/ (06.11.2018)
-        //Vector3 relPos = LocalPlayer.transform.position - transform.position;
-        //LocalPlayer.transform.position = transform.position + relPos;
-        //LocalPlayer.myHullPos = transform.position;
-        //LocalPlayer.myHullRot = transform.rotation;
-        //LocalPlayer.myTurrPos = Turret.transform.position;
-        //LocalPlayer.myTurrRot = Turret.transform.rotation;
-        //LocalPlayer.transform.position = transform.position;
+            if (TurrToGo <= A) { Turret.transform.Rotate(new Vector3(0, -C_TurrTurnRate * Time.deltaTime, 0)); }
+            else if (TurrToGo < B)
+            {
+                float mod = (B - TurrToGo) / AB;
+                Turret.transform.Rotate(new Vector3(0, -C_TurrTurnRate * Time.deltaTime * mod, 0));
+            }
+            else if (TurrToGo > C && TurrToGo < D)
+            {
+                float mod = (TurrToGo - C) / AB;
+                Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime * mod, 0));
+            }
+            else if (TurrToGo >= D) { Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime, 0)); }
 
+       }
+
+            // Now to drag the Parent with me
+            // thanks to https://forum.unity.com/threads/child-parent-dragging-not-working.30927/ (06.11.2018)
+            //Vector3 relPos = LocalPlayer.transform.position - transform.position;
+            //LocalPlayer.transform.position = transform.position + relPos;
+            //LocalPlayer.myHullPos = transform.position;
+            //LocalPlayer.myHullRot = transform.rotation;
+            //LocalPlayer.myTurrPos = Turret.transform.position;
+            //LocalPlayer.myTurrRot = Turret.transform.rotation;
+            //LocalPlayer.transform.position = transform.position;
 
     }
 }

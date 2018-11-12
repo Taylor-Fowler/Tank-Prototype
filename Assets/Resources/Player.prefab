@@ -92,13 +92,12 @@ MonoBehaviour:
   TankType2: {fileID: 1992513107031480, guid: bbf690a599d737044a8da3409be3e5c4, type: 2}
   TankChoice: 1
   _Vcolor: {x: 255, y: 0, z: 0}
-  PlayerID: 0
-  PlayerNick: 
-  Score: 0
-  Curr_Health: 0
-  Max_Health: 0
   _Spawns: []
-  _Players: []
   _SpawnPos: {x: 0, y: 0, z: 0}
   _SpawnRot: {x: 0, y: 0, z: 0, w: 0}
   IsActive: 0
+  PlayerID: 0
+  Name: 
+  Max_Health: 0
+  Curr_Health: 0
+  Score: 0
