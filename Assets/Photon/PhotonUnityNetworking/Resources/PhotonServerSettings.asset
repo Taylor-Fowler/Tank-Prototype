@@ -38,4 +38,8 @@ MonoBehaviour:
   - RpcFire
   - RpcTakeDamage
   - RpcUpdateScore
+  - RpcUpdateIGVCurrHealth
+  - RpcUpdateIGVMaxHealth
+  - RpcUpdateIGVName
+  - RpcSynchAllIGV
   DisableAutoOpenWizard: 1

@@ -6,8 +6,8 @@ public enum ShellType { Standard, Bouncy, Triple } // Placeholder for "when" we 
 
 public class ShellScript : MonoBehaviour
 {
-    // Instantiated by void Fire() (in TankBase) those marked *by TB* are configured there
-      // *by TB*
+    // Instantiated by void Fire() (in TankBase)
+      //  *Set by TB*
     public int OwnerID;          
     public float dmg;           
     public ShellType type;            
@@ -15,7 +15,7 @@ public class ShellScript : MonoBehaviour
       // For future "DeathCam" use          
     public Vector3 start;   
     public Quaternion direction; 
-      // set in Configure()   
+      // * set in Configure() *
     public float velocity;    
     public float life;
     public bool bouncy;
@@ -66,7 +66,7 @@ public class ShellScript : MonoBehaviour
                     // Care of https://answers.unity.com/questions/316918/local-forward.html (27 Oct 2018)
                     //clone.transform.Translate(clone.transform.worldToLocalMatrix.MultiplyVector(clone.transform.forward) * 0.1f * i);
                     clone.transform.Rotate(clone.transform.up, 4 * i);
-                    //clone.transform.Translate(clone.transform.forward * i * 0.01f); // a bit buggy here ..... maybe a timed callback?
+                    //clone.transform.Translate(clone.transform.forward * i * 0.01f); // a bit buggy here ..... maybe a Co-Routine?
                 }
                 break;
             default:

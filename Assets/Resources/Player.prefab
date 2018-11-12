@@ -101,3 +101,8 @@ MonoBehaviour:
   Max_Health: 0
   Curr_Health: 0
   Score: 0
+  P2PlayerID: 0
+  P2Name: 
+  P2Max_Health: 0
+  P2Curr_Health: 0
+  P2Score: 0

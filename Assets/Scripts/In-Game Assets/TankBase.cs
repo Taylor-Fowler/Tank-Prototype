@@ -12,6 +12,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public GameObject Turret;
     public Transform _firePos;
     public Transform Shell;
+    public GameObject ExpPreFab;
 
     private TankHelpers Help = new TankHelpers();
 
@@ -157,6 +158,11 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         Physics.IgnoreCollision(ss.GetComponent<Collider>(), Col);
     }
 
+    public void TankDie()
+    {
+        GameObject boom = Instantiate(ExpPreFab, transform.position, Quaternion.identity) as GameObject;
+        Destroy(boom, 1);
+    }
 
     #region Interface IDamageable Implementation
     public void TakeDamage(int OwnerID, float damage)

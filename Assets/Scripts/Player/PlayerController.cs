@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviourPun
     private TankBase _myTankScript;
     private GameObject _myTankBody;
     public bool IsActive = false;
+
     [Header("OwnStats Reporting")] // can delete once debugged and working
     [SerializeField] private int PlayerID;
     [SerializeField] private string Name;
@@ -41,12 +42,18 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField]  private float Curr_Health;
     [SerializeField]  private int Score;
 
+    [Header("Opponent Stats Reporting")] // can delete once debugged and working
+    [SerializeField]
+    private int P2PlayerID;
+    [SerializeField]
+    private string P2Name;
+    [SerializeField]
+    private float P2Max_Health;
+    [SerializeField]
+    private float P2Curr_Health;
+    [SerializeField]
+    private int P2Score;
 
-    // Will re-visit synching this way if Transform view continued to be laggy
-    //public Vector3 myHullPos;
-    //public Quaternion myHullRot;
-    //public Vector3 myTurrPos;
-    //public Quaternion myTurrRot;
 
     #region UNITY API
     private void Awake()
@@ -84,21 +91,28 @@ public class PlayerController : MonoBehaviourPun
         {
             return;
         }
-        UpdateInspectorOwnStats(); // required as can't readily "see" an Struct in the Inspector
+
+        if (IsActive) UpdateInspectorOwnStats(); // required as can't readily "see" a Struct in the Inspector
     }
 
     private void UpdateInspectorOwnStats()
     {
-        Max_Health = OwnStats.Max_Health;
-        Curr_Health = OwnStats.Curr_Health;
-        Score = OwnStats.Score;
+        Max_Health = _Players[PlayerID].Max_Health;
+        Curr_Health = _Players[PlayerID].Curr_Health;
+        Score = _Players[PlayerID].Score;
+        // Debug for 2 Player
+        int other = 0;
+        if (PlayerID == 0) other = 1;
+        P2Curr_Health = _Players[other].Curr_Health;
+        P2Max_Health = _Players[other].Max_Health;
+        P2Score = _Players[other].Score;
     }
 
     public void StartGame()
     {
         // NOTE: 
         //       Maybe in this method, each player controller adds
-        //       themselves to the "LocalPlayer" array of player controllers?
+        //       themselves to the "LocalPlayer" array of player controllers? (We can try that ..... will do after Spawn to ensure all variables present)
         PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
         _Players = new InGameVariables[TempPlayers.Length];
         foreach (PlayerController pc in TempPlayers)
@@ -138,10 +152,7 @@ public class PlayerController : MonoBehaviourPun
         OwnStats.Curr_Health = OwnStats.Max_Health = C_Health;
         if (photonView.IsMine)
         {
-            foreach (InGameVariables GV in _Players)
-            {
-                // maybe do something
-            }
+            RpcSynchAllIGV(PlayerID);
         }
     }
 
@@ -171,7 +182,7 @@ public class PlayerController : MonoBehaviourPun
                 _myTankBody = PhotonNetwork.Instantiate(TankType2.name, transform.position, _SpawnRot);
                 break;
         }
-
+        IsActive = true;
         photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
     }
 
@@ -195,12 +206,12 @@ public class PlayerController : MonoBehaviourPun
         _myTankScript = _myTankBody.GetComponent<TankBase>();
         _myTankScript.MyV3Color = OwnStats.Color;
         _myTankScript.ChangeColor();
+        RpcUpdateIGVName(PlayerID, OwnStats.PlayerName);
     }
 
     public void Fire()
     {
-        //photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
-        photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID); // do we need the view ID ?
+        photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
     }
 
     [PunRPC]
@@ -216,16 +227,27 @@ public class PlayerController : MonoBehaviourPun
 
     public void TakeDamage(int ShellOwnerID, float damage, int TankHitPlayerID)
     {
-        photonView.RPC("RpcTakeDamage", RpcTarget.AllBuffered,ShellOwnerID,damage,TankHitPlayerID);
+        if (photonView.IsMine && TankHitPlayerID == PlayerID) // My View AND My Tank was hit ....
+        {
+            if (IsActive) // still in the game?
+            {       
+                OwnStats.Curr_Health -= damage;
+                RpcUpdateIGVCurrHealth(TankHitPlayerID, OwnStats.Curr_Health);
+                if (OwnStats.Curr_Health <= 0)
+                {
+                    IsActive = false; // now out of the game
+                    RpcUpdateScore(ShellOwnerID);
+                    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
+                }
+            }
+        }
     }
 
     [PunRPC]
     private void RpcTakeDamage (int ShellOwnerID, float damage, int TankHitPlayerID)
     {
-        if (!photonView.IsMine)
-        {
-            // do nothing
-        }
+        RpcUpdateIGVCurrHealth(TankHitPlayerID, Curr_Health);
+
         _Players[TankHitPlayerID].Curr_Health -= damage;
         if (OwnStats.Curr_Health <= 0)
         {
@@ -235,14 +257,44 @@ public class PlayerController : MonoBehaviourPun
         }
     }
 
+    #region Pun Update _Player InGameVariables
+    /// <summary>
+    /// All called by Local Client when their OwnStats are modified, to synch up their and all other client's _Players[] record
+    /// </summary>
+    [PunRPC]
+    private void RpcSynchAllIGV (int OwnerID)
+    {
+        RpcUpdateIGVMaxHealth(OwnerID,OwnStats.Max_Health);
+        RpcUpdateIGVCurrHealth(OwnerID, OwnStats.Curr_Health);
+        RpcUpdateIGVName(OwnerID, OwnStats.PlayerName);
+    }
+   
     [PunRPC]
     private void RpcUpdateScore (int OwnerID)
     {
-       if (!photonView.IsMine)
-       {
-            // do nothing
-       }
         _Players[OwnerID].Score++;
-        Debug.Log("[PlayerController] PlayerID " + OwnStats.PlayerID + " (" + OwnStats.PlayerName + ") SCORES");
     }
+
+    [PunRPC]
+    private void RpcUpdateIGVMaxHealth (int PlayerID, float MaxHealth)
+    {
+        _Players[PlayerID].Max_Health = MaxHealth;
+    }
+
+    [PunRPC]
+    private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
+    {
+        _Players[PlayerID].Curr_Health = CurrHealth;
+    }
+
+    [PunRPC]
+    private void RpcUpdateIGVName (int PlayerID, string Name)
+    {
+        _Players[PlayerID].PlayerName = Name;
+    }
+    #endregion
+
+
+
+
 }

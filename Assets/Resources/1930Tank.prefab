@@ -8404,6 +8404,7 @@ MonoBehaviour:
   Turret: {fileID: 1379428623575022}
   _firePos: {fileID: 4428036437681664}
   Shell: {fileID: 4823616812344284, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
+  ExpPreFab: {fileID: 1703999668449258, guid: dc2a0649c0df88f44b8b1245ed152aec, type: 2}
   TESTING: 1
   BaseSpeedMax: 2
   BaseAccel: 20000
