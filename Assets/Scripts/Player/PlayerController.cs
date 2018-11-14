@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine.Networking;
 using Photon.Pun;
 
-public struct InGameVariables
+[System.Serializable]
+public class InGameVariables
 {
     public int PlayerID;
     public string PlayerName;
@@ -35,26 +36,6 @@ public class PlayerController : MonoBehaviourPun
     private GameObject _myTankBody;
     public bool IsActive = false;
 
-    [Header("OwnStats Reporting")] // can delete once debugged and working
-    [SerializeField] private int PlayerID;
-    [SerializeField] private string Name;
-    [SerializeField] private float Max_Health;
-    [SerializeField]  private float Curr_Health;
-    [SerializeField]  private int Score;
-
-    [Header("Opponent Stats Reporting")] // can delete once debugged and working
-    [SerializeField]
-    private int P2PlayerID;
-    [SerializeField]
-    private string P2Name;
-    [SerializeField]
-    private float P2Max_Health;
-    [SerializeField]
-    private float P2Curr_Health;
-    [SerializeField]
-    private int P2Score;
-
-
     #region UNITY API
     private void Awake()
     {
@@ -77,36 +58,18 @@ public class PlayerController : MonoBehaviourPun
             // configured when Tank body added
         OwnStats.Max_Health = 0; 
         OwnStats.Curr_Health = 0;
-
-        // For Debugging ...
-        PlayerID = OwnStats.PlayerID;
-        Name = OwnStats.PlayerName;
-
     }
 
-    private void Update()
-    {
-        // Only For Active Player
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true) // IsConnected added to allow off-line testing
-        {
-            return;
-        }
+    //private void Update()
+    //{
+    //    // Only For Active Player
+    //    //if (photonView.IsMine == false && PhotonNetwork.IsConnected == true) // IsConnected added to allow off-line testing
+    //    //{
+    //    //    return;
+    //    //}
+    //}
 
-        if (IsActive) UpdateInspectorOwnStats(); // required as can't readily "see" a Struct in the Inspector
-    }
 
-    private void UpdateInspectorOwnStats()
-    {
-        Max_Health = _Players[PlayerID].Max_Health;
-        Curr_Health = _Players[PlayerID].Curr_Health;
-        Score = _Players[PlayerID].Score;
-        // Debug for 2 Player
-        int other = 0;
-        if (PlayerID == 0) other = 1;
-        P2Curr_Health = _Players[other].Curr_Health;
-        P2Max_Health = _Players[other].Max_Health;
-        P2Score = _Players[other].Score;
-    }
 
     public void StartGame()
     {
@@ -147,12 +110,12 @@ public class PlayerController : MonoBehaviourPun
         return OwnStats.PlayerID;
     }
 
-    public void  RecieveBaseHealth( float C_Health)
+    public void RecieveBaseHealth(float C_Health)
     {
         OwnStats.Curr_Health = OwnStats.Max_Health = C_Health;
         if (photonView.IsMine)
         {
-            RpcSynchAllIGV(PlayerID);
+            RpcSynchAllIGV(OwnStats.PlayerID);
         }
     }
 
@@ -186,9 +149,6 @@ public class PlayerController : MonoBehaviourPun
         photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
     }
 
-
-
-
     [PunRPC]
     private void RpcChangeTank(int type)
     {
@@ -206,37 +166,32 @@ public class PlayerController : MonoBehaviourPun
         _myTankScript = _myTankBody.GetComponent<TankBase>();
         _myTankScript.MyV3Color = OwnStats.Color;
         _myTankScript.ChangeColor();
-        RpcUpdateIGVName(PlayerID, OwnStats.PlayerName);
+        RpcUpdateIGVName(OwnStats.PlayerID, OwnStats.PlayerName);
     }
 
     public void Fire()
     {
-        photonView.RPC("RpcFire", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
+        photonView.RPC("RpcFire", RpcTarget.AllBuffered, OwnStats.PlayerID);
     }
 
     [PunRPC]
-    private void RpcFire(int viewID)
+    private void RpcFire(int playerID)
     {
-        if (!photonView.IsMine)
-        {
-            _myTankBody = PhotonView.Find(viewID).gameObject;
-        }
-        _myTankScript = _myTankBody.GetComponent<TankBase>();
-        _myTankScript.Fire();
+        _myTankScript.Fire(playerID);
     }
 
-    public void TakeDamage(int ShellOwnerID, float damage, int TankHitPlayerID)
+    public void TakeDamage(int ShellOwnerID, float damage)
     {
-        if (photonView.IsMine && TankHitPlayerID == PlayerID) // My View AND My Tank was hit ....
+        if (photonView.IsMine) // My View AND My Tank was hit ....
         {
             if (IsActive) // still in the game?
             {       
                 OwnStats.Curr_Health -= damage;
-                RpcUpdateIGVCurrHealth(TankHitPlayerID, OwnStats.Curr_Health);
+                photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
                 if (OwnStats.Curr_Health <= 0)
                 {
                     IsActive = false; // now out of the game
-                    RpcUpdateScore(ShellOwnerID);
+                    photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
                     _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
                 }
             }
@@ -246,7 +201,7 @@ public class PlayerController : MonoBehaviourPun
     [PunRPC]
     private void RpcTakeDamage (int ShellOwnerID, float damage, int TankHitPlayerID)
     {
-        RpcUpdateIGVCurrHealth(TankHitPlayerID, Curr_Health);
+        RpcUpdateIGVCurrHealth(TankHitPlayerID, OwnStats.Curr_Health);
 
         _Players[TankHitPlayerID].Curr_Health -= damage;
         if (OwnStats.Curr_Health <= 0)

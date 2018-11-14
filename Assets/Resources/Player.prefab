@@ -93,16 +93,15 @@ MonoBehaviour:
   TankChoice: 1
   _Vcolor: {x: 255, y: 0, z: 0}
   _Spawns: []
+  OwnStats:
+    PlayerID: 0
+    PlayerName: 
+    Color: {x: 0, y: 0, z: 0}
+    Controller: {fileID: 0}
+    Max_Health: 0
+    Curr_Health: 0
+    Score: 0
+  _Players: []
   _SpawnPos: {x: 0, y: 0, z: 0}
   _SpawnRot: {x: 0, y: 0, z: 0, w: 0}
   IsActive: 0
-  PlayerID: 0
-  Name: 
-  Max_Health: 0
-  Curr_Health: 0
-  Score: 0
-  P2PlayerID: 0
-  P2Name: 
-  P2Max_Health: 0
-  P2Curr_Health: 0
-  P2Score: 0

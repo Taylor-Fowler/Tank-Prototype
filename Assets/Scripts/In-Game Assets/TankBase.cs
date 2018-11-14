@@ -5,8 +5,6 @@ using UnityEngine;
 
 public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 {
-    public static PlayerController LocalPlayer; // what is this magic ??
-
     public GameObject CameraPrefab;
     public Transform CameraAnchor;
     public GameObject Turret;
@@ -54,35 +52,21 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public Collider Col; // reference for own shells to ignore .. public so Photon can use it?
 
     private bool _turretlock = false;
-    [SerializeField]
-    private int PlayerID = -1; // default
     public Vector3 MyV3Color;
     //public Color MyColor;
 
     [SerializeField]
     private float Cooldown = 0;
 
-
-    private void Awake()
-    {
-        if (photonView.IsMine)
-        {
-            //LocalPlayer = this;
-        }
-    }
-
     // Use this for initialization
-    void Start () {
-
-        // Only For Active Player
+    void Start ()
+    {
+        // Only For Local Player
         if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
         {
             return;
         }
 
-        //Okies ... lets connect this Tank to the Player
-        LocalPlayer = GetComponentInParent<PlayerController>();
-        PlayerID = LocalPlayer.ReportID();
         Instantiate(CameraPrefab, CameraAnchor);
         CurrentSpeed = 0f;
         RB = GetComponent<Rigidbody>();
@@ -92,8 +76,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
         // set the "settables" & report them
         C_Health = BaseHealth* ModHealth;
-        LocalPlayer.RecieveBaseHealth(C_Health);
-
+        PlayerController.LocalPlayer.RecieveBaseHealth(C_Health);
     }
 
     public void ChangeColor()
@@ -139,16 +122,16 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         if (Cooldown <=0) // Auto fire for testing
         //if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
         {
-            LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
+            PlayerController.LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
             Cooldown = C_FireRate;
         }
     }
 
-    public void Fire()
+    public void Fire(int playerID)
     {
         Transform shell = (Transform)Instantiate(Shell, _firePos.transform.position, _firePos.transform.rotation);
         ShellScript ss = shell.GetComponent<ShellScript>();
-        ss.OwnerID = PlayerID;
+        ss.OwnerID = playerID;
         ss.dmg = C_Damage;
         ss.type = ShellType.Standard;
         Color MyColor = Help.V3ToColor(MyV3Color);
@@ -170,7 +153,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         float pen = damage - C_Armour;
         if (pen > 0)
         {
-            LocalPlayer.TakeDamage(OwnerID, damage, PlayerID);
+            PlayerController.LocalPlayer.TakeDamage(OwnerID, damage);
         }
     }
     #endregion
@@ -222,12 +205,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     void ControlMovement()
     {
-        // Only For Active Player ... ONLY called by active player .....
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-        {
-            return;
-        }
-
         // Tank Hull Forward / Backward input
         if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel);
         if (Input.GetKey("s")) RB.AddForce(-transform.forward * C_Accel);
