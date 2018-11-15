@@ -46,7 +46,7 @@ namespace Network
             UnityWebRequest webRequest = UnityWebRequest.Post(WebPath + "login.php", form);
             yield return webRequest.SendWebRequest();
 
-            callback(IsRequestValid(webRequest));            
+            callback(IsRequestValid(webRequest));
         }
 
 //        public IEnumerator RegisterUserData(string deviceIdentifier, string username, Action<NetworkResponseMessage, string> callback)
@@ -70,7 +70,6 @@ namespace Network
 
             callback(IsRequestValid(webRequest));
         }
-
 
         private static NetworkResponseMessage IsRequestValid(UnityWebRequest request)
         {

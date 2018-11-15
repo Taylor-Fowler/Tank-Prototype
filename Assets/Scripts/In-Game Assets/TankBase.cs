@@ -58,8 +58,8 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     [SerializeField]
     private float Cooldown = 0;
 
-    // Use this for initialization
-    void Start ()
+    #region UNITY API
+    private void Start ()
     {
         // Only For Local Player
         if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
@@ -79,6 +79,20 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         PlayerController.LocalPlayer.RecieveBaseHealth(C_Health);
     }
 
+    private void Update()
+    {
+        // Only For Active Player
+        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+        ControlMovement();
+        ControlWeaponToggles();
+        ControlFiring();
+        CheckTurretLock();
+    }
+    #endregion
+
     public void ChangeColor()
     {
        Color MyColor = Help.V3ToColor(MyV3Color);
@@ -92,18 +106,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
        }
     }
 
-    void Update()
-    {
-        // Only For Active Player
-        if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-        {
-            return;
-        }
-        ControlMovement();
-        ControlWeaponToggles();
-        ControlFiring();
-        CheckTurretLock();
-    }
+
 
     public float GetHealth()
     {
@@ -150,6 +153,11 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     #region Interface IDamageable Implementation
     public void TakeDamage(int OwnerID, float damage)
     {
+        // Only the Local player will process the damage and tell everybody else about it
+        if(!photonView.IsMine)
+        {
+            return;
+        }
         float pen = damage - C_Armour;
         if (pen > 0)
         {

@@ -19,6 +19,7 @@ public class GameController : MonoBehaviourPun
     [Header("Master Game Variables")]
     public int PlayerCount = 0;
     public string DeviceID { get; private set; }
+    public bool GameRunning { get; private set; }
     public NetworkManager NetworkManager { get; private set; }
     public PlayerManager PlayerManager { get; private set; }
 
@@ -55,6 +56,7 @@ public class GameController : MonoBehaviourPun
         }
         instance = this;
         DontDestroyOnLoad(this);
+        GameRunning = false;
 
         // add Comms
         Comms = gameObject.AddComponent<CommsManager>();
@@ -64,6 +66,7 @@ public class GameController : MonoBehaviourPun
         _managers = new List<IManager>();
         _managers.Add(NetworkManager);
         _managers.Add(PlayerManager);
+
     }
 
     //---------------------------//
@@ -87,10 +90,15 @@ public class GameController : MonoBehaviourPun
 
     private void SceneManager_sceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
     {
-        if(loadedScene.buildIndex != 0)
+        if (loadedScene.buildIndex != 0)
         {
+            GameRunning = true;
             GameObject player = PhotonNetwork.Instantiate(PlayerController.name, Vector3.zero, Quaternion.identity);
             StartCoroutine(Delay(2f, OnGameSceneInitialised));
+        }
+        else
+        {
+            GameRunning = false;
         }
     }
 
