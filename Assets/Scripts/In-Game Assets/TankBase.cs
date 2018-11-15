@@ -57,6 +57,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     [SerializeField]
     private float Cooldown = 0;
+    public bool AutoFire = false;
 
     #region UNITY API
     private void Start ()
@@ -64,6 +65,8 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         // Only For Local Player
         if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
         {
+            RB = GetComponent<Rigidbody>();
+            RB.isKinematic = true;
             return;
         }
 
@@ -116,14 +119,14 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     void CheckTurretLock()
     {
         if (Input.GetKeyDown("space")) _turretlock = !_turretlock;
+        if (Input.GetKeyDown("p")) AutoFire = !AutoFire;
     }
 
     void ControlFiring()
     {
         // Reduce cooldown
         Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
-        if (Cooldown <=0) // Auto fire for testing
-        //if (Input.GetMouseButtonDown(0) && Cooldown <= 0) // FIRE
+        if (Cooldown <=0 && AutoFire || (Input.GetMouseButtonDown(0) && Cooldown <= 0) && !AutoFire) // Auto fire for testing
         {
             PlayerController.LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
             Cooldown = C_FireRate;

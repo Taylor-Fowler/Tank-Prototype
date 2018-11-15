@@ -196,19 +196,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
-    private void RpcTakeDamage (int ShellOwnerID, float damage, int TankHitPlayerID)
-    {
-        RpcUpdateIGVCurrHealth(TankHitPlayerID, OwnStats.Curr_Health);
 
-        PlayerControllers[TankHitPlayerID].Curr_Health -= damage;
-        if (OwnStats.Curr_Health <= 0)
-        {
-            // add death script ... for Dev purposes will throw a cube into the game
-            Debug.Log("[PlayerController] PlayerID " + OwnStats.PlayerID + " ("+ OwnStats.PlayerName+ ") DIED !!");
-            photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-        }
-    }
 
     #region Pun Update _Player InGameVariables
     /// <summary>
