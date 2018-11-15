@@ -15,7 +15,7 @@ public class InGameVariables
     public int Score;
 }
 
-public class PlayerController : MonoBehaviourPun
+public class PlayerController : MonoBehaviourPunCallbacks
 {
     public static PlayerController LocalPlayer;
     public static PlayerManager MyManager;
@@ -24,17 +24,21 @@ public class PlayerController : MonoBehaviourPun
 
     public GameObject TankType1;
     public GameObject TankType2;
+
     public int TankChoice = 1; // default
     public Vector3 _Vcolor = new Vector3(255, 0, 0); // default // public required for TankBase
     private Color _color = new Color(255, 0, 0); // default
     [SerializeField] private Transform[] _Spawns;
     public InGameVariables OwnStats;
-    [SerializeField] public InGameVariables[] _Players;
+    public static InGameVariables[] PlayerControllers;
     [SerializeField] private Vector3 _SpawnPos;
     [SerializeField] private Quaternion _SpawnRot;
     private TankBase _myTankScript;
     private GameObject _myTankBody;
     public bool IsActive = false;
+#if UNITY_EDITOR
+    public InGameVariables[] EditorOnlyControllers;
+#endif
 
     #region UNITY API
     private void Awake()
@@ -42,10 +46,9 @@ public class PlayerController : MonoBehaviourPun
         if (photonView.IsMine)
         {
             LocalPlayer = this;
-            //Instantiate(CameraPrefab, transform);
-            // NOTE:
-            //       Moved // MyManager = FindObjectOfType(typeof(PlayerManager)) as PlayerManager;
-            //       It now resides in PlayerManager.Startup
+            // Static list of ingame variables, only the local client creates the empty list
+            // Later on, the Unity Start method has each controller add themselves to the list.
+            PlayerControllers = new InGameVariables[PlayerManager.PlayersInRoomCount()];
         }
 
         GameController.Instance.Event_OnGameSceneInitialised += StartGame;
@@ -55,33 +58,32 @@ public class PlayerController : MonoBehaviourPun
         OwnStats.Color = Help.ColorToV3(PlayerManager.PlayerColour(photonView.Owner));
         OwnStats.Controller = this;
         OwnStats.Score = 0;
-            // configured when Tank body added
+        // configured when Tank body added
         OwnStats.Max_Health = 0; 
         OwnStats.Curr_Health = 0;
     }
 
-    //private void Update()
-    //{
-    //    // Only For Active Player
-    //    //if (photonView.IsMine == false && PhotonNetwork.IsConnected == true) // IsConnected added to allow off-line testing
-    //    //{
-    //    //    return;
-    //    //}
-    //}
-
-
+    private void Start()
+    {
+        // Add ourselves to the array
+        PlayerControllers[OwnStats.PlayerID] = OwnStats;
+    }
+    #endregion
 
     public void StartGame()
     {
+#if UNITY_EDITOR
+        EditorOnlyControllers = PlayerControllers;
+#endif
         // NOTE: 
         //       Maybe in this method, each player controller adds
         //       themselves to the "LocalPlayer" array of player controllers? (We can try that ..... will do after Spawn to ensure all variables present)
-        PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
-        _Players = new InGameVariables[TempPlayers.Length];
-        foreach (PlayerController pc in TempPlayers)
-        {
-            _Players[pc.OwnStats.PlayerID] = pc.OwnStats;
-        }
+        //PlayerController[] TempPlayers = FindObjectsOfType(typeof(PlayerController)) as PlayerController[];
+        //_Players = new InGameVariables[TempPlayers.Length];
+        //foreach (PlayerController pc in TempPlayers)
+        //{
+        //    _Players[pc.OwnStats.PlayerID] = pc.OwnStats;
+        //}
 
         // Get Spawn Points
         // If more than one MapController in a scene ... we've done something wrong .....
@@ -102,21 +104,12 @@ public class PlayerController : MonoBehaviourPun
             Spawn();
         }
     }
-    #endregion
 
-
-    public int ReportID()
-    {
-        return OwnStats.PlayerID;
-    }
-
+    // This is guaranteed to only be ran locally, this is called from TankBase.Start(), which only calls
+    // this method if it is the local tank base.
     public void RecieveBaseHealth(float C_Health)
     {
-        OwnStats.Curr_Health = OwnStats.Max_Health = C_Health;
-        if (photonView.IsMine)
-        {
-            RpcSynchAllIGV(OwnStats.PlayerID);
-        }
+        photonView.RPC("RpcUpdateInitialHealth", RpcTarget.AllBuffered, C_Health);
     }
 
     public void ChangeTank(int type)
@@ -174,6 +167,11 @@ public class PlayerController : MonoBehaviourPun
         photonView.RPC("RpcFire", RpcTarget.AllBuffered, OwnStats.PlayerID);
     }
 
+    private void Die()
+    {
+        IsActive = false;
+    }
+
     [PunRPC]
     private void RpcFire(int playerID)
     {
@@ -190,9 +188,9 @@ public class PlayerController : MonoBehaviourPun
                 photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
                 if (OwnStats.Curr_Health <= 0)
                 {
-                    IsActive = false; // now out of the game
+                //    IsActive = false; // now out of the game
                     photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-                    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
+                //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
                 }
             }
         }
@@ -203,7 +201,7 @@ public class PlayerController : MonoBehaviourPun
     {
         RpcUpdateIGVCurrHealth(TankHitPlayerID, OwnStats.Curr_Health);
 
-        _Players[TankHitPlayerID].Curr_Health -= damage;
+        PlayerControllers[TankHitPlayerID].Curr_Health -= damage;
         if (OwnStats.Curr_Health <= 0)
         {
             // add death script ... for Dev purposes will throw a cube into the game
@@ -227,25 +225,47 @@ public class PlayerController : MonoBehaviourPun
     [PunRPC]
     private void RpcUpdateScore (int OwnerID)
     {
-        _Players[OwnerID].Score++;
+        PlayerControllers[OwnerID].Score++;
     }
 
     [PunRPC]
     private void RpcUpdateIGVMaxHealth (int PlayerID, float MaxHealth)
     {
-        _Players[PlayerID].Max_Health = MaxHealth;
+        PlayerControllers[PlayerID].Max_Health = MaxHealth;
+    }
+
+    [PunRPC]
+    private void RpcUpdateInitialHealth(float health)
+    {
+        OwnStats.Curr_Health = OwnStats.Max_Health = health;
     }
 
     [PunRPC]
     private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
     {
-        _Players[PlayerID].Curr_Health = CurrHealth;
+        PlayerControllers[PlayerID].Curr_Health = CurrHealth;
+
+        if(CurrHealth <= 0)
+        {
+            IsActive = false;
+            // We could add reduce health, update score and take damage to one network call....
+            // Want to?
+        }
+        if(photonView.IsMine)
+        {
+            if(CurrHealth <= 0)
+            {
+                IsActive = false; // now out of the game
+                //photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
+                _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
+            }
+        }
     }
 
     [PunRPC]
     private void RpcUpdateIGVName (int PlayerID, string Name)
     {
-        _Players[PlayerID].PlayerName = Name;
+        PlayerControllers[PlayerID].PlayerName = Name;
     }
     #endregion
 
