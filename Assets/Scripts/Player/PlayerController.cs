@@ -140,6 +140,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
         IsActive = true;
         photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
+        FindObjectOfType<GuiScript>().Configure();
     }
 
     [PunRPC]
