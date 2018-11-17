@@ -8402,10 +8402,10 @@ MonoBehaviour:
     type: 2}
   CameraAnchor: {fileID: 4397632780065478}
   Turret: {fileID: 1379428623575022}
-  _firePos: {fileID: 4428036437681664}
+  FirePos: {fileID: 4428036437681664}
   Shell: {fileID: 4823616812344284, guid: f872efc107dd0b1438d151ffdbbdd54d, type: 2}
   ExpPreFab: {fileID: 1703999668449258, guid: dc2a0649c0df88f44b8b1245ed152aec, type: 2}
-  TESTING: 1
+  Col: {fileID: 65262282814355578}
   BaseSpeedMax: 2
   BaseAccel: 20000
   BaseTurnRate: 30
@@ -8425,8 +8425,6 @@ MonoBehaviour:
   ModDamage: 1
   ModFireRate: 1
   ModMass: 1
-  Col: {fileID: 65262282814355578}
-  MyV3Color: {x: 0, y: 0, z: 0}
   Cooldown: 0
   AutoFire: 0
 --- !u!114 &114892831232235174

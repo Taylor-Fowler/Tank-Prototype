@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 /// <summary>
-/// Utility Class (or Library), just to store multi-class usable functions
+/// Utility Class, just to store multi-class usable functions
 /// </summary>
     class TankHelpers
     { 
@@ -21,12 +21,7 @@
 
         public Color InvertColor(Color ColorToInvert)
         {
-            Color Ret = new Color();
-            Ret.r = 1f - ColorToInvert.r;
-            Ret.g = 1f - ColorToInvert.g;
-            Ret.b = 1f - ColorToInvert.b;
-            return Ret;
+            return new Color(1f - ColorToInvert.r, 1f - ColorToInvert.g, 1f - ColorToInvert.b);
         }
-
     }
 

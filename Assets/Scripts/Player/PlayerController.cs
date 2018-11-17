@@ -113,11 +113,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
         photonView.RPC("RpcUpdateInitialHealth", RpcTarget.AllBuffered, C_Health);
     }
 
-    public void RecievePowerUpHealth (float Health)
+    public void RecievePowerUpHealth (float Health, int PlayerID)
     {
-        OwnStats.Curr_Health = Mathf.Clamp(OwnStats.Curr_Health + Health, 0f, OwnStats.Max_Health);
-        if (photonView.IsMine)
+        if (photonView.IsMine && OwnStats.PlayerID == PlayerID)
         {
+            OwnStats.Curr_Health = Mathf.Clamp(OwnStats.Curr_Health + Health, 0f, OwnStats.Max_Health);
             photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
         }
     }
@@ -169,8 +169,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
         _myTankBody.transform.parent = transform;
         _myTankScript = _myTankBody.GetComponent<TankBase>();
-        _myTankScript.MyV3Color = OwnStats.Color;
-        _myTankScript.ChangeColor();
+        _myTankScript.ChangeColor(OwnStats.Color);
+        _myTankScript.SetPlayerID(OwnStats.PlayerID);
         RpcUpdateIGVName(OwnStats.PlayerID, OwnStats.PlayerName);
     }
 

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GUIManager : MonoBehaviour {
@@ -12,7 +10,7 @@ public class GUIManager : MonoBehaviour {
     // thereafter ... Local PlayerController calls UpdateXYZ(PlayerID) methods which in turn ....
     // ...  makes the panel in _myPanels[PlayerID] update to reflect the stats in _myPlayers[PlayerID]
     //
-
+    #region Inspector Settables Public Vars
     [Header("Player Panels (in scene)")]
     public PanelScript P0;
     public PanelScript P1;
@@ -24,27 +22,32 @@ public class GUIManager : MonoBehaviour {
     public RectTransform BG1;
     public RectTransform BG2;
 
-    private PanelScript[] _myPanels;
-    private TankHelpers Help = new TankHelpers();
+    [Header("Time for damage flash")]
+    public float FlashTime = 0.1f;
+    #endregion
 
-    [SerializeField]
+    #region Private Vars
+    private PanelScript[] _myPanels;
+    private TankHelpers _Help = new TankHelpers();
+
     private InGameVariables[] _myPlayers;
-    [SerializeField]
-    public int PlayerCount = 0;     // default until configured .. Serialized for Debug Purposes
-    [SerializeField]
-    public int OwnPlayerNumber = 0; // as above
+    private int _PlayerCount = 0;     // default until configured
+    private int _OwnPlayerNumber = 0; // as above
+    #endregion
+
+    #region Public Methods
 
     // Called by Local Player's PlayerController ... once tank has spawned.
     public void Configure(int NumberPlayers, int OwnPlayer)
     {
-        PlayerCount = NumberPlayers;
-        OwnPlayerNumber = OwnPlayer;
+        _PlayerCount = NumberPlayers;
+        _OwnPlayerNumber = OwnPlayer;
 
         // populate Panels's Array (and deactivate redundant Panels)
-        _myPanels = new PanelScript[PlayerCount];
+        _myPanels = new PanelScript[_PlayerCount];
         _myPanels[0] = P0;
         _myPanels[1] = P1;
-        if (PlayerCount == 4)
+        if (_PlayerCount == 4)
         {
             _myPanels[2] = P2;
             _myPanels[3] = P3;
@@ -56,35 +59,38 @@ public class GUIManager : MonoBehaviour {
         }
 
         // Populate IGV's References
-        _myPlayers = new InGameVariables[PlayerCount];
+        _myPlayers = new InGameVariables[_PlayerCount];
         _myPlayers[0] = PlayerController.PlayerControllers[0];
         _myPlayers[1] = PlayerController.PlayerControllers[1];
-        if (PlayerCount == 4)
+        if (_PlayerCount == 4)
         {
             _myPlayers[2] = PlayerController.PlayerControllers[2];
             _myPlayers[3] = PlayerController.PlayerControllers[3];
         }
 
         // Color Screen Border BackGround
-        Color BGCol = Help.V3ToColor(_myPlayers[OwnPlayer].Color);
+        Color BGCol = _Help.V3ToColor(_myPlayers[OwnPlayer].Color);
         BG0.GetComponent<Image>().color = BGCol;
         BG1.GetComponent<Image>().color = BGCol;
         BG2.GetComponent<Image>().color = BGCol;
 
-        // configure Panels
-        for (int i = 0; i < PlayerCount; i++)
+        // Initial Panel Set-up
+        for (int i = 0; i < _PlayerCount; i++)
         {
             _myPanels[i].SetScore(0);
             _myPanels[i].SetName(_myPlayers[i].PlayerName);
-            _myPanels[i].SetColor(Help.V3ToColor(_myPlayers[i].Color));
+            _myPanels[i].SetColor(_Help.V3ToColor(_myPlayers[i].Color));
             _myPanels[i].SetHealth(1f);
+            _myPanels[i].SetFlashTime(FlashTime);
         }
     }
 
-    // N.B. Trying to do a selective Update based upon PlayerID proved "erratic" and only local client updated
+    // All method's below call all Panels' update methods
+    // N.B. Trying to do a selective Updates based upon PlayerID proved "erratic" with only local client being updated    
+
     public void UpdateScore()
     {
-        for (int i = 0; i < PlayerCount; i++)
+        for (int i = 0; i < _PlayerCount; i++)
         {
             _myPanels[i].SetScore(_myPlayers[i].Score);
         }
@@ -92,9 +98,11 @@ public class GUIManager : MonoBehaviour {
 
     public void UpdateHealth()
     {
-        for (int i = 0; i < PlayerCount; i++)
+        for (int i = 0; i < _PlayerCount; i++)
         {
             _myPanels[i].SetHealth(_myPlayers[i].Curr_Health / _myPlayers[i].Max_Health);
         }
     }
+    #endregion
+
 }

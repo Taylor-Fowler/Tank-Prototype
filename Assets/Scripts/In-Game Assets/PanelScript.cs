@@ -5,18 +5,26 @@ using UnityEngine.UI;
 
 public class PanelScript : MonoBehaviour {
 
+    #region Inspector Settables Public Vars
+
+    [Header("Components (in scene)")]
     public RectTransform DamagePanel;
     public RectTransform LeftPanel;
     public RectTransform RightPanel;
     public RectTransform Flash;
-    public float FlashTime = 0.1f;
     public Text Name;
     public Text Score;
-    private Color BGColor;
-    private float _lastHealth = 0f;
-    
+    #endregion
 
-    
+    #region Private Vars
+
+    private Color _BGColor;
+    private float _FlashTime = 0.1f;
+    private float _lastHealth = 0f;
+    #endregion
+
+    #region Public Methods
+
     public void SetName(string name)
     {
         Name.text = name;
@@ -27,11 +35,16 @@ public class PanelScript : MonoBehaviour {
         Score.text = UpdatedScore.ToString();
     }
 
+    public void SetFlashTime(float Time)
+    {
+        _FlashTime = Time;
+    }
+
     public void SetColor (Color col)
     {
-        BGColor = col;
-        LeftPanel.GetComponent<Image>().color = BGColor;
-        RightPanel.GetComponent<Image>().color = BGColor;
+        _BGColor = col;
+        LeftPanel.GetComponent<Image>().color = _BGColor;
+        RightPanel.GetComponent<Image>().color = _BGColor;
     }
 
     public void SetHealth(float Health)
@@ -51,26 +64,34 @@ public class PanelScript : MonoBehaviour {
         _lastHealth = Health;
     }
 
-    private IEnumerator StopFlash()
-    {
-        yield return new WaitForSeconds(FlashTime);
-        Flash.localScale = new Vector3(0f, Flash.localScale.y, Flash.localScale.z);
-    }
-
-
     // Called by GUI Manager if no player for this panel
     public void DeActivate()
     {
         StopAllCoroutines();
         this.gameObject.SetActive(false);
     }
+    #endregion
+
+
+    #region Unity Monobehaviour API
+
     void OnDestroy()
     {
         // insurance policy
         StopAllCoroutines();
     }
 
+    #endregion
 
+    #region CoRoutines
+
+    private IEnumerator StopFlash()
+    {
+        yield return new WaitForSeconds(_FlashTime);
+        Flash.localScale = new Vector3(0f, Flash.localScale.y, Flash.localScale.z);
+    }
+
+    #endregion
 
 
 }

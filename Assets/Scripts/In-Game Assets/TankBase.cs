@@ -1,20 +1,19 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
 
 public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 {
+    #region Public Vars
+    [Header("Components (Pre-fabs)")]
     public GameObject CameraPrefab;
     public Transform CameraAnchor;
     public GameObject Turret;
-    public Transform _firePos;
+    public Transform FirePos;
     public Transform Shell;
     public GameObject ExpPreFab;
+    public Collider Col; // reference for own shells to ignore
 
-    private TankHelpers Help = new TankHelpers();
-
-    public bool TESTING = true; // toggle "true" means can test without Photon
     [Header("Core Stats")] // Core Stats are Customised by Children
     public float BaseSpeedMax = 1f;
     public float BaseAccel = 1f;
@@ -24,7 +23,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public float BaseArmour = 1;
     public float BaseDamage = 1;
     public float BaseFireRate = 1f;
-    public int BaseShell = 1; // default Shell type, will be changed by Power up's
+    public int BaseShell = 1; // default Shell type, (maybe) changed by Power up's
     public float BaseMass = 1;
 
     [Header("Stat Modifiers")] // Changed by Power Up goodies
@@ -38,6 +37,18 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public float ModFireRate = 1f;
     public float ModMass = 1f;
 
+    #endregion
+
+    #region Private Vars
+    private int _MyPlayerID;
+    private Rigidbody _RB;
+    private Vector3 _MyV3Color;
+    private TankHelpers _Help = new TankHelpers();
+    private bool _turretlock = false;
+    [SerializeField]
+    private float Cooldown = 0;
+    #endregion
+
     float C_SpeedMax { get { return BaseSpeedMax * ModSpeed; } } // N.B. no setter
     float C_Accel { get { return BaseAccel * ModAccel; } }
     float C_TurnRate { get { return BaseTurnRate * ModTurn; } }
@@ -48,34 +59,25 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     float C_FireRate { get { return BaseFireRate * ModFireRate; } }
     float C_Mass { get { return BaseMass * ModMass; } }
     public float CurrentSpeed { get; private set; }
-    private Rigidbody RB;
-    public Collider Col; // reference for own shells to ignore .. public so Photon can use it?
 
-    private bool _turretlock = false;
-    public Vector3 MyV3Color;
-    //public Color MyColor;
-
-    [SerializeField]
-    private float Cooldown = 0;
     public bool AutoFire = false;
 
     #region UNITY API
     private void Start ()
     {
-        // Only For Local Player
+        // For OTHER player representation in Scene .. swith on RigidBody Kinematics (stops a lot of juddering)
         if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
         {
-            RB = GetComponent<Rigidbody>();
-            RB.isKinematic = true;
+            _RB = GetComponent<Rigidbody>();
+            _RB.isKinematic = true;
             return;
         }
 
         Instantiate(CameraPrefab, CameraAnchor);
         CurrentSpeed = 0f;
-        RB = GetComponent<Rigidbody>();
-        if (RB == null) Debug.Log(" No RB found");
-        RB.mass = C_Mass;
-        Col = GetComponent<Collider>();
+        _RB = GetComponent<Rigidbody>();
+        if (_RB == null) Debug.Log(" No RB found");
+        _RB.mass = C_Mass;
 
         // set the "settables" & report them
         C_Health = BaseHealth* ModHealth;
@@ -90,9 +92,9 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
             return;
         }
         ControlMovement();
-        ControlWeaponToggles();
         ControlFiring();
         CheckTurretLock();
+       // ControlWeaponToggles(); // Development only
     }
 
     private void OnDestroy()
@@ -103,9 +105,17 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     #endregion
 
-    public void ChangeColor()
+    #region Public Methods (called by PlayerController)
+
+    public void SetPlayerID(int ID)
     {
-       Color MyColor = Help.V3ToColor(MyV3Color);
+        _MyPlayerID = ID;
+    }
+
+    public void ChangeColor(Vector3 ColorV)
+    {
+        _MyV3Color = ColorV;
+       Color MyColor = _Help.V3ToColor(_MyV3Color);
        Renderer[] RendList = GetComponentsInChildren<Renderer>();
        foreach (Renderer Rend in RendList)
        {
@@ -116,38 +126,20 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
        }
     }
 
-
-
     public float GetHealth()
     {
         return C_Health;
     }
 
-    void CheckTurretLock()
-    {
-        if (Input.GetKeyDown("space")) _turretlock = !_turretlock;
-        if (Input.GetKeyDown("p")) AutoFire = !AutoFire;
-    }
-
-    void ControlFiring()
-    {
-        // Reduce cooldown
-        Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
-        if (Cooldown <=0 && AutoFire || (Input.GetMouseButtonDown(0) && Cooldown <= 0) && !AutoFire) // Auto fire for testing
-        {
-            PlayerController.LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
-            Cooldown = C_FireRate;
-        }
-    }
 
     public void Fire(int playerID)
     {
-        Transform shell = (Transform)Instantiate(Shell, _firePos.transform.position, _firePos.transform.rotation);
+        Transform shell = (Transform)Instantiate(Shell, FirePos.transform.position, FirePos.transform.rotation);
         ShellScript ss = shell.GetComponent<ShellScript>();
         ss.OwnerID = playerID;
         ss.dmg = C_Damage;
         ss.type = ShellType.Standard;
-        Color MyColor = Help.V3ToColor(MyV3Color);
+        Color MyColor = _Help.V3ToColor(_MyV3Color);
         ss.color = MyColor;
         // Get Shell to ignore Firing Units Collider
         // https://docs.unity3d.com/ScriptReference/Physics.IgnoreCollision.html (03 Nov 2018)
@@ -159,9 +151,10 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         GameObject boom = Instantiate(ExpPreFab, transform.position, Quaternion.identity) as GameObject;
         Destroy(boom, 1);
     }
+    #endregion
 
     #region Interface IDamageable Implementation
-    public void TakeDamage(int OwnerID, float damage)
+    public void TakeDamage(int ShellOwnerID, float damage)
     {
         // Only the Local player will process the damage and tell everybody else about it
         if(!photonView.IsMine)
@@ -171,23 +164,22 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         float pen = damage - C_Armour;
         if (pen > 0)
         {
-            PlayerController.LocalPlayer.TakeDamage(OwnerID, damage);
+            PlayerController.LocalPlayer.TakeDamage(ShellOwnerID, damage);
         }
     }
     #endregion
 
-
     #region  Interface ITakesPowerUps Implementation (and revertion CoRoutines)
     public void FireRatePlus(float factor, float time)
     {
-        ModFireRate *= factor;
+        ModFireRate /= factor;
         StartCoroutine(RevertFireRate(factor, time));
     }
 
     IEnumerator RevertFireRate (float factor, float time)
     {
         yield return new WaitForSeconds(time);
-        ModFireRate /= factor;
+        ModFireRate *= factor;
     }
 
     public void MovementPlus(float factor, float time)
@@ -208,11 +200,29 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     public void HealthPlus(float gain)
     {
-        PlayerController.LocalPlayer.RecievePowerUpHealth(gain);
+        PlayerController.LocalPlayer.RecievePowerUpHealth(gain, _MyPlayerID);
     }
     #endregion
 
 
+    #region Private Methods (aka Player Controls)
+
+    void ControlFiring()
+    {
+        // Reduce cooldown
+        Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
+        if (Cooldown <= 0 && AutoFire || (Input.GetMouseButtonDown(0) && Cooldown <= 0) && !AutoFire) // Auto fire for testing
+        {
+            PlayerController.LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
+            Cooldown = C_FireRate;
+        }
+    }
+
+    void CheckTurretLock()
+    {
+        if (Input.GetKeyDown("space")) _turretlock = !_turretlock;
+        if (Input.GetKeyDown("p")) AutoFire = !AutoFire;
+    }
 
     void ControlWeaponToggles() // For Development only
     {
@@ -224,34 +234,34 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     void ControlMovement()
     {
         // Tank Hull Forward / Backward input
-        if (Input.GetKey("w")) RB.AddForce(transform.forward * C_Accel);
-        if (Input.GetKey("s")) RB.AddForce(-transform.forward * C_Accel);
+        if (Input.GetKey("w")) _RB.AddForce(transform.forward * C_Accel);
+        if (Input.GetKey("s")) _RB.AddForce(-transform.forward * C_Accel);
         // no input deceleration ... stops @ 0
-        if (!Input.GetKey("w") && !Input.GetKey("s") && RB.velocity.magnitude != 0)
+        if (!Input.GetKey("w") && !Input.GetKey("s") && _RB.velocity.magnitude != 0)
         {
             // going forwards
-            if (Vector3.Dot(RB.velocity, transform.forward) > 0)
-            { RB.AddForce(-transform.forward * C_Accel / 4); }
+            if (Vector3.Dot(_RB.velocity, transform.forward) > 0)
+            { _RB.AddForce(-transform.forward * C_Accel / 4); }
             // backwards
             else
-            { RB.AddForce(transform.forward * C_Accel / 4); }
+            { _RB.AddForce(transform.forward * C_Accel / 4); }
 
             // bring to graceful halt if close to 0
-            if (RB.velocity.magnitude < 0.1 && RB.velocity.magnitude > -0.1)
-            { RB.velocity = Vector3.zero; }
+            if (_RB.velocity.magnitude < 0.1 && _RB.velocity.magnitude > -0.1)
+            { _RB.velocity = Vector3.zero; }
         }
 
         // clamp velocity
-        if (RB.velocity.magnitude > C_SpeedMax)
-        { RB.velocity = Vector3.ClampMagnitude(RB.velocity, C_SpeedMax); }
+        if (_RB.velocity.magnitude > C_SpeedMax)
+        { _RB.velocity = Vector3.ClampMagnitude(_RB.velocity, C_SpeedMax); }
 
         // Eliminate any annoying sideways movement
-        RB.velocity = Vector3.Project(RB.velocity, transform.forward);
+        _RB.velocity = Vector3.Project(_RB.velocity, transform.forward);
 
 
         // Tank Hull Rotation
-        if (Input.GetKey("a")) RB.AddTorque(-transform.up * C_TurnRate);
-        else if (Input.GetKey("d")) RB.AddTorque(transform.up * C_TurnRate);
+        if (Input.GetKey("a")) _RB.AddTorque(-transform.up * C_TurnRate);
+        else if (Input.GetKey("d")) _RB.AddTorque(transform.up * C_TurnRate);
 
         // Turret (and therefore camera Rotation)
         // N.B. Turret does NOT use Physics
@@ -285,4 +295,5 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
        }
 
     }
+    #endregion
 }
