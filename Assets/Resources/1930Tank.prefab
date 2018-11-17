@@ -8428,7 +8428,7 @@ MonoBehaviour:
   Col: {fileID: 65262282814355578}
   MyV3Color: {x: 0, y: 0, z: 0}
   Cooldown: 0
-  AutoFire: 1
+  AutoFire: 0
 --- !u!114 &114892831232235174
 MonoBehaviour:
   m_ObjectHideFlags: 1

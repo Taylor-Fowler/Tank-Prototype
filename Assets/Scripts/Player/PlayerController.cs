@@ -35,6 +35,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] private Quaternion _SpawnRot;
     private TankBase _myTankScript;
     private GameObject _myTankBody;
+    private GUIManager _myGUI;
     public bool IsActive = false;
 #if UNITY_EDITOR
     public InGameVariables[] EditorOnlyControllers;
@@ -101,7 +102,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         if (photonView.IsMine)
         {
-            Spawn();
+            InitialSpawn();
         }
     }
 
@@ -125,7 +126,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     /// and then executes an RPC to inform the instance of this script (on other clients) that the tank body
     /// has been created with the given PhotonView.ViewID
     /// </summary>
-    private void Spawn()
+    private void InitialSpawn()
     {
         // let's make a tank
         // Move Controller to Spawn
@@ -140,7 +141,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
         IsActive = true;
         photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
-        FindObjectOfType<GuiScript>().Configure();
+        _myGUI = FindObjectOfType<GUIManager>();
+        _myGUI.Configure(PlayerControllers.Length,OwnStats.PlayerID);
     }
 
     [PunRPC]
@@ -187,11 +189,13 @@ public class PlayerController : MonoBehaviourPunCallbacks
             {       
                 OwnStats.Curr_Health -= damage;
                 photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
+                _myGUI.UpdateHealth(OwnStats.PlayerID);
                 if (OwnStats.Curr_Health <= 0)
                 {
                 //    IsActive = false; // now out of the game
                     photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-                //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
+                    _myGUI.UpdateScore(ShellOwnerID);
+                    //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
                 }
             }
         }
@@ -212,9 +216,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     }
    
     [PunRPC]
-    private void RpcUpdateScore (int OwnerID)
+    private void RpcUpdateScore (int ShellOwnerID)
     {
-        PlayerControllers[OwnerID].Score++;
+        PlayerControllers[ShellOwnerID].Score++;
     }
 
     [PunRPC]
@@ -234,6 +238,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         PlayerControllers[PlayerID].Curr_Health = CurrHealth;
 
+
         if(CurrHealth <= 0)
         {
             IsActive = false;
@@ -245,7 +250,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
             if(CurrHealth <= 0)
             {
                 IsActive = false; // now out of the game
-                //photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
                 _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
             }
         }
