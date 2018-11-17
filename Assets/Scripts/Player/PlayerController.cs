@@ -113,6 +113,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
         photonView.RPC("RpcUpdateInitialHealth", RpcTarget.AllBuffered, C_Health);
     }
 
+    public void RecievePowerUpHealth (float Health)
+    {
+        OwnStats.Curr_Health = Mathf.Clamp(OwnStats.Curr_Health + Health, 0f, OwnStats.Max_Health);
+        if (photonView.IsMine)
+        {
+            photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
+        }
+    }
+
     public void ChangeTank(int type)
     {
         if (photonView.IsMine)
@@ -189,12 +198,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
             {       
                 OwnStats.Curr_Health -= damage;
                 photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
-                _myGUI.UpdateHealth(OwnStats.PlayerID);
                 if (OwnStats.Curr_Health <= 0)
                 {
                 //    IsActive = false; // now out of the game
                     photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-                    _myGUI.UpdateScore(ShellOwnerID);
                     //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
                 }
             }
@@ -214,11 +221,38 @@ public class PlayerController : MonoBehaviourPunCallbacks
         RpcUpdateIGVCurrHealth(OwnerID, OwnStats.Curr_Health);
         RpcUpdateIGVName(OwnerID, OwnStats.PlayerName);
     }
-   
+
+    [PunRPC]
+    private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
+    {
+        PlayerControllers[PlayerID].Curr_Health = CurrHealth;
+        // GUI Update
+        if (_myGUI == null) _myGUI = FindObjectOfType<GUIManager>(); // Required since (sometimes) the reference has been lost .. for reasons unknown !
+        _myGUI.UpdateHealth();
+
+        if (CurrHealth <= 0)
+        {
+            IsActive = false;
+            // We could add reduce health, update score and take damage to one network call....
+            // Want to?
+        }
+        if (photonView.IsMine)
+        {
+            if (CurrHealth <= 0)
+            {
+                IsActive = false; // now out of the game
+                _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
+            }
+        }
+    }
+
     [PunRPC]
     private void RpcUpdateScore (int ShellOwnerID)
     {
         PlayerControllers[ShellOwnerID].Score++;
+        // GUI Update
+        if (_myGUI == null) _myGUI = FindObjectOfType<GUIManager>(); // Required since (sometimes) the reference has been lost .. for reasons unknown !
+        _myGUI.UpdateScore();
     }
 
     [PunRPC]
@@ -233,27 +267,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         OwnStats.Curr_Health = OwnStats.Max_Health = health;
     }
 
-    [PunRPC]
-    private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
-    {
-        PlayerControllers[PlayerID].Curr_Health = CurrHealth;
 
-
-        if(CurrHealth <= 0)
-        {
-            IsActive = false;
-            // We could add reduce health, update score and take damage to one network call....
-            // Want to?
-        }
-        if(photonView.IsMine)
-        {
-            if(CurrHealth <= 0)
-            {
-                IsActive = false; // now out of the game
-                _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
-            }
-        }
-    }
 
     [PunRPC]
     private void RpcUpdateIGVName (int PlayerID, string Name)

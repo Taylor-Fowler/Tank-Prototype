@@ -94,6 +94,13 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         ControlFiring();
         CheckTurretLock();
     }
+
+    private void OnDestroy()
+    {
+        // death insurance
+        StopAllCoroutines();
+    }
+
     #endregion
 
     public void ChangeColor()
@@ -170,7 +177,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     #endregion
 
 
-    #region  Interface ITakesPowerUps Implementation
+    #region  Interface ITakesPowerUps Implementation (and revertion CoRoutines)
     public void FireRatePlus(float factor, float time)
     {
         ModFireRate *= factor;
@@ -201,7 +208,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     public void HealthPlus(float gain)
     {
-        C_Health = Mathf.Clamp(C_Health + gain, 0, BaseHealth * ModHealth);
+        PlayerController.LocalPlayer.RecievePowerUpHealth(gain);
     }
     #endregion
 
@@ -276,16 +283,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
             else if (TurrToGo >= D) { Turret.transform.Rotate(new Vector3(0, C_TurrTurnRate * Time.deltaTime, 0)); }
 
        }
-
-            // Now to drag the Parent with me
-            // thanks to https://forum.unity.com/threads/child-parent-dragging-not-working.30927/ (06.11.2018)
-            //Vector3 relPos = LocalPlayer.transform.position - transform.position;
-            //LocalPlayer.transform.position = transform.position + relPos;
-            //LocalPlayer.myHullPos = transform.position;
-            //LocalPlayer.myHullRot = transform.rotation;
-            //LocalPlayer.myTurrPos = Turret.transform.position;
-            //LocalPlayer.myTurrRot = Turret.transform.rotation;
-            //LocalPlayer.transform.position = transform.position;
 
     }
 }
