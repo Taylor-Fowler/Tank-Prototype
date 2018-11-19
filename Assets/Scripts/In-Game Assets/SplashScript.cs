@@ -25,6 +25,10 @@ public class SplashScript : MonoBehaviour {
     private float _SplashScale_timer = 0;
     private Vector3 InitialSplashScale;
 
+    // For Tweening
+    private TankHelpers Help = new TankHelpers();
+
+
     void Awake ()
     {
         InitialSplashScale = SplashPanel.localScale;
@@ -44,21 +48,58 @@ public class SplashScript : MonoBehaviour {
         UpperText.text = "Game Starting .....";
         TankSelect_Canvas.alpha = 0;
         TankSelect_Canvas.interactable = false;
-        Splash_ScaleUp();
+        Splash_ScaleUp_MainOut();
     }
 	
+    public void GameOverWin ()
+    {
+        UpperText.text = "GRATZ";
+        LowerText.text = "You Won !!";
+        Splash_Canvas.alpha = 1;
+        Splash_Canvas.interactable = false;
+        TankSelect_Canvas.alpha = 0;
+        TankSelect_Canvas.interactable = false;
+        MainFade_Start(true);
+        Splash_ScaleUp();
+    }
+
 	// Update is called once per frame
 	void Update () {
 
         // TEST KEYS FOR DEBUGGING
         if (Input.GetKeyUp("1")) MainFade_Start(true);
         if (Input.GetKeyUp("2")) MainFade_Start(false);
+        if (Input.GetKeyUp("3")) GameOverWin();
     }
 
     void OnDestroy ()
     {
         // insurance
         StopAllCoroutines();
+    }
+
+    private void Splash_ScaleUp_MainOut()
+    {
+        if (_SplashScale_timer != 0)
+        {
+            Debug.Log("[SplashScript] attempt to initiate SCALE-UP cancelled as one already running");
+            return;
+        }
+        _SplashScale_timer = SplashScale_Duration;
+        StartCoroutine("SplashScale_MainOut");
+    }
+
+    IEnumerator SplashScale_MainOut()
+    {
+        while (_SplashScale_timer > 0)
+        {
+            _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
+            float lerp = 1f - (_SplashScale_timer / SplashScale_Duration);
+            SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
+            yield return null;
+        }
+        MainFade_Start(false);
+        yield return null;
     }
 
     private void Splash_ScaleUp()
@@ -72,18 +113,17 @@ public class SplashScript : MonoBehaviour {
         StartCoroutine("SplashScale");
     }
 
-    IEnumerator SplashScale ()
+    IEnumerator SplashScale()
     {
         while (_SplashScale_timer > 0)
         {
             _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
-            SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, (1f - _SplashScale_timer) / SplashScale_Duration);
+            float lerp = 1f - (_SplashScale_timer / SplashScale_Duration);
+            SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
             yield return null;
         }
-        MainFade_Start(false);
         yield return null;
     }
-
 
     // fades main canvas over everything .. direction = true => fade-in, false: fade out 
     private void MainFade_Start(bool direction)
@@ -125,6 +165,5 @@ public class SplashScript : MonoBehaviour {
         Main_Canvas.interactable = false;
         yield return null;
     }
-
 
 }

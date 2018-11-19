@@ -8,7 +8,7 @@ public class PanelScript : MonoBehaviour {
     #region Inspector Settables Public Vars
 
     [Header("Components (in scene)")]
-    public RectTransform DamagePanel;
+    public RectTransform HealthPanel;
     public RectTransform LeftPanel;
     public RectTransform RightPanel;
     public RectTransform Flash;
@@ -57,9 +57,8 @@ public class PanelScript : MonoBehaviour {
             Health = 1f;
             Debug.Log("[PanelScript] Cannot set Health to more than 100%");
         }
-        Flash.localScale = new Vector3((_lastHealth - Health) * (1f - DamagePanel.localScale.x), Flash.localScale.y, Flash.localScale.z);
         StartCoroutine("StopFlash");
-        DamagePanel.localScale = new Vector3((1f - Health), DamagePanel.localScale.y, DamagePanel.localScale.z);
+        HealthPanel.localScale = new Vector3(Health, HealthPanel.localScale.y, HealthPanel.localScale.z);
 
         _lastHealth = Health;
     }
@@ -88,7 +87,7 @@ public class PanelScript : MonoBehaviour {
     private IEnumerator StopFlash()
     {
         yield return new WaitForSeconds(_FlashTime);
-        Flash.localScale = new Vector3(0f, Flash.localScale.y, Flash.localScale.z);
+        Flash.localScale = HealthPanel.localScale;
     }
 
     #endregion
