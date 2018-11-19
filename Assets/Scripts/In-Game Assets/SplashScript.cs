@@ -28,9 +28,8 @@ public class SplashScript : MonoBehaviour {
 
     // For Tweening
     private TankHelpers Help = new TankHelpers();
+    private bool DEBUG = true; // Allows Debugging of Transition screens with 1-7
     #endregion
-
-
 
     #region UNITY API
     void Awake ()
@@ -44,14 +43,17 @@ public class SplashScript : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-
-        // TEST KEYS FOR DEBUGGING
-        if (Input.GetKeyUp("1")) MainFade_Start(true);
-        if (Input.GetKeyUp("2")) MainFade_Start(false);
-        if (Input.GetKeyUp("3")) GameOverWin();
-        if (Input.GetKeyUp("4")) GameOverLost();
-        if (Input.GetKeyUp("5")) Died("Tester");
-        if (Input.GetKeyUp("6")) ReSpawn();
+        if (DEBUG)
+        {
+            // TEST KEYS FOR DEBUGGING
+            if (Input.GetKeyUp("1")) MainFade_Start(true);
+            if (Input.GetKeyUp("2")) MainFade_Start(false);
+            if (Input.GetKeyUp("3")) GameOverWin();
+            if (Input.GetKeyUp("4")) GameOverLost();
+            if (Input.GetKeyUp("5")) Died("Tester");
+            if (Input.GetKeyUp("6")) ReSpawn();
+            if (Input.GetKeyUp("7")) OtherDisconnect();
+        }
     }
 
     void OnDestroy()
@@ -61,8 +63,9 @@ public class SplashScript : MonoBehaviour {
     }
     #endregion
 
-    #region PUBLIC METHODS
-    public void GameOverWin ()
+    #region PUBLIC METHODS (Called by GUIManager)
+
+    public void GameOverWin()
     {
         SplashZoom("GRATZ", "You Won!!", false, true);
         MainFade_Start(true);
@@ -74,7 +77,7 @@ public class SplashScript : MonoBehaviour {
         MainFade_Start(true);
     }
 
-    public void Died (string name)
+    public void Died(string name)
     {
         SplashZoom("Killed by "+ name, "Select a Tank", true, true);
         MainFade_Start(true);
@@ -86,6 +89,11 @@ public class SplashScript : MonoBehaviour {
         MainFade_Start(false);
     }
 
+    public void OtherDisconnect()
+    {
+        SplashZoom("Player Disconnect", "Game dies now ..", false, true);
+        MainFade_Start(true);
+    }
     #endregion
 
     #region PRIVATE METHODS

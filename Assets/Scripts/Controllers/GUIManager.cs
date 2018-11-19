@@ -17,6 +17,9 @@ public class GUIManager : MonoBehaviour {
     public PanelScript P2;
     public PanelScript P3;
 
+    [Header("GUI SplashScreen (in scene)")]
+    public SplashScript Splash;
+
     [Header("GUI Background Border (in scene)")]
     public RectTransform BG0;
     public RectTransform BG1;
@@ -29,14 +32,31 @@ public class GUIManager : MonoBehaviour {
     #region Private Vars
     private PanelScript[] _myPanels;
     private TankHelpers _Help = new TankHelpers();
-
     private InGameVariables[] _myPlayers;
-    private int _PlayerCount = 0;     // default until configured
+    private int _PlayerCount = 0;     // default until configured by local Player Manager
     private int _OwnPlayerNumber = 0; // as above
 
     #endregion
 
-    #region Public Methods
+    #region Public Methods (Tank Choice)
+
+    public void PickTankOne ()
+    {
+        PlayerController myCon = FindObjectOfType<PlayerController>();
+        myCon.ChangeTank(1);
+        Debug.Log("[GUI Manager] Change tank Choice called: 1" );
+    }
+
+    public void PickTankTwo()
+    {
+        PlayerController myCon = FindObjectOfType<PlayerController>();
+        myCon.ChangeTank(2);
+        Debug.Log("[[GUI Manager] Change tank Choice called: 2");
+    }
+
+    #endregion
+
+    #region GUI Player Panels - Public Methods (called by PlayerController, as stats change)
 
     // Called by Local Player's PlayerController ... once tank has spawned.
     public void Configure(int NumberPlayers, int OwnPlayer)
@@ -103,6 +123,34 @@ public class GUIManager : MonoBehaviour {
         {
             _myPanels[i].SetHealth(_myPlayers[i].Curr_Health / _myPlayers[i].Max_Health);
         }
+    }
+    #endregion
+
+    #region SplashScreen - Public Methods (called by PlayerController - relayed to Splashscreen)
+
+    public void Splash_GameOverWin()
+    {
+        Splash.GameOverWin();
+    }
+
+    public void Splash_GameOverLost()
+    {
+        Splash.GameOverLost();
+    }
+
+    public void Splash_Died(string name)
+    {
+        Splash.Died(name);
+    }
+
+    public void Splash_ReSpawn()
+    {
+        Splash.ReSpawn();
+    }
+
+    public void Splash_OtherDisconnect()
+    {
+        Splash.OtherDisconnect();
     }
     #endregion
 

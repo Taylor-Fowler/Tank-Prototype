@@ -126,6 +126,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if (photonView.IsMine)
         {
+            Debug.Log("[PC] Change tank Choice called: " + type);
             photonView.RPC("RpcChangeTank", RpcTarget.AllBuffered, type);
         }
     }
@@ -201,6 +202,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 if (OwnStats.Curr_Health <= 0)
                 {
                 //    IsActive = false; // now out of the game
+                    _myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
                     photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
                     //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
                 }

@@ -1075,10 +1075,11 @@ MonoBehaviour:
   P1: {fileID: 114599885278674198}
   P2: {fileID: 114827760497416544}
   P3: {fileID: 114996023550516464}
+  Splash: {fileID: 114583559734829256}
   BG0: {fileID: 224317434273147606}
   BG1: {fileID: 224012604355068914}
   BG2: {fileID: 224714612707526598}
-  FlashTime: 0.1
+  FlashTime: 0.06
 --- !u!114 &114008834993638646
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1295,7 +1296,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 114326558089806372}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 114006829572487570}
+        m_MethodName: PickTankOne
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &114101474575659438
@@ -1522,7 +1534,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 114371094258840562}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 114006829572487570}
+        m_MethodName: PickTankTwo
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &114225277887509558
