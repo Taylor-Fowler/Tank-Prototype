@@ -33,6 +33,7 @@ public class GUIManager : MonoBehaviour {
     private InGameVariables[] _myPlayers;
     private int _PlayerCount = 0;     // default until configured
     private int _OwnPlayerNumber = 0; // as above
+
     #endregion
 
     #region Public Methods

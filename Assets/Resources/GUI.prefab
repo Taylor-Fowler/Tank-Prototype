@@ -2196,6 +2196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f324e161036d8341862a2dcad01c2ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MyManager: {fileID: 114006829572487570}
   Main_Canvas: {fileID: 225992789248310354}
   SplashPanel: {fileID: 224473103871845894}
   Splash_Canvas: {fileID: 225992789248310354}

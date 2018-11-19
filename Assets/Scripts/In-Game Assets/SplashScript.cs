@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SplashScript : MonoBehaviour {
 
     #region INSPECTOR SET COMPONENTS & VALUES
+    public GUIManager MyManager;
     public CanvasGroup Main_Canvas;
     public RectTransform SplashPanel;
     public CanvasGroup Splash_Canvas;
@@ -17,29 +18,77 @@ public class SplashScript : MonoBehaviour {
     public float SplashScale_Duration = 2f;
     #endregion
 
+    #region PRIVATE FIELDS
     [SerializeField]
     private float _MainFade_timer = 0;
     private bool _MainFade_Direction = true;
 
     [SerializeField]
     private float _SplashScale_timer = 0;
-    private Vector3 InitialSplashScale;
 
     // For Tweening
     private TankHelpers Help = new TankHelpers();
+    #endregion
 
 
+
+    #region UNITY API
     void Awake ()
     {
-        InitialSplashScale = SplashPanel.localScale;
-
         // Make it Everything we see
         Main_Canvas.interactable = false;
         Main_Canvas.alpha = 1;
-        // Activate "Game Starting"
         GameStart();
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+
+        // TEST KEYS FOR DEBUGGING
+        if (Input.GetKeyUp("1")) MainFade_Start(true);
+        if (Input.GetKeyUp("2")) MainFade_Start(false);
+        if (Input.GetKeyUp("3")) GameOverWin();
+        if (Input.GetKeyUp("4")) GameOverLost();
+        if (Input.GetKeyUp("5")) Died("Tester");
+        if (Input.GetKeyUp("6")) ReSpawn();
+    }
+
+    void OnDestroy()
+    {
+        // insurance
+        StopAllCoroutines();
+    }
+    #endregion
+
+    #region PUBLIC METHODS
+    public void GameOverWin ()
+    {
+        SplashZoom("GRATZ", "You Won!!", false, true);
+        MainFade_Start(true);
+    }
+
+    public void GameOverLost()
+    {
+        SplashZoom("Too bad ...", "You Lost!!", false, true);
+        MainFade_Start(true);
+    }
+
+    public void Died (string name)
+    {
+        SplashZoom("Killed by "+ name, "Select a Tank", true, true);
+        MainFade_Start(true);
+    }
+
+    public void ReSpawn()
+    {
+        SplashZoom("Re-spawning ...", "", false, false);
+        MainFade_Start(false);
+    }
+
+    #endregion
+
+    #region PRIVATE METHODS
     private void GameStart ()
     {
         LowerText.text = "";
@@ -50,32 +99,30 @@ public class SplashScript : MonoBehaviour {
         TankSelect_Canvas.interactable = false;
         Splash_ScaleUp_MainOut();
     }
-	
-    public void GameOverWin ()
+    private void SplashZoom(string TopText, string BottomText, bool Tank_Select, bool UpOrDown)
     {
-        UpperText.text = "GRATZ";
-        LowerText.text = "You Won !!";
+        UpperText.text = TopText;
+        LowerText.text = BottomText;
         Splash_Canvas.alpha = 1;
         Splash_Canvas.interactable = false;
-        TankSelect_Canvas.alpha = 0;
-        TankSelect_Canvas.interactable = false;
-        MainFade_Start(true);
-        Splash_ScaleUp();
-    }
-
-	// Update is called once per frame
-	void Update () {
-
-        // TEST KEYS FOR DEBUGGING
-        if (Input.GetKeyUp("1")) MainFade_Start(true);
-        if (Input.GetKeyUp("2")) MainFade_Start(false);
-        if (Input.GetKeyUp("3")) GameOverWin();
-    }
-
-    void OnDestroy ()
-    {
-        // insurance
-        StopAllCoroutines();
+        if (Tank_Select)
+        {
+            TankSelect_Canvas.alpha = 1;
+            TankSelect_Canvas.interactable = true;
+        }
+        else
+        {
+            TankSelect_Canvas.alpha = 0;
+            TankSelect_Canvas.interactable = false;
+        }
+        if (UpOrDown)
+        {
+            Splash_ScaleUp();
+        }
+        else
+        {
+            Splash_ScaleDown();
+        }
     }
 
     private void Splash_ScaleUp_MainOut()
@@ -110,15 +157,38 @@ public class SplashScript : MonoBehaviour {
             return;
         }
         _SplashScale_timer = SplashScale_Duration;
-        StartCoroutine("SplashScale");
+        StartCoroutine("SplashScaleUp");
     }
 
-    IEnumerator SplashScale()
+    IEnumerator SplashScaleUp()
     {
         while (_SplashScale_timer > 0)
         {
             _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
             float lerp = 1f - (_SplashScale_timer / SplashScale_Duration);
+            SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
+            yield return null;
+        }
+        yield return null;
+    }
+
+    private void Splash_ScaleDown()
+    {
+        if (_SplashScale_timer != 0)
+        {
+            Debug.Log("[SplashScript] attempt to initiate SCALE-UP cancelled as one already running");
+            return;
+        }
+        _SplashScale_timer = SplashScale_Duration;
+        StartCoroutine("SplashScaleDown");
+    }
+
+    IEnumerator SplashScaleDown()
+    {
+        while (_SplashScale_timer > 0)
+        {
+            _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
+            float lerp = (_SplashScale_timer / SplashScale_Duration);
             SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
             yield return null;
         }
@@ -165,5 +235,12 @@ public class SplashScript : MonoBehaviour {
         Main_Canvas.interactable = false;
         yield return null;
     }
+
+    #endregion
+
+	
+
+
+
 
 }
