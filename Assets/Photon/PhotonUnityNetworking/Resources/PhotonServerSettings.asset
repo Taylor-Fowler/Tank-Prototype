@@ -15,7 +15,7 @@ MonoBehaviour:
     AppIdRealtime: def2647d-a5a9-4476-8e7b-d61f58fa361a
     AppIdChat: 
     AppIdVoice: 
-    AppVersion: 
+    AppVersion: 1
     UseNameServer: 1
     FixedRegion: 
     Server: 
@@ -43,4 +43,6 @@ MonoBehaviour:
   - RpcUpdateIGVName
   - RpcSynchAllIGV
   - RpcUpdateInitialHealth
+  - RpcLoadedGame
+  - RpcSetStartTime
   DisableAutoOpenWizard: 1

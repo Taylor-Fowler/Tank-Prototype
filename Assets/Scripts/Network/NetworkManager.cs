@@ -52,13 +52,13 @@ namespace Network
 
             if (DevAutoJoin)
             {
-                Debug.Log("[Network Manager] AUTOJOIN: Trying to Join Random Room");
+                Debug.Log("[NetworkManager] AUTOJOIN: Trying to Join Random Room");
                 PhotonNetwork.AutomaticallySyncScene = true;
                 PhotonNetwork.JoinRandomRoom(); // failure will call OnJoinRandomFailed() ... where we will create one
             }
             else
             {
-                Debug.Log("[Network Manager] Trying to Join Lobby");
+                Debug.Log("[NetworkManager] Trying to Join Lobby");
                 PhotonNetwork.JoinLobby();
             }
         }
@@ -70,9 +70,11 @@ namespace Network
             CreatePublicRoom("Dev for 2", 2);
         }
 
+
         public override void OnJoinedLobby()
         {
             Debug.Log("[NetworkManager] OnJoinedLobby");
+            Debug.Log(PhotonNetwork.CurrentLobby.IsDefault);
             PhotonNetwork.AutomaticallySyncScene = true;
             //PhotonNetwork.JoinOrCreateRoom("room", new RoomOptions(), PhotonNetwork.CurrentLobby);
         }

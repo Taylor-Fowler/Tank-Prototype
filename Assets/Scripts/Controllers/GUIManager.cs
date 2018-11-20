@@ -1,7 +1,44 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
-public class GUIManager : MonoBehaviour {
+using Photon.Pun;
+
+public class GUIManager : MonoBehaviour
+{
+    #region TAYLOR EDITS
+    public Text TimeToStartText;
+
+    private void Start()
+    {
+        PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
+    }
+
+    private void OnDestroy()
+    {
+        PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
+    }
+
+    private void OnAllPlayersInitialised(double startTime)
+    {
+        StartCoroutine(UpdateTimer(startTime));
+    }
+
+    private IEnumerator UpdateTimer(double startTime)
+    {
+        TimeToStartText.gameObject.SetActive(true);
+        do
+        {
+            TimeToStartText.text = ((int)(startTime - PhotonNetwork.Time)).ToString();
+            yield return null;
+        } while(startTime > PhotonNetwork.Time);
+
+        TimeToStartText.text = "";
+        TimeToStartText.gameObject.SetActive(false);
+
+        //Splash.
+    }
+    #endregion
     // SUMMARY
     // GuiManager has a set of 4 GUIPanels (from prefabS, in Scene and Inspector defined)
     // when Configure() called by Local Player ...
@@ -42,16 +79,20 @@ public class GUIManager : MonoBehaviour {
 
     public void PickTankOne ()
     {
-        PlayerController myCon = FindObjectOfType<PlayerController>();
-        myCon.ChangeTank(1);
+        // Taylor Modifications...sorry!
+        // PlayerController myCon = FindObjectOfType<PlayerController>();
+        // myCon.ChangeTank(1);
+        PlayerController.LocalPlayer.TankChoice = 1;
         Debug.Log("[GUI Manager] Change tank Choice called: 1" );
     }
 
     public void PickTankTwo()
     {
-        PlayerController myCon = FindObjectOfType<PlayerController>();
-        myCon.ChangeTank(2);
-        Debug.Log("[[GUI Manager] Change tank Choice called: 2");
+        // Taylor Modifications...sorry!
+        // PlayerController myCon = FindObjectOfType<PlayerController>();
+        // myCon.ChangeTank(2);
+        PlayerController.LocalPlayer.TankChoice = 2;
+        Debug.Log("[GUI Manager] Change tank Choice called: 2");
     }
 
     #endregion

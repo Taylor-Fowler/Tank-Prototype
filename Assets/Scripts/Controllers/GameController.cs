@@ -14,7 +14,7 @@ public class GameController : MonoBehaviourPun
     // TBA variables placeholders
     [Header("Necessary Tranforms, Cameras and Objects")]
     public Camera PlayerCamera;
-    public GameObject PlayerController;
+    public GameObject PlayerPrefab;
 
     [Header("Master Game Variables")]
     public int PlayerCount = 0;
@@ -23,8 +23,13 @@ public class GameController : MonoBehaviourPun
     public NetworkManager NetworkManager { get; private set; }
     public PlayerManager PlayerManager { get; private set; }
 
+    #region CUSTOM EVENT DEFINITIONS
     public delegate void GameSceneInitialised();
     public GameSceneInitialised Event_OnGameSceneInitialised;
+
+    public delegate void GameStart();
+    public GameStart Event_OnGameStart;
+    #endregion
 
     [Header("Serialized Fields - for debug reference only")]
     [SerializeField] private CommsManager Comms;
@@ -67,6 +72,7 @@ public class GameController : MonoBehaviourPun
         _managers.Add(NetworkManager);
         _managers.Add(PlayerManager);
 
+        PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
     }
 
     //---------------------------//
@@ -86,29 +92,12 @@ public class GameController : MonoBehaviourPun
         InjectServices();
     }
 
+    private void OnDestroy()
+    {
+        PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
+    }
+
     #endregion
-
-    private void SceneManager_sceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
-    {
-        if (loadedScene.buildIndex != 0)
-        {
-            GameRunning = true;
-            GameObject player = PhotonNetwork.Instantiate(PlayerController.name, Vector3.zero, Quaternion.identity);
-            StartCoroutine(Delay(2f, OnGameSceneInitialised));
-        }
-        else
-        {
-            GameRunning = false;
-        }
-    }
-
-    private void OnGameSceneInitialised()
-    {
-        if(Event_OnGameSceneInitialised != null)
-        {
-            Event_OnGameSceneInitialised();
-        }
-    }
 
     private void InjectServices()
     {
@@ -120,13 +109,58 @@ public class GameController : MonoBehaviourPun
         }
     }
 
+    private void SceneManager_sceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
+    {
+        if (loadedScene.buildIndex != 0)
+        {
+            GameRunning = true;
+            GameObject player = PhotonNetwork.Instantiate(PlayerPrefab.name, Vector3.zero, Quaternion.identity);
+            //StartCoroutine(Delay(2f, OnGameSceneInitialised));
+        }
+        else
+        {
+            GameRunning = false;
+        }
+    }
 
+    #region CUSTOM EVENT RESPONSES
+    private void OnAllPlayersInitialised(double startTime)
+    {
+        StartCoroutine(CountdownGameStart(startTime));
+    }
+    #endregion
+
+    #region CUSTOM EVENT TRIGGERS
+    private void OnGameSceneInitialised()
+    {
+        if(Event_OnGameSceneInitialised != null)
+        {
+            Event_OnGameSceneInitialised();
+        }
+    }
+
+    private void OnGameStart()
+    {
+        if(Event_OnGameStart != null)
+        {
+            Event_OnGameStart();
+        }
+    }
+    #endregion
+
+    private IEnumerator CountdownGameStart(double startTime)
+    {
+        do
+        {
+            yield return null;
+        } while (startTime > PhotonNetwork.Time);
+
+        OnGameStart();
+    }
 
     public static IEnumerator Delay(float delay, Action callback)
     {
         yield return new WaitForSeconds(delay);
         callback();
     }
-
-
 }

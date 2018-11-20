@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class MapController : MonoBehaviour {
-
+public class MapController : MonoBehaviour
+{
     private MapData _data = new MapData();
     private int[,] _CurrentLevel;
     public Transform Floor;
@@ -23,8 +23,9 @@ public class MapController : MonoBehaviour {
 
     public UnityEvent MapReady;
 
-    // Use this for initialization
-    void Start () {
+    #region UNITY API
+    private void Start ()
+    {
         _FloorObjects = transform.Find("FloorObjects");
         _WallObjects = transform.Find("WallObjects");
         _PowerUpObjects = transform.Find("PowerUpObjects");
@@ -33,7 +34,17 @@ public class MapController : MonoBehaviour {
         _CurrentLevel = _data.GetLevelData(1);
         MakeLevel();
 	}
-	
+
+    // NOTE: Assuming this isn't necessary anymore?
+    //private void Update()
+    //{
+    //    // DEVELOPMENT PURPOSES ONLY
+    //    if (Input.GetKeyDown("9")) DestroyLevel();
+    //    if (Input.GetKeyDown("0")) MakeLevel();
+    //}
+    #endregion
+
+
     public void MakeLevel()
     {
         // Eliminate what is there already
@@ -123,22 +134,4 @@ public class MapController : MonoBehaviour {
         }
         return report;
     }
-
-    private void SpawnTank()
-    {
-        Transform MyTank = (Transform)Instantiate(ThirtiesTank, transform.position, Quaternion.identity);
-    }
-
-    private void SpawnPlayer()
-    {
-        Transform MyPlayer = (Transform)Instantiate(Player, transform.position, Quaternion.identity);
-        MyPlayer.GetComponent<PlayerController>().StartGame();
-    }
-
-    // Update is called once per frame
-    void Update () {
-        // DEVELOPMENT PURPOSES ONLY
-        if (Input.GetKeyDown("9")) DestroyLevel();
-        if (Input.GetKeyDown("0")) MakeLevel();
-	}
 }

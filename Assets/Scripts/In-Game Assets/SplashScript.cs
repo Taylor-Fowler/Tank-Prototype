@@ -32,12 +32,18 @@ public class SplashScript : MonoBehaviour {
     #endregion
 
     #region UNITY API
-    void Awake ()
+    // Taylor Modifications
+    //void Awake ()
+    //{
+    //    // Make it Everything we see
+    //    Main_Canvas.interactable = false;
+    //    Main_Canvas.alpha = 1;
+
+    //    GameStart();
+    //}
+    private void Start()
     {
-        // Make it Everything we see
-        Main_Canvas.interactable = false;
-        Main_Canvas.alpha = 1;
-        GameStart();
+        GameController.Instance.Event_OnGameStart += GameStart;
     }
 
     // Update is called once per frame
@@ -58,6 +64,7 @@ public class SplashScript : MonoBehaviour {
 
     void OnDestroy()
     {
+        GameController.Instance.Event_OnGameStart -= GameStart;
         // insurance
         StopAllCoroutines();
     }
@@ -97,7 +104,7 @@ public class SplashScript : MonoBehaviour {
     #endregion
 
     #region PRIVATE METHODS
-    private void GameStart ()
+    public void GameStart ()
     {
         LowerText.text = "";
         Splash_Canvas.alpha = 1;

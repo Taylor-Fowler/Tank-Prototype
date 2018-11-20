@@ -101,6 +101,7 @@ MonoBehaviour:
     Max_Health: 0
     Curr_Health: 0
     Score: 0
+    Loaded: 0
   _SpawnPos: {x: 0, y: 0, z: 0}
   _SpawnRot: {x: 0, y: 0, z: 0, w: 0}
   IsActive: 0
