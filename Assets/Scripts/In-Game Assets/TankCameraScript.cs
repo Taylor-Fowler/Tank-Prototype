@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TankCameraScript : MonoBehaviour {
 
@@ -20,7 +18,7 @@ public class TankCameraScript : MonoBehaviour {
 	
     public void Activate()
     {
-        transform.localPosition = LowerPoint.localPosition;
+        transform.localPosition = UpperPoint.localPosition;
         tag = "MainCamera";
         UpdateCameraZoom();
     }

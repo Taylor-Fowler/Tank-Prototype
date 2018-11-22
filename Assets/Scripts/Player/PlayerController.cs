@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     public GameObject TankType1;
     public GameObject TankType2;
 
-    public int TankChoice = 2; // default
+    public int TankChoice = 1; // default
     public Vector3 _Vcolor = new Vector3(255, 0, 0); // default // public required for TankBase
     private Color _color = new Color(255, 0, 0); // default
     [SerializeField] private Transform[] _Spawns;
