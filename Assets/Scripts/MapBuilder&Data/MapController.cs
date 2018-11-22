@@ -134,4 +134,45 @@ public class MapController : MonoBehaviour
         }
         return report;
     }
+
+    public Transform GetSpawn(InGameVariables playerVariable)
+    {
+        Transform closest = null;
+        int length = _SpawnPoints.childCount;
+        int longestDistanceOfPlayerClosestToSpawn = int.MinValue;
+
+        for(int i = 0; i < length; i++)
+        {
+            Transform currentSpawn = _SpawnPoints.GetChild(i);
+            int closestPlayer = int.MaxValue;
+
+            foreach(var player in PlayerController.PlayerControllers)
+            {
+                if(player == playerVariable)
+                {
+                    continue;
+                }
+
+                Transform playerPosition = player.Controller.Position();
+                if(playerPosition != null)
+                {
+                    int distance = (int)Vector3.Distance(playerPosition.position, currentSpawn.position);
+
+                    if (distance < closestPlayer)
+                    {
+                        closestPlayer = distance;
+                    }
+                }
+
+            }
+
+            if(closestPlayer > longestDistanceOfPlayerClosestToSpawn)
+            {
+                longestDistanceOfPlayerClosestToSpawn = closestPlayer;
+                closest = currentSpawn;
+            }
+        }
+        
+        return closest;
+    }
 }

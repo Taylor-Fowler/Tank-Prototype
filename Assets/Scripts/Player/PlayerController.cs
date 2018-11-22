@@ -17,13 +17,16 @@ public class InGameVariables
 
 public class PlayerController : MonoBehaviourPunCallbacks
 {
-    #region STATIC MEMBERS + METHODS
+    #region STATIC MEMBERS & METHODS
     public static PlayerController LocalPlayer;
     public static PlayerManager MyManager;
     public static InGameVariables[] PlayerControllers;
 
     public delegate void AllPlayersInitialised(double startTime);
     public static AllPlayersInitialised Event_OnAllPlayersInitialised;
+
+    public delegate void LocalPlayerRespawn();
+    public static LocalPlayerRespawn Event_OnLocalPlayerRespawn;
 
     private static void OnAllPlayersInitialised(double startTime)
     {
@@ -32,9 +35,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
             Event_OnAllPlayersInitialised(startTime);
         }
     }
+
+    private static void OnLocalPlayerRespawn()
+    {
+        if(Event_OnLocalPlayerRespawn != null)
+        {
+            Event_OnLocalPlayerRespawn();
+        }
+    }
     #endregion
-
-
 
     private TankHelpers Help = new TankHelpers(); // A function Utility Class
 
@@ -67,6 +76,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
             // Static list of ingame variables, only the local client creates the empty list
             // Later on, the Unity Start method has each controller add themselves to the list.
             PlayerControllers = new InGameVariables[PlayerManager.PlayersInRoomCount()];
+
+            Event_OnLocalPlayerRespawn += Respawn;
         }
         // Populate "OwnStats"
         OwnStats.PlayerID = PlayerManager.PlayerID(photonView.Owner);
@@ -106,6 +117,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
+        Event_OnLocalPlayerRespawn -= Respawn;
         GameController.Instance.Event_OnGameStart -= OnGameStart;
     }
     #endregion
@@ -115,9 +127,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
 #if UNITY_EDITOR
         EditorOnlyControllers = PlayerControllers;
 #endif      
+        _myGUI = FindObjectOfType<GUIManager>();
+
         if (photonView.IsMine)
         {
-            InitialSpawn();
+            Spawn();
+            _myGUI.Configure(PlayerControllers.Length, OwnStats.PlayerID);
         }
     }
 
@@ -137,27 +152,22 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    // NOTE: Removed temporarily to test if needed
-    //public void ChangeTank(int type)
-    //{
-    //    if (photonView.IsMine)
-    //    {
-    //        Debug.Log("[PC] Change tank Choice called: " + type);
-    //        photonView.RPC("RpcChangeTank", RpcTarget.AllBuffered, type);
-    //    }
-    //}
-    //[PunRPC]
-    //private void RpcChangeTank(int type)
-    //{
-    //    TankChoice = type;
-    //}
+    public Transform Position()
+    {
+        if(_myTankBody == null)
+        {
+            return null;
+        }
+
+        return _myTankBody.transform;
+    }
 
     /// <summary>
     /// Should only be called from the local client, instantiates the chosen tank body across the network
     /// and then executes an RPC to inform the instance of this script (on other clients) that the tank body
     /// has been created with the given PhotonView.ViewID
     /// </summary>
-    private void InitialSpawn()
+    private void Spawn()
     {
         // let's make a tank
         // Move Controller to Spawn
@@ -172,10 +182,19 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
         IsActive = true;
         photonView.RPC("RpcSetTankBody", RpcTarget.AllBuffered, _myTankBody.GetComponent<PhotonView>().ViewID);
-        _myGUI = FindObjectOfType<GUIManager>();
-        _myGUI.Configure(PlayerControllers.Length,OwnStats.PlayerID);
     }
 
+    private void Respawn()
+    {
+        MapController[] map = FindObjectsOfType(typeof(MapController)) as MapController[];
+        _SpawnPos = map[0].GetSpawn(OwnStats).position;
+        _SpawnRot = Quaternion.LookRotation((new Vector3(25, _SpawnPos.y, 25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
+        transform.position = _SpawnPos;
+        transform.rotation = _SpawnRot;
+
+        Spawn();
+        _myGUI.UpdateHealth();
+    }
 
     [PunRPC]
     private void RpcSetTankBody(int viewID)
@@ -202,33 +221,54 @@ public class PlayerController : MonoBehaviourPunCallbacks
         _myTankScript.Fire(playerID);
     }
 
-    private void Die()
+    private void Die(string playerWhoKilled)
     {
+        // All clients should update the dead player controllers properties
         IsActive = false;
+        _myTankScript.TankDie();
+
+        // Only the dead player should destroy their tank and call the respawn stuff
+        if(photonView.IsMine)
+        {
+            double time = PhotonNetwork.Time;
+            _myGUI.Splash_Died(playerWhoKilled);
+            PhotonNetwork.Destroy(_myTankBody);
+            StartCoroutine(_myGUI.UpdateTimer(time + 10.0));
+            StartCoroutine(WaitToRespawn(time + 10.0));
+        }
+
+        _myTankScript = null;
+        _myTankBody = null;
+    }
+
+    private IEnumerator WaitToRespawn(double waitUntil)
+    {
+        while(PhotonNetwork.Time < waitUntil)
+        {
+            yield return null;
+        }
+
+        OnLocalPlayerRespawn();
     }
 
     public void TakeDamage(int ShellOwnerID, float damage)
     {
-        if (photonView.IsMine) // My View AND My Tank was hit ....
+        if (photonView.IsMine && IsActive) // My View AND My Tank was hit .... still in the game?
         {
-            if (IsActive) // still in the game?
-            {       
-                OwnStats.Curr_Health -= damage;
-                photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
-                if (OwnStats.Curr_Health <= 0)
-                {
-                //    IsActive = false; // now out of the game
-                    _myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
-                    photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-                    //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
-                }
+            OwnStats.Curr_Health -= damage;
+            photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
+            if (OwnStats.Curr_Health <= 0)
+            {
+            //    IsActive = false; // now out of the game
+                //_myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
+                photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
+                //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
             }
         }
     }
 
     private void CheckAllAreLoaded()
     {
-        Debug.Log("Checking");
         for (int i = 0; i < PlayerControllers.Length; i++)
         {
             if (PlayerControllers[i] == null)
@@ -236,7 +276,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 return;
             }
         }
-        Debug.Log("All Loaded");
         photonView.RPC("RpcSetStartTime", RpcTarget.AllBuffered, PhotonNetwork.Time + 11.0);
     }
 
@@ -245,8 +284,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         OnAllPlayersInitialised(time);
     }
-
-
 
     #region Pun Update _Player InGameVariables
     /// <summary>
@@ -264,33 +301,17 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
     {
         PlayerControllers[PlayerID].Curr_Health = CurrHealth;
-        // GUI Update
-        if (_myGUI == null) _myGUI = FindObjectOfType<GUIManager>(); // Required since (sometimes) the reference has been lost .. for reasons unknown !
         _myGUI.UpdateHealth();
-
-        if (CurrHealth <= 0)
-        {
-            IsActive = false;
-            // We could add reduce health, update score and take damage to one network call....
-            // Want to?
-        }
-        if (photonView.IsMine)
-        {
-            if (CurrHealth <= 0)
-            {
-                IsActive = false; // now out of the game
-                _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
-            }
-        }
     }
 
+    // Note: Update score means a player died, the player who died sent the message to their controller on the other
+    //       clients, therefore we can use update score to trigger the die function locally
     [PunRPC]
     private void RpcUpdateScore (int ShellOwnerID)
     {
         PlayerControllers[ShellOwnerID].Score++;
-        // GUI Update
-        if (_myGUI == null) _myGUI = FindObjectOfType<GUIManager>(); // Required since (sometimes) the reference has been lost .. for reasons unknown !
         _myGUI.UpdateScore();
+        Die(PlayerControllers[ShellOwnerID].PlayerName);
     }
 
     [PunRPC]
@@ -304,8 +325,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         OwnStats.Curr_Health = OwnStats.Max_Health = health;
     }
-
-
 
     [PunRPC]
     private void RpcUpdateIGVName (int PlayerID, string Name)

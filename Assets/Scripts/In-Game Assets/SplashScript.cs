@@ -71,6 +71,26 @@ public class SplashScript : MonoBehaviour {
     #endregion
 
     #region PUBLIC METHODS (Called by GUIManager)
+    public void TankSelection()
+    {
+        Splash_Canvas.alpha = 1;
+        Splash_Canvas.interactable = true;
+        UpperText.text = "Respawn";
+        LowerText.text = "Select your tank:";
+        TankSelect_Canvas.alpha = 1;
+        TankSelect_Canvas.interactable = true;
+    }
+
+    public void GameStart()
+    {
+        LowerText.text = "";
+        Splash_Canvas.alpha = 1;
+        Splash_Canvas.interactable = false;
+        UpperText.text = "Game Starting .....";
+        TankSelect_Canvas.alpha = 0;
+        TankSelect_Canvas.interactable = false;
+        Splash_ScaleUp_MainOut();
+    }
 
     public void GameOverWin()
     {
@@ -104,16 +124,7 @@ public class SplashScript : MonoBehaviour {
     #endregion
 
     #region PRIVATE METHODS
-    public void GameStart ()
-    {
-        LowerText.text = "";
-        Splash_Canvas.alpha = 1;
-        Splash_Canvas.interactable = false;
-        UpperText.text = "Game Starting .....";
-        TankSelect_Canvas.alpha = 0;
-        TankSelect_Canvas.interactable = false;
-        Splash_ScaleUp_MainOut();
-    }
+
     private void SplashZoom(string TopText, string BottomText, bool Tank_Select, bool UpOrDown)
     {
         UpperText.text = TopText;

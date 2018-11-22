@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,19 +13,37 @@ public class GUIManager : MonoBehaviour
     private void Start()
     {
         PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
+        PlayerController.Event_OnLocalPlayerRespawn += OnLocalPlayerRespawn;
     }
 
     private void OnDestroy()
     {
         PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
+        PlayerController.Event_OnLocalPlayerRespawn -= OnLocalPlayerRespawn;
     }
 
     private void OnAllPlayersInitialised(double startTime)
     {
-        StartCoroutine(UpdateTimer(startTime));
+        StartCoroutine(UpdateTimer(startTime, DisableTimeToStart));
     }
 
-    private IEnumerator UpdateTimer(double startTime)
+    private void OnLocalPlayerRespawn()
+    {
+        Splash_ReSpawn();
+    }
+
+    private void DisableTimeToStart()
+    {
+        TimeToStartText.text = "";
+        TimeToStartText.gameObject.SetActive(false);
+    }
+
+    public IEnumerator UpdateTimer(double startTime)
+    {
+        return UpdateTimer(startTime, DisableTimeToStart);
+    }
+
+    private IEnumerator UpdateTimer(double startTime, Action callback)
     {
         TimeToStartText.gameObject.SetActive(true);
         do
@@ -33,10 +52,7 @@ public class GUIManager : MonoBehaviour
             yield return null;
         } while(startTime > PhotonNetwork.Time);
 
-        TimeToStartText.text = "";
-        TimeToStartText.gameObject.SetActive(false);
-
-        //Splash.
+        callback();
     }
     #endregion
     // SUMMARY
