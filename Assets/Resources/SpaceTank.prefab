@@ -869,6 +869,7 @@ GameObject:
   - component: {fileID: 114779350856727616}
   - component: {fileID: 65088219281846286}
   - component: {fileID: 114206440511414902}
+  - component: {fileID: 54064098020510448}
   m_Layer: 0
   m_Name: SpaceTank
   m_TagString: Untagged
@@ -8486,6 +8487,21 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1579483746915074}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &54064098020510448
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1376648546518200}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.95
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 84
+  m_CollisionDetection: 0
 --- !u!65 &65088219281846286
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -8595,7 +8611,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 114779350856727616}
   viewIdField: 0
-  InstantiationId: 3
+  InstantiationId: 4
   isRuntimeInstantiated: 0
 --- !u!114 &114779350856727616
 MonoBehaviour:
@@ -8630,7 +8646,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 114150552567097620}
   viewIdField: 0
-  InstantiationId: 4
+  InstantiationId: 3
   isRuntimeInstantiated: 0
 --- !u!135 &135085771527905376
 SphereCollider:
