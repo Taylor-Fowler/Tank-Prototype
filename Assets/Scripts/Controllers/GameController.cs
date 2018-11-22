@@ -18,6 +18,7 @@ public class GameController : MonoBehaviourPun
 
     [Header("Master Game Variables")]
     public int PlayerCount = 0;
+    public int KillsRequired = 2;
     public string DeviceID { get; private set; }
     public bool GameRunning { get; private set; }
     public NetworkManager NetworkManager { get; private set; }
@@ -29,6 +30,9 @@ public class GameController : MonoBehaviourPun
 
     public delegate void GameStart();
     public GameStart Event_OnGameStart;
+
+    public delegate void GameOver(InGameVariables winningPlayer);
+    public GameOver Event_OnGameOver;
     #endregion
 
     [Header("Serialized Fields - for debug reference only")]
@@ -56,7 +60,7 @@ public class GameController : MonoBehaviourPun
         if (instance)
         {
             Debug.Log("Already a GameController running - going to die now .....");
-            DestroyImmediate(gameObject);
+            Destroy(gameObject);
             return;
         }
         instance = this;
@@ -94,7 +98,17 @@ public class GameController : MonoBehaviourPun
 
     private void OnDestroy()
     {
+        if(instance != this)
+        {
+            return;
+        }
+
+        foreach(var manager in _managers)
+        {
+            manager.Shutdown();
+        }
         PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
+        SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
     }
 
     #endregion
@@ -111,15 +125,11 @@ public class GameController : MonoBehaviourPun
 
     private void SceneManager_sceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
     {
-        if (loadedScene.buildIndex != 0)
+        if (loadedScene.buildIndex > 1)
         {
             GameRunning = true;
             GameObject player = PhotonNetwork.Instantiate(PlayerPrefab.name, Vector3.zero, Quaternion.identity);
             //StartCoroutine(Delay(2f, OnGameSceneInitialised));
-        }
-        else
-        {
-            GameRunning = false;
         }
     }
 
@@ -131,6 +141,16 @@ public class GameController : MonoBehaviourPun
     #endregion
 
     #region CUSTOM EVENT TRIGGERS
+    public void OnGameOver(InGameVariables winningPlayer)
+    {
+        GameRunning = false;
+
+        if(Event_OnGameOver != null)
+        {
+            Event_OnGameOver(winningPlayer);
+        }
+    }
+
     private void OnGameSceneInitialised()
     {
         if(Event_OnGameSceneInitialised != null)

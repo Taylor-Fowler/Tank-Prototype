@@ -7,4 +7,5 @@ public interface IManager
     ManagerStatus Status { get; }
 
     void Startup(NetworkService networkService);
+    void Shutdown();
 }

@@ -12,12 +12,14 @@ public class GUIManager : MonoBehaviour
 
     private void Start()
     {
+        GameController.Instance.Event_OnGameOver += OnGameOver;
         PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
         PlayerController.Event_OnLocalPlayerRespawn += OnLocalPlayerRespawn;
     }
 
     private void OnDestroy()
     {
+        GameController.Instance.Event_OnGameOver -= OnGameOver;
         PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
         PlayerController.Event_OnLocalPlayerRespawn -= OnLocalPlayerRespawn;
     }
@@ -30,6 +32,18 @@ public class GUIManager : MonoBehaviour
     private void OnLocalPlayerRespawn()
     {
         Splash_ReSpawn();
+    }
+
+    private void OnGameOver(InGameVariables winningPlayer)
+    {
+        if(winningPlayer == PlayerController.LocalPlayer.OwnStats)
+        {
+            Splash_GameOverWin();
+        }
+        else
+        {
+            Splash_GameOverLost();
+        }
     }
 
     private void DisableTimeToStart()

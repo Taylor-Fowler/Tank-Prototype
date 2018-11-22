@@ -19,7 +19,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
 {
     #region STATIC MEMBERS & METHODS
     public static PlayerController LocalPlayer;
-    public static PlayerManager MyManager;
     public static InGameVariables[] PlayerControllers;
 
     public delegate void AllPlayersInitialised(double startTime);
@@ -117,11 +116,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        Event_OnLocalPlayerRespawn -= Respawn;
+        if(photonView.IsMine)
+        {
+            Event_OnLocalPlayerRespawn -= Respawn;
+        }
         GameController.Instance.Event_OnGameStart -= OnGameStart;
     }
     #endregion
 
+    #region CUSTOM EVENT RESPONSES
     private void OnGameStart()
     {
 #if UNITY_EDITOR
@@ -135,12 +138,34 @@ public class PlayerController : MonoBehaviourPunCallbacks
             _myGUI.Configure(PlayerControllers.Length, OwnStats.PlayerID);
         }
     }
+    #endregion
 
-    // This is guaranteed to only be ran locally, this is called from TankBase.Start(), which only calls
-    // this method if it is the local tank base.
-    public void RecieveBaseHealth(float C_Health)
+
+    //// This is guaranteed to only be ran locally, this is called from TankBase.Start(), which only calls
+    //// this method if it is the local tank base.
+    //public void RecieveBaseHealth(float C_Health)
+    //{
+    //    photonView.RPC("RpcUpdateInitialHealth", RpcTarget.AllBuffered, C_Health);
+    //}
+    public void Fire()
     {
-        photonView.RPC("RpcUpdateInitialHealth", RpcTarget.AllBuffered, C_Health);
+        photonView.RPC("RpcFire", RpcTarget.AllBuffered, OwnStats.PlayerID);
+    }
+
+    public void TakeDamage(int ShellOwnerID, float damage)
+    {
+        if (photonView.IsMine && IsActive) // My View AND My Tank was hit .... still in the game?
+        {
+            OwnStats.Curr_Health -= damage;
+            photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
+            if (OwnStats.Curr_Health <= 0)
+            {
+                //    IsActive = false; // now out of the game
+                //_myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
+                photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
+                //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
+            }
+        }
     }
 
     public void RecievePowerUpHealth (float Health, int PlayerID)
@@ -196,31 +221,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
         _myGUI.UpdateHealth();
     }
 
-    [PunRPC]
-    private void RpcSetTankBody(int viewID)
-    {
-        if (!photonView.IsMine)
-        {
-            _myTankBody = PhotonView.Find(viewID).gameObject;
-        }
-        _myTankBody.transform.parent = transform;
-        _myTankScript = _myTankBody.GetComponent<TankBase>();
-        _myTankScript.ChangeColor(OwnStats.Color);
-        _myTankScript.SetPlayerID(OwnStats.PlayerID);
-        RpcUpdateIGVName(OwnStats.PlayerID, OwnStats.PlayerName);
-    }
-
-    public void Fire()
-    {
-        photonView.RPC("RpcFire", RpcTarget.AllBuffered, OwnStats.PlayerID);
-    }
-
-    [PunRPC]
-    private void RpcFire(int playerID)
-    {
-        _myTankScript.Fire(playerID);
-    }
-
     private void Die(string playerWhoKilled)
     {
         // All clients should update the dead player controllers properties
@@ -251,22 +251,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
         OnLocalPlayerRespawn();
     }
 
-    public void TakeDamage(int ShellOwnerID, float damage)
-    {
-        if (photonView.IsMine && IsActive) // My View AND My Tank was hit .... still in the game?
-        {
-            OwnStats.Curr_Health -= damage;
-            photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
-            if (OwnStats.Curr_Health <= 0)
-            {
-            //    IsActive = false; // now out of the game
-                //_myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
-                photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-                //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
-            }
-        }
-    }
-
     private void CheckAllAreLoaded()
     {
         for (int i = 0; i < PlayerControllers.Length; i++)
@@ -285,17 +269,30 @@ public class PlayerController : MonoBehaviourPunCallbacks
         OnAllPlayersInitialised(time);
     }
 
-    #region Pun Update _Player InGameVariables
-    /// <summary>
-    /// All called by Local Client when their OwnStats are modified, to synch up their and all other client's _Players[] record
-    /// </summary>
     [PunRPC]
-    private void RpcSynchAllIGV (int OwnerID)
+    private void RpcSetTankBody(int viewID)
     {
-        RpcUpdateIGVMaxHealth(OwnerID,OwnStats.Max_Health);
-        RpcUpdateIGVCurrHealth(OwnerID, OwnStats.Curr_Health);
-        RpcUpdateIGVName(OwnerID, OwnStats.PlayerName);
+        if (!photonView.IsMine)
+        {
+            _myTankBody = PhotonView.Find(viewID).gameObject;
+        }
+        _myTankBody.transform.parent = transform;
+        _myTankScript = _myTankBody.GetComponent<TankBase>();
+        _myTankScript.ChangeColor(OwnStats.Color);
+        _myTankScript.SetPlayerID(OwnStats.PlayerID);
+
+        OwnStats.Curr_Health = OwnStats.Max_Health = _myTankScript.GetHealth();
+        // Commented out as marked for removal
+        // RpcUpdateIGVName(OwnStats.PlayerID, OwnStats.PlayerName);
     }
+
+    [PunRPC]
+    private void RpcFire(int playerID)
+    {
+        _myTankScript.Fire(playerID);
+    }
+    #region Pun Update _Player InGameVariables
+
 
     [PunRPC]
     private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
@@ -309,28 +306,50 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RpcUpdateScore (int ShellOwnerID)
     {
-        PlayerControllers[ShellOwnerID].Score++;
+        InGameVariables shooter = PlayerControllers[ShellOwnerID];
+        shooter.Score++;
         _myGUI.UpdateScore();
-        Die(PlayerControllers[ShellOwnerID].PlayerName);
+
+        if(shooter.Score == GameController.Instance.KillsRequired)
+        {
+            GameController.Instance.OnGameOver(shooter);
+        }
+        else
+        {
+            Die(PlayerControllers[ShellOwnerID].PlayerName);
+        }
     }
 
-    [PunRPC]
-    private void RpcUpdateIGVMaxHealth (int PlayerID, float MaxHealth)
-    {
-        PlayerControllers[PlayerID].Max_Health = MaxHealth;
-    }
 
-    [PunRPC]
-    private void RpcUpdateInitialHealth(float health)
-    {
-        OwnStats.Curr_Health = OwnStats.Max_Health = health;
-    }
+    //[PunRPC]
+    //private void RpcUpdateInitialHealth(float health)
+    //{
+    //    OwnStats.Curr_Health = OwnStats.Max_Health = health;
+    //}
 
-    [PunRPC]
-    private void RpcUpdateIGVName (int PlayerID, string Name)
-    {
-        PlayerControllers[PlayerID].PlayerName = Name;
-    }
+    // NOTE: We never ended up using this
+    /// <summary>
+    /// All called by Local Client when their OwnStats are modified, to synch up their and all other client's _Players[] record
+    /// </summary>
+    //[PunRPC]
+    //private void RpcSynchAllIGV (int OwnerID)
+    //{
+    //    RpcUpdateIGVMaxHealth(OwnerID,OwnStats.Max_Health);
+    //    RpcUpdateIGVCurrHealth(OwnerID, OwnStats.Curr_Health);
+    //    RpcUpdateIGVName(OwnerID, OwnStats.PlayerName);
+    //}
+    // NOTE: This was done locally so this just set the value to what it already was
+    //[PunRPC]
+    //private void RpcUpdateIGVName (int PlayerID, string Name)
+    //{
+    //    PlayerControllers[PlayerID].PlayerName = Name;
+    //}
+
+    //[PunRPC]
+    //private void RpcUpdateIGVMaxHealth(int PlayerID, float MaxHealth)
+    //{
+    //    PlayerControllers[PlayerID].Max_Health = MaxHealth;
+    //}
     #endregion
 
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 using Photon.Pun;
@@ -20,7 +22,14 @@ namespace Network
 
             NetworkService = networkService;
             CachedRooms = new List<RoomInfo>();
+
+            GameController.Instance.Event_OnGameOver += OnGameOver;
             ConnectToServer();
+        }
+
+        public void Shutdown()
+        {
+            GameController.Instance.Event_OnGameOver -= OnGameOver;
         }
         #endregion
 
@@ -188,10 +197,28 @@ namespace Network
 
         public void StartGame()
         {
-            //PhotonNetwork.LoadLevel(1);
             PhotonNetwork.LoadLevel("Map for 2");
         }
-        
+
+        #region CUSTOM EVENT RESPONSES
+        private void OnGameOver(InGameVariables winningPlayer)
+        {
+            StartCoroutine(Wait(PhotonNetwork.Time + 5.0, delegate
+            {
+                PhotonNetwork.LoadLevel(1);
+            }));
+        }
+        #endregion
+
+        private IEnumerator Wait(double waitUntil, Action callback)
+        {
+            while(PhotonNetwork.Time < waitUntil)
+            {
+                yield return null;
+            }
+            callback();
+        }
+
         private static bool ConnectToServer()
         {
             Debug.Log("[NetworkManager] ConnectToServer");

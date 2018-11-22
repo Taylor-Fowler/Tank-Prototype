@@ -63,6 +63,13 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public bool AutoFire = false;
 
     #region UNITY API
+    private void Awake()
+    {
+        // set the "settables" & report them
+        CurrentSpeed = 0f;
+        C_Health = BaseHealth * ModHealth;
+    }
+
     private void Start ()
     {
         // For OTHER player representation in Scene .. swith on RigidBody Kinematics (stops a lot of juddering)
@@ -74,14 +81,9 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         }
 
         Instantiate(CameraPrefab, CameraAnchor);
-        CurrentSpeed = 0f;
         _RB = GetComponent<Rigidbody>();
         if (_RB == null) Debug.Log(" No RB found");
         _RB.mass = C_Mass;
-
-        // set the "settables" & report them
-        C_Health = BaseHealth* ModHealth;
-        PlayerController.LocalPlayer.RecieveBaseHealth(C_Health);
     }
 
     private void Update()

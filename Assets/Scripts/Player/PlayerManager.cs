@@ -22,11 +22,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
     public void Startup(NetworkService networkService)
     {
         Status = ManagerStatus.Initializing;
-
-        PlayerController.MyManager = this;
         NetworkService = networkService;
+
         StartCoroutine(NetworkService.DownloadUserData(GameController.Instance.DeviceID, GetUserData));
+
         Messenger<Color, int>.AddListener("OnChangePlayerColour", OnChangePlayerColour);
+        GameController.Instance.Event_OnGameOver += OnGameOver;
+    }
+
+    public void Shutdown()
+    {
+        Messenger<Color, int>.RemoveListener("OnChangePlayerColour", OnChangePlayerColour);
+        GameController.Instance.Event_OnGameOver -= OnGameOver;
     }
     #endregion
 
@@ -196,12 +203,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
     #endregion
 
     #region CUSTOM EVENTS
-    public void OnGameOver()
+    private void OnGameOver(InGameVariables winningPlayer)
     {
-        if(PhotonNetwork.LocalPlayer.IsMasterClient)
-        {
 
-        }
     }
 
     private void OnChangePlayerColour(Color playerColour, int colourIndex)
