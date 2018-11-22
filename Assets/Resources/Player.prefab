@@ -61,7 +61,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 114687890233819372}
   viewIdField: 0
-  InstantiationId: 0
+  InstantiationId: 5
   isRuntimeInstantiated: 0
 --- !u!114 &114687890233819372
 MonoBehaviour:
@@ -89,7 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TankType1: {fileID: 1992513107031480, guid: bbf690a599d737044a8da3409be3e5c4, type: 2}
-  TankType2: {fileID: 1992513107031480, guid: bbf690a599d737044a8da3409be3e5c4, type: 2}
+  TankType2: {fileID: 1376648546518200, guid: 81571241e1beb674c9b65ee08456638e, type: 2}
   TankChoice: 1
   _Vcolor: {x: 255, y: 0, z: 0}
   _Spawns: []
