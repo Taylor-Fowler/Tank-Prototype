@@ -81,6 +81,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         // Populate "OwnStats"
         OwnStats.PlayerID = PlayerManager.PlayerID(photonView.Owner);
         OwnStats.PlayerName = PlayerManager.PlayerNick(photonView.Owner);
+        Debug.Log(OwnStats.PlayerName);
         OwnStats.Color = Help.ColorToV3(PlayerManager.PlayerColour(photonView.Owner));
         OwnStats.Controller = this;
         OwnStats.Score = 0;
@@ -160,7 +161,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
             if (OwnStats.Curr_Health <= 0)
             {
-                //    IsActive = false; // now out of the game
+                IsActive = false; // now out of the game
                 //_myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
                 photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
                 //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
@@ -218,7 +219,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
         transform.rotation = _SpawnRot;
 
         Spawn();
-        _myGUI.UpdateHealth();
     }
 
     private void Die(string playerWhoKilled)
@@ -282,6 +282,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         _myTankScript.SetPlayerID(OwnStats.PlayerID);
 
         OwnStats.Curr_Health = OwnStats.Max_Health = _myTankScript.GetHealth();
+        _myGUI.UpdateHealth();
         // Commented out as marked for removal
         // RpcUpdateIGVName(OwnStats.PlayerID, OwnStats.PlayerName);
     }

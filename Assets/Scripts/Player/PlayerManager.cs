@@ -70,7 +70,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public static string PlayerNick(Player player)
     {
-        return PhotonNetwork.NickName;
+        return player.NickName;
     }
 
     public static int PlayerColourIndex()
