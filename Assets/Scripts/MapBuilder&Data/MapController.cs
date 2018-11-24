@@ -1,29 +1,31 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 public class MapController : MonoBehaviour
 {
-    private MapData _data = new MapData();
-    private int[,] _CurrentLevel;
+    #region INSPECTOR REQUIRED SETTABLES
+    public int MapDataToUse = 1; // default Map For 2
     public Transform Floor;
     public Transform SpawnPoint;
-    public Transform Wall1;
-    public Transform Wall2;
-    public Transform Wall3;
-    public Transform Wall4;
+    public Transform Wall1; // Interior Wall block
+    public Transform Wall2; // Interior Column
+    public Transform Wall3; // Low Wall
+    public Transform Wall4; // Map Edge Wall
     public Transform PUHealth;
     public Transform PUMove;
     public Transform PUFire;
-    public Transform ThirtiesTank; // dev test only
-    public Transform Player; // dev test only
-    public float PUUpValue = 0.2f; // how hight Power Up items spawn above the floor
+    public float PUUpValue = 0.2f; // how high Power Up items spawn above the floor
+    #endregion
+
+    #region PRIVATE VARIABLES
+    private MapData _data = new MapData();
+    private int[,] _CurrentLevel;
     private Transform _FloorObjects;
     private Transform _WallObjects;
     private Transform _PowerUpObjects;
     private Transform _SpawnPoints;
     private Transform _InitialSpawnPoints;
+    #endregion
 
-    public UnityEvent MapReady;
 
     #region UNITY API
     private void Start ()
@@ -33,13 +35,13 @@ public class MapController : MonoBehaviour
         _PowerUpObjects = transform.Find("PowerUpObjects");
         _SpawnPoints = transform.Find("SpawnPoints");
         _InitialSpawnPoints = transform.Find("InitialSpawns");
-        // this can and wil be tweaked .... for dev purposes ... just getting 1 level
-        _CurrentLevel = _data.GetLevelData(1);
+        // Dev note:  1 = Map for 2, 2 = Map for 4
+        _CurrentLevel = _data.GetLevelData(MapDataToUse);
         MakeLevel();
 	}
     #endregion
 
-
+    #region PUBLIC METHODS
     public void MakeLevel()
     {
         // Eliminate what is there already
@@ -114,9 +116,6 @@ public class MapController : MonoBehaviour
             }
         }
         Debug.Log("Time to Destroy old and build " + first.ToString() + "x" + second.ToString() + " Level = " + (Time.realtimeSinceStartup - Start).ToString() + " secs");
-        MapReady.Invoke();
-        //SpawnTank();
-        //SpawnPlayer();
     }
 
     public void DestroyLevel ()
@@ -192,4 +191,5 @@ public class MapController : MonoBehaviour
         
         return closest;
     }
+    #endregion
 }
