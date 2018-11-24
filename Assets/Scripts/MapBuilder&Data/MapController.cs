@@ -10,6 +10,7 @@ public class MapController : MonoBehaviour
     public Transform Wall1;
     public Transform Wall2;
     public Transform Wall3;
+    public Transform Wall4;
     public Transform PUHealth;
     public Transform PUMove;
     public Transform PUFire;
@@ -85,6 +86,10 @@ public class MapController : MonoBehaviour
                         Transform myWall4 = (Transform)Instantiate(Wall3, new Vector3(i, 0.1f, j), Quaternion.identity);
                         myWall4.transform.Rotate(Vector3.up * 90);
                         myWall4.transform.parent = _WallObjects;
+                        break;
+                    case 8: // outer Wall
+                        Transform myWall8 = (Transform)Instantiate(Wall4, new Vector3(i, 0.5f, j), Quaternion.identity);
+                        myWall8.transform.parent = _WallObjects;
                         break;
                     // anything 11 - 19 = PowerUp Items
                     case 11:

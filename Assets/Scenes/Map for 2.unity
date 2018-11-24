@@ -164,6 +164,12 @@ Prefab:
       value: 
       objectReference: {fileID: 4804090638962038, guid: 65c450d661ed8ab408bc31c2776ed79a,
         type: 2}
+    - target: {fileID: 114962834161602398, guid: b161f680e7159f64989c954e41481607,
+        type: 2}
+      propertyPath: Wall4
+      value: 
+      objectReference: {fileID: 4668682118239750, guid: 31db1ea0c9df35f4084664353a9fd7a1,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b161f680e7159f64989c954e41481607, type: 2}
   m_IsPrefabAsset: 0
