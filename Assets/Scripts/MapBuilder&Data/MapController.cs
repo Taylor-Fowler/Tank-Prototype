@@ -16,11 +16,12 @@ public class MapController : MonoBehaviour
     public Transform PUFire;
     public Transform ThirtiesTank; // dev test only
     public Transform Player; // dev test only
-    public float PUUpValue = 0.2f;
+    public float PUUpValue = 0.2f; // how hight Power Up items spawn above the floor
     private Transform _FloorObjects;
     private Transform _WallObjects;
     private Transform _PowerUpObjects;
     private Transform _SpawnPoints;
+    private Transform _InitialSpawnPoints;
 
     public UnityEvent MapReady;
 
@@ -31,18 +32,11 @@ public class MapController : MonoBehaviour
         _WallObjects = transform.Find("WallObjects");
         _PowerUpObjects = transform.Find("PowerUpObjects");
         _SpawnPoints = transform.Find("SpawnPoints");
+        _InitialSpawnPoints = transform.Find("InitialSpawns");
         // this can and wil be tweaked .... for dev purposes ... just getting 1 level
         _CurrentLevel = _data.GetLevelData(1);
         MakeLevel();
 	}
-
-    // NOTE: Assuming this isn't necessary anymore?
-    //private void Update()
-    //{
-    //    // DEVELOPMENT PURPOSES ONLY
-    //    if (Input.GetKeyDown("9")) DestroyLevel();
-    //    if (Input.GetKeyDown("0")) MakeLevel();
-    //}
     #endregion
 
 
@@ -104,6 +98,11 @@ public class MapController : MonoBehaviour
                         Transform myPU3 = (Transform)Instantiate(PUMove, new Vector3(i, PUUpValue, j), Quaternion.identity);
                         myPU3.transform.parent = _PowerUpObjects;
                         break;
+                    // 90 = INITIAL SPAWN POINT
+                    case 90:
+                        Transform myISP = (Transform)Instantiate(SpawnPoint, new Vector3(i, 0.21f, j), Quaternion.identity); // MAGIC NUMBER ALERT ... 0.21f = ideal height for Tank to Spawn
+                        myISP.transform.parent = _InitialSpawnPoints;
+                        break;
                     // 99 = SPAWN POINT
                     case 99:
                         Transform mySP = (Transform)Instantiate(SpawnPoint, new Vector3(i, 0.21f, j), Quaternion.identity); // MAGIC NUMBER ALERT ... 0.21f = ideal height for Tank to Spawn
@@ -126,6 +125,7 @@ public class MapController : MonoBehaviour
         foreach (Transform child in _WallObjects) GameObject.Destroy(child.gameObject);
         foreach (Transform child in _PowerUpObjects) GameObject.Destroy(child.gameObject);
         foreach (Transform child in _SpawnPoints) GameObject.Destroy(child.gameObject);
+        foreach (Transform child in _InitialSpawnPoints) GameObject.Destroy(child.gameObject);
     }
 
     public Transform[] ReportSpawns()
@@ -136,6 +136,18 @@ public class MapController : MonoBehaviour
         for (int i = 0; i < x; i++)
         {
             report[i] = _SpawnPoints.GetChild(i);
+        }
+        return report;
+    }
+
+    public Transform[] ReportInitialSpawns()
+    {
+        int x = _InitialSpawnPoints.childCount;
+        if (x == 0) return null; // safety net
+        Transform[] report = new Transform[x];
+        for (int i = 0; i < x; i++)
+        {
+            report[i] = _InitialSpawnPoints.GetChild(i);
         }
         return report;
     }

@@ -1513,7 +1513,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Splash Message
+  m_Text: Initial Spawn
 --- !u!114 &114210027681224876
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2231,7 +2231,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Lower Splash Message
+  m_Text: Select a Tank type
 --- !u!114 &114503866567866154
 MonoBehaviour:
   m_ObjectHideFlags: 1

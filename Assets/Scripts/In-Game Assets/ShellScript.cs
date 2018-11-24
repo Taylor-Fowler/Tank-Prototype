@@ -46,7 +46,7 @@ public class ShellScript : MonoBehaviour
         foreach (Renderer r in Rs) r.material.color = color;
 
         // "Default" // maybe changed for different shells
-        life = 2f;
+        life = 3f;
         velocity = 10f;
         // Switch for "Others" inc bouncy and further customising
         switch (type)

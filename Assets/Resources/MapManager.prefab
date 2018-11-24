@@ -72,6 +72,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1624273353900740
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4890868700600412}
+  m_Layer: 0
+  m_Name: InitialSpawns
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1959639608105482
 GameObject:
   m_ObjectHideFlags: 0
@@ -107,13 +122,14 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1300962020353266}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.8355708, y: 1.595966, z: -1.2180691}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4826873124047960}
   - {fileID: 4686857469785890}
   - {fileID: 4360650187148196}
   - {fileID: 4162027603525522}
+  - {fileID: 4890868700600412}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -156,6 +172,19 @@ Transform:
   m_Father: {fileID: 4291313862619858}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4890868700600412
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1624273353900740}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4291313862619858}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114962834161602398
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -172,7 +201,16 @@ MonoBehaviour:
   Wall1: {fileID: 4728384880197588, guid: 27b2d141f8646ab41bb68fdc94fcf912, type: 2}
   Wall2: {fileID: 4759440630400998, guid: f2c72cd896e91fd4285d7fd46a2eef87, type: 2}
   Wall3: {fileID: 4461932386773890, guid: 49bfc07b79042f44b8040e80b137bc82, type: 2}
+  Wall4: {fileID: 4668682118239750, guid: 31db1ea0c9df35f4084664353a9fd7a1, type: 2}
   PUHealth: {fileID: 4267186825757464, guid: 9bfb25348c545464496dd58aebb9da3f, type: 2}
   PUMove: {fileID: 4731804788695074, guid: a0ff1cb184831664e99e77649cda2417, type: 2}
   PUFire: {fileID: 4345936371468392, guid: e5bb70cda4c84e94f8536b33aabf5788, type: 2}
+  ThirtiesTank: {fileID: 4019515311380574, guid: bbf690a599d737044a8da3409be3e5c4,
+    type: 2}
+  Player: {fileID: 4804090638962038, guid: 65c450d661ed8ab408bc31c2776ed79a, type: 2}
   PUUpValue: 0.2
+  MapReady:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null

@@ -93,6 +93,7 @@ MonoBehaviour:
   TankChoice: 2
   _Vcolor: {x: 255, y: 0, z: 0}
   _Spawns: []
+  _InitialSpawns: []
   OwnStats:
     PlayerID: 0
     PlayerName: 

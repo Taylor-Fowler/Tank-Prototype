@@ -53,6 +53,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     public Vector3 _Vcolor = new Vector3(255, 0, 0); // default // public required for TankBase
     private Color _color = new Color(255, 0, 0); // default
     [SerializeField] private Transform[] _Spawns;
+    [SerializeField] private Transform[] _InitialSpawns;
     public InGameVariables OwnStats;
     [SerializeField] private Vector3 _SpawnPos;
     [SerializeField] private Quaternion _SpawnRot;
@@ -99,12 +100,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
         // If more than one MapController in a scene ... we've done something wrong .....
         MapController[] map = FindObjectsOfType(typeof(MapController)) as MapController[]; // there has to be a better way ....
         _Spawns = map[0].ReportSpawns();
+        _InitialSpawns = map[0].ReportInitialSpawns();
 
         // Find Spawn
-        // Developer Note ... initial spawn will be based on "Player" ID ... 
-        // so MUST ensure enough Spawn Points on map to cover max number of players
-        // something to be considered for level design (maybe randomise after map creation?)
-        _SpawnPos = _Spawns[OwnStats.PlayerID].position;
+        // Developer Note ... initial spawn is based on "Player" ID ... 
+        // So each Map has as many Initial Spawn Sites as Players
+        _SpawnPos = _InitialSpawns[OwnStats.PlayerID].position;
         _SpawnRot = Quaternion.LookRotation((new Vector3(25, _SpawnPos.y, 25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
         transform.position = _SpawnPos;
         transform.rotation = _SpawnRot;
