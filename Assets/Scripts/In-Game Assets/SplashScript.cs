@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -192,6 +193,8 @@ public class SplashScript : MonoBehaviour {
         {
             _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
             float lerp = 1f - (_SplashScale_timer / SplashScale_Duration);
+            // DLL call here .. done twice since it's too subtle to see !!
+            lerp = EaseLibSharp.EaseLibSharp.Triple(EaseLibSharp.EaseLibSharp.Triple(lerp));
             SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
             yield return null;
         }
@@ -215,6 +218,8 @@ public class SplashScript : MonoBehaviour {
         {
             _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
             float lerp = (_SplashScale_timer / SplashScale_Duration);
+            // DLL call here
+            lerp = EaseLibSharp.EaseLibSharp.InOutQuad(lerp);
             SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
             yield return null;
         }
