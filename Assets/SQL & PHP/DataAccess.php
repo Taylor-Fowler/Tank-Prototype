@@ -32,12 +32,27 @@ class DataAccess
 		if($query->execute())
 			return str_replace(array('[', ']'), '', json_encode($query->fetchAll(PDO::FETCH_ASSOC)));
 
-		return '[{"Player_ID":"-1"}]';		
+		return '
+		[
+			{
+				"Player_ID"		: "-1",
+				"Username"		: "Guest",
+				"Device_ID"		: "0",
+				"Games_Played"	: "0",
+				"Kills"			: "0",
+				"Deaths"		: "0",
+				"Assists"		: "0",
+				"Wins"			: "0",
+				"Losses"		: "0"
+			}
+		]';		
 	}
 	
 	public function Register($device_id, $username)
 	{
-		
+		$query = $this->connection->prepare("INSERT INTO `TankGame_Users` (Username, Device_ID) VALUES (:username, :device_id)");
+		$query->bindValue(":username", $username);
+		$query->bindValue(":device_id", $device_id);
 	}
 	
 	

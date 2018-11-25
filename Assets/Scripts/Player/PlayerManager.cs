@@ -131,8 +131,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
             else
             {
                 Messenger<string>.Broadcast("OnUserDataUpdate", User.Username);
-                GameController.Instance.NetworkManager.Started(OnNetworkManagerStarted);
             }
+
+            GameController.Instance.NetworkManager.Started(OnNetworkManagerStarted);
         }
         else
         {

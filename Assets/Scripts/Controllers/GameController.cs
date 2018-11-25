@@ -35,9 +35,6 @@ public class GameController : MonoBehaviourPun
     public GameOver Event_OnGameOver;
     #endregion
 
-    [Header("Serialized Fields - for debug reference only")]
-    [SerializeField] private CommsManager Comms;
-
     private List<IManager> _managers;
     private NetworkService _networkService;
 
@@ -67,14 +64,14 @@ public class GameController : MonoBehaviourPun
         DontDestroyOnLoad(this);
         GameRunning = false;
 
-        // add Comms
-        Comms = gameObject.AddComponent<CommsManager>();
         NetworkManager = gameObject.AddComponent<NetworkManager>();
         PlayerManager = gameObject.AddComponent<PlayerManager>();
 
-        _managers = new List<IManager>();
-        _managers.Add(NetworkManager);
-        _managers.Add(PlayerManager);
+        _managers = new List<IManager>
+        {
+            NetworkManager,
+            PlayerManager
+        };
 
         PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
     }

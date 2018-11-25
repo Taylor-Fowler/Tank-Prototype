@@ -91,7 +91,7 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     {
         // TODO: Add a registration icon/button that takes to a canvas to
         //       enter a username for the device ID.
-        UserDataConnectionText.text = "Not Registered";
+        UserDataConnectionText.text = "Guest";
         UserDataConnectionText.color = Color.yellow;
     }
 

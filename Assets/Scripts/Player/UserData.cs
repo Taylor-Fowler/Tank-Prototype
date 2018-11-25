@@ -20,7 +20,7 @@ public class UserData
         // Regular expression to check for alpha numeric only
         // Source: https://stackoverflow.com/a/1046743/6184424
         Regex regularExpression = new Regex("^[a-zA-Z0-9]*$");
-        return regularExpression.IsMatch(username);
+        return regularExpression.IsMatch(username) || username == "Guest";
     }
 }
 
