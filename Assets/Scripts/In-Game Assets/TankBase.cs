@@ -13,6 +13,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public Transform Shell;
     public GameObject ExpPreFab;
     public Collider Col; // reference for own shells to ignore
+    public SoundManager SM;
 
     [Header("Core Stats")] // Core Stats are Customised by Children
     public float BaseSpeedMax = 1f;
@@ -135,6 +136,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     public void Fire(int playerID)
     {
+        SM.PlaySFX(SFX.Fire);
         Transform shell = (Transform)Instantiate(Shell, FirePos.transform.position, FirePos.transform.rotation);
         ShellScript ss = shell.GetComponent<ShellScript>();
         ss.OwnerID = playerID;
@@ -149,6 +151,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
 
     public void TankDie()
     {
+        SM.PlaySFX(SFX.Boom);
         GameObject boom = Instantiate(ExpPreFab, transform.position, Quaternion.identity) as GameObject;
         Destroy(boom, 1);
         PhotonView[] _MyPhotons = GetComponentsInChildren<PhotonView>();
@@ -178,6 +181,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         {
             return;
         }
+        SM.PlaySFX(SFX.Hit);
         float pen = damage - C_Armour;
         if (pen > 0)
         {
