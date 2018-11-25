@@ -45,7 +45,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     #endregion
 
     private TankHelpers Help = new TankHelpers(); // A function Utility Class
-    public SoundManager SM;
     public GameObject TankType1;
     public GameObject TankType2;
 
@@ -78,7 +77,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
             PlayerControllers = new InGameVariables[PlayerManager.PlayersInRoomCount()];
             // Sound set-up
             this.gameObject.AddComponent<AudioListener>();
-            SM.PlayMusic();
 
             Event_OnLocalPlayerRespawn += Respawn;
         }
