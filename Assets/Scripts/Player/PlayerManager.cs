@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
@@ -108,6 +109,28 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
             );
     }
     #endregion
+    public void RegisterNewUser(string username, Action<string, bool> callback)
+    {
+        bool success = false;
+
+        if(!UserData.ValidateUsername(username))
+        {
+            callback("Invalid Username: Username cannot be Guest or contain non-alphanumeric characters.", success);
+            return;
+        }
+
+        StartCoroutine(NetworkService.RegisterUserData(GameController.Instance.DeviceID, username,
+            (NetworkResponseMessage response) =>
+            {
+                if(response.Status == NetworkRequestStatus.Success)
+                {
+                    User = JsonUtility.FromJson<UserData>(response.Message);
+                    callback("Successfully registered.", true);
+                    Messenger<string>.Broadcast("OnUserDataUpdate", User.Username);
+                }
+            }));
+    }
+
 
     private void GetUserData(NetworkResponseMessage response)
     {
@@ -126,7 +149,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
             if(User.Player_ID == -1)
             {
                 Messenger.Broadcast("OnDeviceIdNotRegistered");
-                // TODO: Popup with Register or Quit Options
             }
             else
             {

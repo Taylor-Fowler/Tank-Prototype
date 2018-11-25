@@ -43,7 +43,7 @@ namespace Network
 
         public PlayerController PlayerPreFab;
 
-        public bool DevAutoJoin = true;
+        public bool DevAutoJoin = false;
 
 
         #region PUN2 API

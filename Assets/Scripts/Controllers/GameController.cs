@@ -126,7 +126,6 @@ public class GameController : MonoBehaviourPun
         {
             GameRunning = true;
             GameObject player = PhotonNetwork.Instantiate(PlayerPrefab.name, Vector3.zero, Quaternion.identity);
-            //StartCoroutine(Delay(2f, OnGameSceneInitialised));
         }
     }
 

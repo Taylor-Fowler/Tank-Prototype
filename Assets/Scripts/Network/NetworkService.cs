@@ -49,10 +49,17 @@ namespace Network
             callback(IsRequestValid(webRequest));
         }
 
-//        public IEnumerator RegisterUserData(string deviceIdentifier, string username, Action<NetworkResponseMessage, string> callback)
-//        {
-//
-//        }
+        public IEnumerator RegisterUserData(string deviceIdentifier, string username, Action<NetworkResponseMessage> callback)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("Device_ID", deviceIdentifier);
+            form.AddField("Username", username);
+
+            UnityWebRequest webRequest = UnityWebRequest.Post(WebPath + "register.php", form);
+            yield return webRequest.SendWebRequest();
+
+            callback(IsRequestValid(webRequest));
+        }
 
         public IEnumerator UpdateUserData(UserData userData, Action<NetworkResponseMessage> callback)
         {

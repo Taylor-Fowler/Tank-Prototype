@@ -25,15 +25,14 @@ class DataAccess
 	}
 	
 	public function Login($device_id)
-	{		
+	{
 		$query = $this->connection->prepare("SELECT * FROM `TankGame_Users` WHERE `Device_ID` = :device_id");
 		$query->bindValue(":device_id", $device_id);
-		
-		if($query->execute())
+
+		if($query->execute() && $query->rowCount() > 0)
 			return str_replace(array('[', ']'), '', json_encode($query->fetchAll(PDO::FETCH_ASSOC)));
 
 		return '
-		[
 			{
 				"Player_ID"		: "-1",
 				"Username"		: "Guest",
@@ -45,7 +44,7 @@ class DataAccess
 				"Wins"			: "0",
 				"Losses"		: "0"
 			}
-		]';		
+		';
 	}
 	
 	public function Register($device_id, $username)
@@ -53,6 +52,9 @@ class DataAccess
 		$query = $this->connection->prepare("INSERT INTO `TankGame_Users` (Username, Device_ID) VALUES (:username, :device_id)");
 		$query->bindValue(":username", $username);
 		$query->bindValue(":device_id", $device_id);
+		$query->execute();
+
+		return $this->Login($device_id);
 	}
 	
 	

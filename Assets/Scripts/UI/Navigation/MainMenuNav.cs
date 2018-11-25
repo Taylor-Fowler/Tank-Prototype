@@ -7,12 +7,78 @@ using System.Collections.Generic;
 
 public class MainMenuNav : MonoBehaviourPunCallbacks
 {
+    [System.Serializable]
+    public class TextFieldAction
+    {
+        public GameObject Panel;
+        public InputField TextField;
+        public Text Feedback;
+        public Button ConfirmButton;
+        public Button CloseButton;
+
+        private Coroutine _closeRoutine;
+
+        public void Initialise()
+        {
+            ConfirmButton.onClick.AddListener(delegate 
+            {
+                ConfirmButton.interactable = false;
+                CloseButton.interactable = false;
+                GameController.Instance.PlayerManager.RegisterNewUser(TextField.text, ReceiveFeedback);
+            });
+            CloseButton.onClick.AddListener(delegate
+            {
+                Close();
+            });
+        }
+
+        public void Open()
+        {
+            Panel.SetActive(true);
+        }
+
+        private void Close()
+        {
+            Panel.SetActive(false);
+            TextField.text = "";
+            Feedback.text = "";
+            if(_closeRoutine != null)
+            {
+                GameController.Instance.StopCoroutine(_closeRoutine);
+                _closeRoutine = null;
+            }
+        }
+
+        private void ReceiveFeedback(string message, bool successful)
+        {
+            Feedback.text = message;
+            CloseButton.interactable = true;
+
+            if(!successful)
+            {
+                Feedback.color = Color.red;
+                ConfirmButton.interactable = true;
+            }
+            else
+            {
+                Feedback.color = Color.green;
+                _closeRoutine = GameController.Instance.StartCoroutine(GameController.Delay(2f, Close));
+            }
+        }
+    };
+
+    [SerializeField]
+    private TextFieldAction _textFieldAction;
+
+    public GameObject RegisterBlinker;
     public Text UserDataConnectionText;
     public Text ServerConnectionText;
     public Text ServerPlayerCountText;
     public Text ServerPlayersInRoomsCountText;
     public Text ServerPlayersOnMasterCountText;
     public Button StartGameButton;
+
+    public Text KillsValue, DeathsValue, GamesPlayedValue, WinsValue, LossesValue;
 
     public GameObject ViewRoomCanvas;
     public GameObject ViewLobbyCanvas;
@@ -24,6 +90,9 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
         Messenger.AddListener("OnDeviceIdNotRegistered", OnDeviceIdNotRegistered);
         Messenger<string>.AddListener("OnUserDataUpdate", OnUserDataUpdate);
         Messenger<string>.AddListener("OnUserDataDownloadError", OnUserDataDownloadError);
+
+        _textFieldAction.Initialise();
+        RegisterBlinker.GetComponent<Button>().onClick.AddListener(_textFieldAction.Open);
     }
 
     private void OnDestroy()
@@ -89,16 +158,23 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     #region CUSTOM EVENTS
     private void OnDeviceIdNotRegistered()
     {
-        // TODO: Add a registration icon/button that takes to a canvas to
-        //       enter a username for the device ID.
         UserDataConnectionText.text = "Guest";
-        UserDataConnectionText.color = Color.yellow;
+        UserDataConnectionText.color = new Color(135f / 255f, 126f / 255f, 20f / 255f);
+        RegisterBlinker.SetActive(true);
     }
 
     private void OnUserDataUpdate(string username)
     {
         UserDataConnectionText.text = username;
         UserDataConnectionText.color = Color.green;
+        RegisterBlinker.SetActive(false);
+
+        UserData user = GameController.Instance.PlayerManager.User;
+        KillsValue.text = user.Kills.ToString();
+        DeathsValue.text = user.Deaths.ToString();
+        GamesPlayedValue.text = user.Games_Played.ToString();
+        WinsValue.text = user.Wins.ToString();
+        LossesValue.text = user.Losses.ToString();
     }
 
     private void OnUserDataDownloadError(string error)
