@@ -85,8 +85,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         _RB = GetComponent<Rigidbody>();
         if (_RB == null) Debug.Log(" No RB found");
         _RB.mass = C_Mass;
-
-        SM.PlaySFX(SFX.Start);
     }
 
     private void Update()
@@ -128,6 +126,8 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
                Rend.material.color = MyColor;
            }
        }
+        // called by Player Controller ... so a good "start"
+        SM.PlaySFX(SFX.Start);
     }
 
     public float GetHealth()
@@ -155,7 +155,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         SM.PlaySFX(SFX.Boom);
         GameObject boom = Instantiate(ExpPreFab, transform.position, Quaternion.identity) as GameObject;
-        Destroy(boom, 1);
+        Destroy(boom, 2);
         PhotonView[] _MyPhotons = GetComponentsInChildren<PhotonView>();
         Transform[] _MyShrapnel = GetComponentsInChildren<Transform>();
         foreach (Transform p in _MyShrapnel)
@@ -289,7 +289,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
             //            \         /
             //              B --- C
             //
-            float A = 0.46f;
+            float A = 0.42f;
             float B = 0.49f;
             float C = 1f - B;
             float D = 1f - A;

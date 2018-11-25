@@ -12,19 +12,19 @@ public class SoundManager : MonoBehaviour
 
     public AudioClip BGMusic;
     public AudioClip[] SFXFiles = new AudioClip[5];
-
+    [SerializeField]
     private AudioSource[] sources;
     private int SFXChannels = 0;
     private int CurrSFXChannel = 1;
 
     /// <summary>
     /// DEVELOPER NOTE
-    /// Loads up all AudioSources attached to parent object and polulates the sources[] array
+    /// Loads up all AudioSources attached to parent object and populates the sources[] array
     /// sources[0] is reserved for the BackGround Music (and loops)
     /// All others are assigned as SFX channels and used in sequence (as required, and don't loop)
     /// </summary>
 
-    void Start()
+    void Awake()
     {
         sources = GetComponents<AudioSource>();
         SFXChannels = sources.Length - 1;
