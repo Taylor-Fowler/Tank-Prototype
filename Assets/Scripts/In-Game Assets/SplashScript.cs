@@ -33,15 +33,7 @@ public class SplashScript : MonoBehaviour {
     #endregion
 
     #region UNITY API
-    // Taylor Modifications
-    //void Awake ()
-    //{
-    //    // Make it Everything we see
-    //    Main_Canvas.interactable = false;
-    //    Main_Canvas.alpha = 1;
 
-    //    GameStart();
-    //}
     private void Start()
     {
         GameController.Instance.Event_OnGameStart += GameStart;
@@ -193,8 +185,7 @@ public class SplashScript : MonoBehaviour {
         {
             _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
             float lerp = 1f - (_SplashScale_timer / SplashScale_Duration);
-            // DLL call here .. done twice since it's too subtle to see !!
-            //lerp = EaseLibSharp.EaseLibSharp.Triple(EaseLibSharp.EaseLibSharp.Triple(lerp));
+            // DLL call here .. 
             lerp = EaseLibSharp.EaseLibSharp.Bounce(lerp);
             SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
             yield return null;
@@ -220,7 +211,7 @@ public class SplashScript : MonoBehaviour {
             _SplashScale_timer = Mathf.Clamp(_SplashScale_timer - Time.deltaTime, 0, SplashScale_Duration);
             float lerp = (_SplashScale_timer / SplashScale_Duration);
             // DLL call here
-            lerp = EaseLibSharp.EaseLibSharp.InOutQuad(lerp);
+            lerp = EaseLibSharp.EaseLibSharp.Triple(lerp);
             SplashPanel.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, lerp);
             yield return null;
         }
