@@ -124,7 +124,7 @@ namespace Network
         }
         #endregion
 
-        #region
+        #region STATIC METHODS
         public static string RoomName(RoomInfo room)
         { 
             if(room.CustomProperties.ContainsKey("room_name"))
@@ -132,6 +132,11 @@ namespace Network
                 return (string)room.CustomProperties["room_name"];
             }
             return "";
+        }
+
+        public static bool RoomJoinable(RoomInfo room)
+        {
+            return room.IsOpen && room.IsVisible && room.PlayerCount != room.MaxPlayers && !room.CustomProperties.ContainsKey("room_pass");
         }
         #endregion  
 
@@ -156,7 +161,6 @@ namespace Network
                 CustomRoomProperties = new PhotonHashtable()
                 {
                     { "room_host", callingUser.Username },
-                    //{ "room_host_device_id", callingUser.Device_ID },
                     { "room_name", roomName }
                 },
                 PublishUserId = true,
@@ -165,7 +169,7 @@ namespace Network
                 IsOpen = true
             };
 
-            PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID, roomOptions, PhotonNetwork.CurrentLobby);
+            PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID + roomName, roomOptions, PhotonNetwork.CurrentLobby);
         }
 
         public void CreatePrivateRoom(string roomName, int maxPlayers, string roomPassword)
@@ -177,7 +181,6 @@ namespace Network
                 CustomRoomProperties = new PhotonHashtable()
                 {
                     { "room_host", callingUser.Username },
-                    //{ "room_host_device_id", callingUser.Device_ID },
                     { "room_name", roomName },
                     { "room_pass", roomPassword }
                 },
@@ -187,7 +190,35 @@ namespace Network
                 IsOpen = true
             };
 
-            PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID, roomOptions, PhotonNetwork.CurrentLobby);
+            PhotonNetwork.JoinOrCreateRoom(callingUser.Username + callingUser.Device_ID + roomName, roomOptions, PhotonNetwork.CurrentLobby);
+        }
+
+        public Action SearchForRoom(int roomSize, Action<bool> callback)
+        {
+            Coroutine routine = StartCoroutine(SearchForRoom(roomSize, 5f, callback));
+            return delegate { StopCoroutine(routine); };
+        }
+
+        private IEnumerator SearchForRoom(int roomSize, float timeTillGiveUp, Action<bool> callback)
+        {
+            do
+            {
+                yield return null;
+
+                foreach(var room in CachedRooms)
+                {
+                    if(RoomJoinable(room) && room.MaxPlayers == roomSize)
+                    {
+                        JoinRoom(room.Name);
+                        callback(true);
+                        yield break;
+                    }
+                }
+
+                timeTillGiveUp -= Time.deltaTime;
+            } while(timeTillGiveUp > 0f);
+
+            callback(false);
         }
 
         public void JoinRoom(string roomName)

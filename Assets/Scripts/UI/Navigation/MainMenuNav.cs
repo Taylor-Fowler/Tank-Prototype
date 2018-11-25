@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
-
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
@@ -77,6 +77,7 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public Text ServerPlayersInRoomsCountText;
     public Text ServerPlayersOnMasterCountText;
     public Button StartGameButton;
+    public LoadingPanel LoadingPanel;
 
     public Text KillsValue, DeathsValue, GamesPlayedValue, WinsValue, LossesValue;
 
@@ -189,6 +190,25 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public void QuitApplication()
     {
         Application.Quit();
+    }
+
+    public void SearchForMatch(int roomSize)
+    {
+        Action cancelAction = GameController.Instance.NetworkManager.SearchForRoom(roomSize, FinishedSearching);
+        LoadingPanel.StartLoading("Searching for a " + roomSize.ToString() + " player game", "Cancelled searching for a game", 3f, cancelAction);
+    }
+
+    private void FinishedSearching(bool found)
+    {
+        LoadingPanel.LoadingRoutineExternallyEnded();
+        if(found)
+        {
+            LoadingPanel.TurnOffPanel("Found game, joining room", 1.5f);
+        }
+        else
+        {
+            LoadingPanel.TurnOffPanel("Could not find a game, returning to lobby", 2f);
+        }
     }
 
     private void ActivateCanvas(GameObject canvas)
