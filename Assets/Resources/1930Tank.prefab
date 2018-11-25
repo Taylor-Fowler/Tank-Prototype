@@ -1667,6 +1667,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4043634266888910}
+  - component: {fileID: 114100158386655496}
   - component: {fileID: 82248627669350348}
   - component: {fileID: 82465857565924548}
   - component: {fileID: 82623111697712874}
@@ -1677,7 +1678,6 @@ GameObject:
   - component: {fileID: 82962567904544482}
   - component: {fileID: 82934935370151394}
   - component: {fileID: 82573152351078778}
-  - component: {fileID: 114100158386655496}
   m_Layer: 0
   m_Name: SoundModule
   m_TagString: Untagged

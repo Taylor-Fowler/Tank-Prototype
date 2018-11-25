@@ -85,6 +85,8 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         _RB = GetComponent<Rigidbody>();
         if (_RB == null) Debug.Log(" No RB found");
         _RB.mass = C_Mass;
+
+        SM.PlaySFX(SFX.Start);
     }
 
     private void Update()

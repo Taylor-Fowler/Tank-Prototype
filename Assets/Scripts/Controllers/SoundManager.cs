@@ -16,10 +16,6 @@ public class SoundManager : MonoBehaviour
     private AudioSource[] sources;
     private int SFXChannels = 0;
     private int CurrSFXChannel = 1;
-    private bool MusicOn;
-    private float MusicVol;
-    private bool SFXON;
-    private float SFXVol;
 
     /// <summary>
     /// DEVELOPER NOTE
@@ -33,29 +29,14 @@ public class SoundManager : MonoBehaviour
         sources = GetComponents<AudioSource>();
         SFXChannels = sources.Length - 1;
         Debug.Log("Sound Manager has " + SFXChannels.ToString() + " SFX Channels");
-        PlayMusic();
-        PlaySFX(SFX.Start);
+        // Set up Backing Music
+        sources[0].clip = BGMusic;
+        sources[0].loop = true;
     }
 
     public void PlayMusic()
     {
-        sources[0].clip = BGMusic;
-        sources[0].loop = true;
         sources[0].Play(0);
-        if (!MusicOn) PauseMusic();
-    }
-
-    public void PauseMusic()
-    {
-        sources[0].Pause();
-    }
-
-    public void ResumeMusic()
-    {
-        if (MusicOn)
-        {
-            sources[0].UnPause();
-        }
     }
 
     public void KillMusic()
@@ -74,28 +55,9 @@ public class SoundManager : MonoBehaviour
         sources[CurrSFXChannel].clip = SFXFiles[(int)choice];
         sources[CurrSFXChannel].loop = false;
         sources[CurrSFXChannel].Play(0);
-        if (!SFXON) PauseSFX();
         ToggleChannel();
     }
 
-    public void PauseSFX()
-    {
-        for (int i = 1; i <= SFXChannels; i++)
-        {
-            sources[i].Pause();
-        }
-    }
-
-    public void ResumeSFX()
-    {
-        if (SFXON)
-        {
-            for (int i = 1; i <= SFXChannels; i++)
-            {
-                sources[i].UnPause();
-            }
-        }
-    }
 
     public void KillSFX()
     {
@@ -118,17 +80,6 @@ public class SoundManager : MonoBehaviour
     {
         KillMusic();
         KillSFX();
-    }
-
-    public void PauseAllSounds()
-    {
-        PauseMusic();
-        PauseSFX();
-    }
-    public void ResumeAllSounds()
-    {
-        ResumeMusic();
-        ResumeSFX();
     }
 
     private void ToggleChannel()

@@ -19,6 +19,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4619982557212228}
+  - component: {fileID: 114475294375743444}
   - component: {fileID: 82998698937890142}
   - component: {fileID: 82135209767753750}
   - component: {fileID: 82109127654473472}
@@ -29,7 +30,6 @@ GameObject:
   - component: {fileID: 82780755035267648}
   - component: {fileID: 82780372537518704}
   - component: {fileID: 82376601360039638}
-  - component: {fileID: 114475294375743444}
   m_Layer: 0
   m_Name: SoundModule
   m_TagString: Untagged
@@ -155,7 +155,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -915,7 +915,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
