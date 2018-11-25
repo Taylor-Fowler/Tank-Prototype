@@ -233,9 +233,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
             double time = PhotonNetwork.Time;
             _myGUI.Splash_Died(playerWhoKilled);
-            PhotonNetwork.Destroy(_myTankBody);
-            StartCoroutine(_myGUI.UpdateTimer(time + 10.0));
-            StartCoroutine(WaitToRespawn(time + 10.0));
+            //PhotonNetwork.Destroy(_myTankBody); // now handled by TankDie()
+            StartCoroutine(_myGUI.UpdateTimer(time + 3.0));
+            StartCoroutine(WaitToRespawn(time + 3.0));
         }
 
         _myTankScript = null;

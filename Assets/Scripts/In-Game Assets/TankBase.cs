@@ -96,7 +96,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         ControlMovement();
         ControlFiring();
         CheckTurretLock();
-       // ControlWeaponToggles(); // Development only
     }
 
     private void OnDestroy()
@@ -152,6 +151,22 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         GameObject boom = Instantiate(ExpPreFab, transform.position, Quaternion.identity) as GameObject;
         Destroy(boom, 1);
+        PhotonView[] _MyPhotons = GetComponentsInChildren<PhotonView>();
+        Transform[] _MyShrapnel = GetComponentsInChildren<Transform>();
+        foreach (Transform p in _MyShrapnel)
+        {
+            p.transform.parent = null;
+            p.gameObject.AddComponent<Shrapnel>();
+            p.gameObject.GetComponent<Shrapnel>().Configure(transform.position);
+        }
+        // Kill child PhotonViews
+        foreach (PhotonView p in _MyPhotons)
+        {
+            PhotonNetwork.Destroy(p);
+        }
+        // Kill TankBase PhotonView
+        PhotonNetwork.Destroy(this.GetComponent<PhotonView>());
+
     }
     #endregion
 
@@ -224,13 +239,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         if (Input.GetKeyDown("space")) _turretlock = !_turretlock;
         if (Input.GetKeyDown("p")) AutoFire = !AutoFire;
-    }
-
-    void ControlWeaponToggles() // For Development only
-    {
-        if (Input.GetKey("1")) { BaseShell = 1; Debug.Log("Standard Shells"); }
-        if (Input.GetKey("2")) { BaseShell = 2; Debug.Log("Bouncy Shells"); }
-        if (Input.GetKey("3")) { BaseShell = 3; Debug.Log("Triple-shot Shells"); }
     }
 
     void ControlMovement()
