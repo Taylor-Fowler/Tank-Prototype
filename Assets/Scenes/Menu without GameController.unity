@@ -4492,6 +4492,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RoomName: {fileID: 962504936}
+  StartGameButton: {fileID: 1510480154}
   RoomPlayersListAnchor: {fileID: 1137752318}
   PlayerInListPrefab: {fileID: 1583119658517982, guid: caa84fbc79360bd44b2bdc879ef1f782,
     type: 2}

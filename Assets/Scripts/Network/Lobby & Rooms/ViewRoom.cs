@@ -15,6 +15,7 @@ using Photon.Realtime;
 public class ViewRoom : MonoBehaviourPunCallbacks
 {
     public Text RoomName;
+    public Button StartGameButton;
     public Transform RoomPlayersListAnchor;
     public GameObject PlayerInListPrefab;
 
@@ -28,7 +29,7 @@ public class ViewRoom : MonoBehaviourPunCallbacks
     #region UNITY API
     private void Awake()
     {
-        if (PhotonNetwork.InRoom)
+        if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex == 1 && PhotonNetwork.InRoom)
         {
             OnJoinedRoom();
         }
@@ -51,8 +52,17 @@ public class ViewRoom : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         ChangeRoomName();
-        
-        foreach(var playerPair in PhotonNetwork.CurrentRoom.Players)
+
+        if (PhotonNetwork.LocalPlayer.IsMasterClient)
+        {
+            SetupButton();
+        }
+        else
+        {
+            StartGameButton.gameObject.SetActive(false);
+        }
+
+        foreach (var playerPair in PhotonNetwork.CurrentRoom.Players)
         {
             AddPlayer(playerPair.Value);
         }
@@ -61,13 +71,22 @@ public class ViewRoom : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         AddPlayer(newPlayer);
+        UpdateButton(PhotonNetwork.CurrentRoom.PlayerCount);
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        Debug.Log("[ViewRoom] OnPlayerLeftRoom");
         Destroy(_playerObjects[otherPlayer.ActorNumber]);
         _playerObjects.Remove(otherPlayer.ActorNumber);
+        UpdateButton(PhotonNetwork.CurrentRoom.PlayerCount);
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if(newMasterClient == PhotonNetwork.LocalPlayer)
+        {
+            SetupButton();
+        }
     }
     #endregion
 
@@ -78,9 +97,24 @@ public class ViewRoom : MonoBehaviourPunCallbacks
 
     private void AddPlayer(Player player)
     {
+        Debug.Log("PlayerObjects Count: " + _playerObjects.Count);
+        Debug.Log("Actor Number: " + player.ActorNumber);
         GameObject playerDetails = Instantiate(PlayerInListPrefab, RoomPlayersListAnchor);
         playerDetails.GetComponent<Text>().text = player.NickName;
 
         _playerObjects.Add(player.ActorNumber, playerDetails);
+    }
+
+    private void SetupButton()
+    {
+        StartGameButton.onClick.RemoveAllListeners();
+        UpdateButton(PhotonNetwork.CurrentRoom.PlayerCount);
+        StartGameButton.gameObject.SetActive(true);
+        StartGameButton.onClick.AddListener(GameController.Instance.NetworkManager.StartGame);
+    }
+
+    private void UpdateButton(int playersInRoom)
+    {
+        StartGameButton.interactable = GameController.Instance.NetworkManager.DevAutoJoin || playersInRoom > 1;
     }
 }

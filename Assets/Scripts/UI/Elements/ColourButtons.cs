@@ -48,8 +48,14 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
     [SerializeField] private BITCombo[] _buttons;
     private BITCombo _selectedButton = null;
+    private bool _hasColour = false;
 
     #region UNITY API
+    private void Awake()
+    {
+        _hasColour = PhotonNetwork.IsConnected && (PlayerManager.PlayerColourIndex() != -1);
+    }
+
     private void Start()
     {
         Button[] allButtons = ButtonsAnchor.GetComponentsInChildren<Button>();
@@ -76,7 +82,7 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         Messenger<int>.AddListener("OnChangePlayerNumberID", OnChangePlayerNumberID);
         Messenger<int, int>.AddListener("OnRemoteChangePlayerID", OnRemoteChangePlayerID);
 
-        if(PhotonNetwork.InRoom)
+        if(_hasColour)
         {
             ReturnToRoomAfterGameEnd();
         }
@@ -159,13 +165,19 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
     private void ReturnToRoomAfterGameEnd()
     {
+        Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
         foreach(var player in PhotonNetwork.CurrentRoom.Players)
         {
-            _buttons[PlayerManager.PlayerColourIndex(player.Value)]
-                .Select(
+            BITCombo button = _buttons[PlayerManager.PlayerColourIndex(player.Value)];
+            button.Select(
                         PlayerManager.PlayerID(player.Value),
                         player.Value.ActorNumber
                         );
+
+            if(player.Value == PhotonNetwork.LocalPlayer)
+            {
+                _selectedButton = button;
+            }
         }
     }
 

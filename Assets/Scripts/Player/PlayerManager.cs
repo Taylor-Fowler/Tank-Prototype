@@ -86,7 +86,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public static int PlayerColourIndex()
     {
-        if(!PhotonNetwork.InRoom)
+        if(!PhotonNetwork.InRoom || !PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("ColourIndex"))
         {
             return -1;
         }
@@ -96,6 +96,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public static int PlayerColourIndex(Player player)
     {
+        if(!player.CustomProperties.ContainsKey("ColourIndex"))
+        {
+            return -1;
+        }
         return (int)player.CustomProperties["ColourIndex"];
     }
 
@@ -196,19 +200,36 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
         SetPlayerNumberID(PhotonNetwork.CurrentRoom.PlayerCount-1);
     }
 
+    public override void OnLeftRoom()
+    {
+        PhotonNetwork.LocalPlayer.CustomProperties.Remove("NumberID");
+        PhotonNetwork.LocalPlayer.CustomProperties.Remove("Colour.r");
+        PhotonNetwork.LocalPlayer.CustomProperties.Remove("Colour.g");
+        PhotonNetwork.LocalPlayer.CustomProperties.Remove("Colour.b");
+        PhotonNetwork.LocalPlayer.CustomProperties.Remove("Colour.a");
+        PhotonNetwork.LocalPlayer.CustomProperties.Remove("ColourIndex");
+    }
+
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        // Don't change the player ID if the game is running
         if(GameController.Instance.GameRunning)
         {
-            return;
+            // Last Player left in the running game means end the game with the
+            // local player as the victor
+            if(PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            {
+                GameController.Instance.OnGameOver(PlayerController.LocalPlayer.OwnStats);
+            }
         }
-        // Only change the local player's `NumberID` if they were after the player who left
-        int localPlayerIndex = (int)PhotonNetwork.LocalPlayer.CustomProperties["NumberID"];
-        if ((int)otherPlayer.CustomProperties["NumberID"] < localPlayerIndex)
+        else
         {
-            localPlayerIndex--;
-            SetPlayerNumberID(localPlayerIndex);
+            // Only change the local player's `NumberID` if they were after the player who left
+            int localPlayerIndex = PlayerID();
+            if (PlayerID(otherPlayer) < localPlayerIndex)
+            {
+                localPlayerIndex--;
+                SetPlayerNumberID(localPlayerIndex);
+            }
         }
     }
 

@@ -1,0 +1,15 @@
+DONE:
+- Back to main menu after game allows for replayability
+- If last person in the room, end game
+
+TODO:
+- In game menu for leave game
+- Player leaves a four player game
+- Register player stats after gameover
+
+
+TO FIX:
+- New player connecting to a post-game room ends up adding themselves to a dictionary twice, both on Awake
+  and on JoinedRoom, need a boolean or some kind of distinguishing feature to indicate post game room or just joined.
+- New player connecting to a post-game room who then leaves causes a NRE.
+- Player 1 leaves a room and the player index doesnt change, need to reset player ID's when returning to room view.

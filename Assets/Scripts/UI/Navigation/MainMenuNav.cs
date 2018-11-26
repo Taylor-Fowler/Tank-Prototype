@@ -82,7 +82,6 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public Text ServerPlayerCountText;
     public Text ServerPlayersInRoomsCountText;
     public Text ServerPlayersOnMasterCountText;
-    public Button StartGameButton;
     public LoadingPanel LoadingPanel;
 
     public Text KillsValue, DeathsValue, GamesPlayedValue, WinsValue, LossesValue;
@@ -153,24 +152,11 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        if(PhotonNetwork.LocalPlayer.IsMasterClient)
-        {
-            StartGameButton.gameObject.SetActive(true);
-            StartGameButton.onClick.AddListener(GameController.Instance.NetworkManager.StartGame);
-        }
-        else
-        {
-            StartGameButton.gameObject.SetActive(false);
-        }
-
         ActivateCanvas(ViewRoomCanvas);
     }
 
     public override void OnLeftRoom()
     {
-        StartGameButton.gameObject.SetActive(false);
-        StartGameButton.onClick.RemoveListener(GameController.Instance.NetworkManager.StartGame);
-
         ActivateCanvas(ViewLobbyCanvas);
     }
     #endregion

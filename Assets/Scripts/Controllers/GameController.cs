@@ -115,15 +115,19 @@ public class GameController : MonoBehaviourPun
         SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
     }
 
-    #endregion
     public void Reset()
     {
+        if(PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.DestroyAll();
+        }
         PhotonNetwork.LoadLevel(1);
         foreach(var manager in _managers)
         {
             manager.Restart();
         }
     }
+    #endregion
 
     private void InjectServices()
     {
