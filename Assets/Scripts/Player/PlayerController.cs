@@ -285,8 +285,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         OwnStats.Curr_Health = OwnStats.Max_Health = _myTankScript.GetHealth();
         _myGUI.UpdateHealth();
-        // Commented out as marked for removal
-        // RpcUpdateIGVName(OwnStats.PlayerID, OwnStats.PlayerName);
+
+        if (photonView.IsMine)
+        {
+            _myTankScript.SM.PlaySFX(SFX.Start);
+        }
     }
 
     [PunRPC]

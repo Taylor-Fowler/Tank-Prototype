@@ -126,8 +126,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
                Rend.material.color = MyColor;
            }
        }
-        // called by Player Controller ... so a good "start"
-        SM.PlaySFX(SFX.Start);
     }
 
     public float GetHealth()
