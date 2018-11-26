@@ -4,16 +4,17 @@
 // Submission by Max Bryans (K1628007) and Taylor Fowler (K1612040)      //
 // December 2018                                                         //
 ///////////////////////////////////////////////////////////////////////////
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public enum ShellType { Standard, Bouncy, Triple } // Placeholder for "when" we go back to implement different shells
 
 public class ShellScript : MonoBehaviour
 {
+
     // Instantiated by void Fire() (in TankBase)
-      //  *Set by TB*
+    #region PUBLIC MEMBERS
+    //  *Set by TB*
     public int OwnerID;          
     public float dmg;           
     public ShellType type;            
@@ -25,18 +26,45 @@ public class ShellScript : MonoBehaviour
     public float velocity;    
     public float life;
     public bool bouncy;
-    private Rigidbody _RB;
-
     public GameObject ExpPreFab;
+    #endregion
 
-	// Use this for initialization
-	void Start () {
+    #region PRIVATE MEMBERS
+    private Rigidbody _RB;
+    #endregion
+
+    #region UNITY API
+    // Use this for initialization
+    void Start () {
         _RB = GetComponent<Rigidbody>();
         Configure();
         Destroy(gameObject, life); // REMEMBER to set life span in Configure()
 	}
 
-    void Configure ()
+    // Collision Script
+    void OnTriggerEnter(Collider col)
+    {
+            IDamageable dam = col.gameObject.GetComponent<IDamageable>();
+            if (dam != null)
+            {
+                dam.TakeDamage(OwnerID, dmg);
+
+                // Explosion animation here too
+                GameObject boom = Instantiate(ExpPreFab, transform.position , Quaternion.identity) as GameObject;
+                boom.transform.LookAt(start);
+                Destroy(boom, 1);
+
+                Destroy(gameObject); 
+            }
+            else if (!bouncy)
+            {
+                Destroy(gameObject);
+            }
+    }
+    #endregion
+
+    #region PRIVATE METHODS
+    void Configure()
     {
         // IMPORTANT NOTE ....
         // Bouncy shells are bugged due to some Unity Physics strangeness which makes then inconsistent
@@ -65,8 +93,8 @@ public class ShellScript : MonoBehaviour
                 break;
             case ShellType.Triple: // Triple Shot // BUGGED DO NOT USE
                 bouncy = false;
-                for (int i = -1; i <= 1; i +=2)
-                { 
+                for (int i = -1; i <= 1; i += 2)
+                {
                     GameObject clone = Instantiate(gameObject);
                     clone.GetComponent<ShellScript>().type = ShellType.Standard;
                     // Care of https://answers.unity.com/questions/316918/local-forward.html (27 Oct 2018)
@@ -77,29 +105,9 @@ public class ShellScript : MonoBehaviour
                 break;
             default:
                 break;
-        }       
+        }
         _RB.velocity = transform.forward * velocity;
     }
-
-    // Collision Script
-    void OnTriggerEnter(Collider col)
-    {
-            IDamageable dam = col.gameObject.GetComponent<IDamageable>();
-            if (dam != null)
-            {
-                dam.TakeDamage(OwnerID, dmg);
-
-                // Explosion animation here too
-                GameObject boom = Instantiate(ExpPreFab, transform.position , Quaternion.identity) as GameObject;
-                boom.transform.LookAt(start);
-                Destroy(boom, 1);
-
-                Destroy(gameObject); 
-            }
-            else if (!bouncy)
-            {
-                Destroy(gameObject);
-            }
-    }
+    #endregion
 
 }
