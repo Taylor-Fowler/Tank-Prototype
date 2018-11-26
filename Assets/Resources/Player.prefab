@@ -88,12 +88,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd5b75b02c29594f9b2418e655c73c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TankChoice: 2
+  IsActive: 0
   TankType1: {fileID: 1992513107031480, guid: bbf690a599d737044a8da3409be3e5c4, type: 2}
   TankType2: {fileID: 1376648546518200, guid: 81571241e1beb674c9b65ee08456638e, type: 2}
-  TankChoice: 2
   _Vcolor: {x: 255, y: 0, z: 0}
-  _Spawns: []
-  _InitialSpawns: []
   OwnStats:
     PlayerID: 0
     PlayerName: 
@@ -102,7 +101,8 @@ MonoBehaviour:
     Max_Health: 0
     Curr_Health: 0
     Score: 0
+  EditorOnlyControllers: []
+  _Spawns: []
+  _InitialSpawns: []
   _SpawnPos: {x: 0, y: 0, z: 0}
   _SpawnRot: {x: 0, y: 0, z: 0, w: 0}
-  IsActive: 0
-  EditorOnlyControllers: []

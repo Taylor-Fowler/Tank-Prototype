@@ -92,6 +92,25 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
     public GameObject[] AllCanvases;
 
     #region UNITY API
+    private void Awake()
+    {
+        if (PhotonNetwork.IsConnected)
+        {
+            OnConnectedToMaster();
+            UpdateOnlinePlayerStatistics();
+            OnUserDataUpdate(GameController.Instance.PlayerManager.User.Username);
+
+            if(PhotonNetwork.InRoom)
+            {
+                OnJoinedRoom();
+            }
+            else
+            {
+                ActivateCanvas(ViewLobbyCanvas);
+            }
+        }
+    }
+
     private void Start()
     {
         Messenger.AddListener("OnDeviceIdNotRegistered", OnDeviceIdNotRegistered);
@@ -119,33 +138,29 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        Debug.Log("[MainMenuNav] OnJoinedLobby");
-
         UpdateOnlinePlayerStatistics();
     }
 
     public override void OnLobbyStatisticsUpdate(List<TypedLobbyInfo> lobbyStatistics)
     {
-        Debug.Log("[MainMenuNav] OnLobbyStatisticsUpdate");
-
         UpdateOnlinePlayerStatistics();
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        Debug.Log("[MainMenuNav] OnRoomListUpdate");
-
         UpdateOnlinePlayerStatistics();
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("[MainMenuNav] OnJoinedRoom");
-
         if(PhotonNetwork.LocalPlayer.IsMasterClient)
         {
             StartGameButton.gameObject.SetActive(true);
             StartGameButton.onClick.AddListener(GameController.Instance.NetworkManager.StartGame);
+        }
+        else
+        {
+            StartGameButton.gameObject.SetActive(false);
         }
 
         ActivateCanvas(ViewRoomCanvas);
@@ -153,8 +168,6 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        Debug.Log("[MainMenuNav] OnLeftRoom");
-
         StartGameButton.gameObject.SetActive(false);
         StartGameButton.onClick.RemoveListener(GameController.Instance.NetworkManager.StartGame);
 

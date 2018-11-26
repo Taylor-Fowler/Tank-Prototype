@@ -37,6 +37,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
         GameController.Instance.Event_OnGameOver += OnGameOver;
     }
 
+    public void Restart()
+    {
+    }
+
     public void Shutdown()
     {
         Messenger<Color, int>.RemoveListener("OnChangePlayerColour", OnChangePlayerColour);
@@ -194,20 +198,17 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        // Do we want to change the player ID if the gane is running?
+        // Don't change the player ID if the game is running
+        if(GameController.Instance.GameRunning)
+        {
+            return;
+        }
         // Only change the local player's `NumberID` if they were after the player who left
         int localPlayerIndex = (int)PhotonNetwork.LocalPlayer.CustomProperties["NumberID"];
         if ((int)otherPlayer.CustomProperties["NumberID"] < localPlayerIndex)
         {
             localPlayerIndex--;
             SetPlayerNumberID(localPlayerIndex);
-        }
-        // When the game is running, if a player leaves the room early, we should....
-        // - Add a loss to the player stats (DB)
-        // - Add deaths but not kills as penalty?
-        if(GameController.Instance.GameRunning && PhotonNetwork.LocalPlayer.IsMasterClient)
-        {
-            //StartCoroutine(NetworkService.DownloadUserData())
         }
     }
 

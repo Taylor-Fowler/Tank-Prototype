@@ -116,6 +116,14 @@ public class GameController : MonoBehaviourPun
     }
 
     #endregion
+    public void Reset()
+    {
+        PhotonNetwork.LoadLevel(1);
+        foreach(var manager in _managers)
+        {
+            manager.Restart();
+        }
+    }
 
     private void InjectServices()
     {

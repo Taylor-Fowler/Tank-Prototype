@@ -75,6 +75,11 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         Messenger<Player, Color>.AddListener("OnRemoteChangePlayerColour", OnRemoteChangePlayerColour);
         Messenger<int>.AddListener("OnChangePlayerNumberID", OnChangePlayerNumberID);
         Messenger<int, int>.AddListener("OnRemoteChangePlayerID", OnRemoteChangePlayerID);
+
+        if(PhotonNetwork.InRoom)
+        {
+            ReturnToRoomAfterGameEnd();
+        }
     }
 
     private void OnDestroy()
@@ -151,6 +156,18 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         }
     }
     #endregion
+
+    private void ReturnToRoomAfterGameEnd()
+    {
+        foreach(var player in PhotonNetwork.CurrentRoom.Players)
+        {
+            _buttons[PlayerManager.PlayerColourIndex(player.Value)]
+                .Select(
+                        PlayerManager.PlayerID(player.Value),
+                        player.Value.ActorNumber
+                        );
+        }
+    }
 
     private void SelectButton(int index)
     {
