@@ -61,7 +61,7 @@ public class PowerUpScript : MonoBehaviour {
             switch (type)
             {
                 case PUType.FireRate:
-                    hello.FireRatePlus(2f, 5f);
+                    hello.FireRatePlus(2f, 8f);
                     Debug.Log("Fire Rate PU");
                     break;
                 case PUType.MoveRate:

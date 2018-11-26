@@ -16,12 +16,16 @@ public class SoundManager : MonoBehaviour
     // https://www.promusicpack.com/license.html
     // http://www.soundeffectpack.com/license.html
 
+    #region PUBLIC / INSPECTOR MEMBERS
     public AudioClip BGMusic;
     public AudioClip[] SFXFiles = new AudioClip[5];
-    [SerializeField]
+    #endregion
+
+    #region PRIVATE MEMBERS
     private AudioSource[] sources;
     private int SFXChannels = 0;
     private int CurrSFXChannel = 1;
+    #endregion
 
     /// <summary>
     /// DEVELOPER NOTE
@@ -30,6 +34,7 @@ public class SoundManager : MonoBehaviour
     /// All others are assigned as SFX channels and used in sequence (as required, and don't loop)
     /// </summary>
 
+    #region UNITY API
     void Awake()
     {
         sources = GetComponents<AudioSource>();
@@ -39,7 +44,9 @@ public class SoundManager : MonoBehaviour
         sources[0].clip = BGMusic;
         sources[0].loop = true;
     }
+    #endregion
 
+    #region PUBLIC METHODS
     public void PlayMusic()
     {
         sources[0].Play(0);
@@ -64,7 +71,6 @@ public class SoundManager : MonoBehaviour
         ToggleChannel();
     }
 
-
     public void KillSFX()
     {
         for (int i = 1; i <= SFXChannels; i++)
@@ -87,11 +93,13 @@ public class SoundManager : MonoBehaviour
         KillMusic();
         KillSFX();
     }
+    #endregion
 
+    #region PRIVATE METHODS
     private void ToggleChannel()
     {
         if (CurrSFXChannel == SFXChannels) { CurrSFXChannel = 1; }
         else { CurrSFXChannel++; }
     }
-   
+    #endregion
 }

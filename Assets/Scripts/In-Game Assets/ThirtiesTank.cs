@@ -9,7 +9,8 @@ public class ThirtiesTank : TankBase {
 
     // This is what makes THIS tank special
     // The TankBase stats are customised here
-	private void Reset()
+    #region PRIVATE METHODS
+    private void Reset()
     {
         BaseSpeedMax = 3f;
         BaseAccel = 20000f;
@@ -22,5 +23,5 @@ public class ThirtiesTank : TankBase {
         BaseShell = 1; // default Shell type, will be changed by Power up's
         BaseMass = 1000;
     }
-
+    #endregion
 }

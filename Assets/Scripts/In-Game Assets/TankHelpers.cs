@@ -9,12 +9,13 @@ using UnityEngine;
 /// Utility Class, just to store multi-class usable functions
 /// </summary>
     class TankHelpers
-    { 
+    {
+    #region PUBLIC METHODS
     /// <summary>
     /// COLOR MANIPULATORS 
     /// </summary>
 
-        public Vector3 ColorToV3(Color color)
+    public Vector3 ColorToV3(Color color)
         {
             return new Vector3(color.r, color.g, color.b);
         }
@@ -87,7 +88,7 @@ using UnityEngine;
         return easeOutElastic(1f - t);
     }
 
-
+    #endregion
 
 }
 

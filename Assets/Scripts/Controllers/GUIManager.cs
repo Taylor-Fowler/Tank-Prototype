@@ -13,77 +13,16 @@ using Photon.Pun;
 
 public class GUIManager : MonoBehaviour
 {
-    #region TAYLOR EDITS
-    public Text TimeToStartText;
 
-    private void Start()
-    {
-        GameController.Instance.Event_OnGameOver += OnGameOver;
-        PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
-        PlayerController.Event_OnLocalPlayerRespawn += OnLocalPlayerRespawn;
-    }
-
-    private void OnDestroy()
-    {
-        GameController.Instance.Event_OnGameOver -= OnGameOver;
-        PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
-        PlayerController.Event_OnLocalPlayerRespawn -= OnLocalPlayerRespawn;
-    }
-
-    private void OnAllPlayersInitialised(double startTime)
-    {
-        StartCoroutine(UpdateTimer(startTime, DisableTimeToStart));
-    }
-
-    private void OnLocalPlayerRespawn()
-    {
-        Splash_ReSpawn();
-    }
-
-    private void OnGameOver(InGameVariables winningPlayer)
-    {
-        if(winningPlayer == PlayerController.LocalPlayer.OwnStats)
-        {
-            Splash_GameOverWin();
-        }
-        else
-        {
-            Splash_GameOverLost();
-        }
-    }
-
-    private void DisableTimeToStart()
-    {
-        TimeToStartText.text = "";
-        TimeToStartText.gameObject.SetActive(false);
-    }
-
-    public IEnumerator UpdateTimer(double startTime)
-    {
-        return UpdateTimer(startTime, DisableTimeToStart);
-    }
-
-    private IEnumerator UpdateTimer(double startTime, Action callback)
-    {
-        TimeToStartText.gameObject.SetActive(true);
-        do
-        {
-            TimeToStartText.text = ((int)(startTime - PhotonNetwork.Time)).ToString();
-            yield return null;
-        } while(startTime > PhotonNetwork.Time);
-
-        callback();
-    }
-    #endregion
     // SUMMARY
-    // GuiManager has a set of 4 GUIPanels (from prefabS, in Scene and Inspector defined)
+    // GuiManager has a set of 4 GUIPanels (from prefabs, in Scene and Inspector defined)
     // when Configure() called by Local Player ...
     //      _myPanels[] populated with the appropriate number of panels for players (excess ones are DeActivated)
     //      _myPlayers[] populated with references to the Local Players Copy of the InGameVariables
     // thereafter ... Local PlayerController calls UpdateXYZ(PlayerID) methods which in turn ....
     // ...  makes the panel in _myPanels[PlayerID] update to reflect the stats in _myPlayers[PlayerID]
     //
-    #region Inspector Settables Public Vars
+    #region PUBLIC / INSPECTOR MEMBERS
     [Header("Player Panels (in scene)")]
     public PanelScript P0;
     public PanelScript P1;
@@ -100,37 +39,35 @@ public class GUIManager : MonoBehaviour
 
     [Header("Time for damage flash")]
     public float FlashTime = 0.1f;
+
+    public Text TimeToStartText;
     #endregion
 
-    #region Private Vars
+    #region PRIVATE MEMBERS
     private PanelScript[] _myPanels;
     private TankHelpers _Help = new TankHelpers();
     private InGameVariables[] _myPlayers;
     private int _PlayerCount = 0;     // default until configured by local Player Manager
     private int _OwnPlayerNumber = 0; // as above
-
     #endregion
 
     #region Public Methods (Tank Choice)
-
     public void PickTankOne ()
     {
-        // Taylor Modifications...sorry!
-        // PlayerController myCon = FindObjectOfType<PlayerController>();
-        // myCon.ChangeTank(1);
         PlayerController.LocalPlayer.TankChoice = 1;
         Debug.Log("[GUI Manager] Change tank Choice called: 1" );
     }
 
     public void PickTankTwo()
     {
-        // Taylor Modifications...sorry!
-        // PlayerController myCon = FindObjectOfType<PlayerController>();
-        // myCon.ChangeTank(2);
         PlayerController.LocalPlayer.TankChoice = 2;
         Debug.Log("[GUI Manager] Change tank Choice called: 2");
     }
 
+    public IEnumerator UpdateTimer(double startTime)
+    {
+        return UpdateTimer(startTime, DisableTimeToStart);
+    }
     #endregion
 
     #region GUI Player Panels - Public Methods (called by PlayerController, as stats change)
@@ -231,4 +168,62 @@ public class GUIManager : MonoBehaviour
     }
     #endregion
 
+    #region UNITY API
+    private void Start()
+    {
+        GameController.Instance.Event_OnGameOver += OnGameOver;
+        PlayerController.Event_OnAllPlayersInitialised += OnAllPlayersInitialised;
+        PlayerController.Event_OnLocalPlayerRespawn += OnLocalPlayerRespawn;
+    }
+
+    private void OnDestroy()
+    {
+        GameController.Instance.Event_OnGameOver -= OnGameOver;
+        PlayerController.Event_OnAllPlayersInitialised -= OnAllPlayersInitialised;
+        PlayerController.Event_OnLocalPlayerRespawn -= OnLocalPlayerRespawn;
+        StopAllCoroutines(); // best not forget this
+    }
+    #endregion
+
+    #region PRIVATE METHODS
+    private void OnAllPlayersInitialised(double startTime)
+    {
+        StartCoroutine(UpdateTimer(startTime, DisableTimeToStart));
+    }
+
+    private void OnLocalPlayerRespawn()
+    {
+        Splash_ReSpawn();
+    }
+
+    private void OnGameOver(InGameVariables winningPlayer)
+    {
+        if (winningPlayer == PlayerController.LocalPlayer.OwnStats)
+        {
+            Splash_GameOverWin();
+        }
+        else
+        {
+            Splash_GameOverLost();
+        }
+    }
+
+    private void DisableTimeToStart()
+    {
+        TimeToStartText.text = "";
+        TimeToStartText.gameObject.SetActive(false);
+    }
+
+    private IEnumerator UpdateTimer(double startTime, Action callback)
+    {
+        TimeToStartText.gameObject.SetActive(true);
+        do
+        {
+            TimeToStartText.text = ((int)(startTime - PhotonNetwork.Time)).ToString();
+            yield return null;
+        } while (startTime > PhotonNetwork.Time);
+
+        callback();
+    }
+    #endregion
 }

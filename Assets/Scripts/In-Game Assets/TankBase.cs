@@ -43,7 +43,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public float ModDamage = 1f;
     public float ModFireRate = 1f;
     public float ModMass = 1f;
-
+    public float CurrentSpeed { get; private set; }
     #endregion
 
     #region Private Vars
@@ -54,7 +54,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     private bool _turretlock = false;
     [SerializeField]
     private float Cooldown = 0;
-    #endregion
 
     float C_SpeedMax { get { return BaseSpeedMax * ModSpeed; } } // N.B. no setter
     float C_Accel { get { return BaseAccel * ModAccel; } }
@@ -65,9 +64,9 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     float C_Damage { get { return BaseDamage * ModDamage; } } // Placeholder only until mechanics established
     float C_FireRate { get { return BaseFireRate * ModFireRate; } }
     float C_Mass { get { return BaseMass * ModMass; } }
-    public float CurrentSpeed { get; private set; }
+    private bool _AutoFire = false;
+    #endregion
 
-    public bool AutoFire = false;
 
     #region UNITY API
     private void Awake()
@@ -200,12 +199,14 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     public void FireRatePlus(float factor, float time)
     {
         ModFireRate /= factor;
+        _AutoFire = true;
         StartCoroutine(RevertFireRate(factor, time));
     }
 
     IEnumerator RevertFireRate (float factor, float time)
     {
         yield return new WaitForSeconds(time);
+        _AutoFire = false;
         ModFireRate *= factor;
     }
 
@@ -238,7 +239,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     {
         // Reduce cooldown
         Cooldown = Mathf.Max(0, Cooldown - Time.deltaTime);
-        if (Cooldown <= 0 && AutoFire || (Input.GetMouseButtonDown(0) && Cooldown <= 0) && !AutoFire) // Auto fire for testing
+        if (Cooldown <= 0 && _AutoFire || (Input.GetMouseButtonDown(0) && Cooldown <= 0) && !_AutoFire) // Auto fire for testing
         {
             PlayerController.LocalPlayer.Fire(); // call via the PlayerController so it can call Fire via RPC.
             Cooldown = C_FireRate;
@@ -248,7 +249,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     void CheckTurretLock()
     {
         if (Input.GetKeyDown("space")) _turretlock = !_turretlock;
-        if (Input.GetKeyDown("p")) AutoFire = !AutoFire;
+        // if (Input.GetKeyDown("p")) AutoFire = !AutoFire; // Dev note .. Disabled, Autofire is now granted by PowerUp
     }
 
     void ControlMovement()

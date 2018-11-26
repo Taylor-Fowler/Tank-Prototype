@@ -4,8 +4,7 @@
 // Submission by Max Bryans (K1628007) and Taylor Fowler (K1612040)      //
 // December 2018                                                         //
 ///////////////////////////////////////////////////////////////////////////
-using System.Collections;
-using System.Collections.Generic;
+///
 using UnityEngine;
 /// <summary>
 /// Assign this to a Blank Object (The Parent) which has multiple children.
@@ -13,8 +12,14 @@ using UnityEngine;
 /// Each Update(), movement of the Parent is established relative to World Space
 /// Each child is then appropriately Lerped towards the Start position of the next child in the chain
 /// </summary>
+/// 
 public class TracksLeader : MonoBehaviour {
 
+    #region PUBLIC / INSPECTOR MEMBERS
+    public bool TracksForward = true; // Used to customise direction, is case assembly motion is against the flow
+    #endregion
+
+    #region PRIVATE MEMBERS
     private Transform _Parent;
     private Vector3 _LastParentPos;
     private Vector3 _CurrParentPos;
@@ -27,10 +32,11 @@ public class TracksLeader : MonoBehaviour {
     private float[] _distances;
     private int[] _index;
     private float _ParentScaleMod = 1;
-    public bool TracksForward = true; // Used to customise direction, is case assembly motion is against the flow
+    #endregion
 
-	// Use this for initialization
-	void Start ()
+    #region UNITY API
+    // Use this for initialization
+    void Start ()
     {
         _ParentScaleMod = transform.root.localScale.z; // since someone can/will scale the parent transform
         _Parent = transform.parent.transform; // edit as appropriate to get "reference movement" object
@@ -78,9 +84,7 @@ public class TracksLeader : MonoBehaviour {
         {
             _childList[i].localPosition = Vector3.MoveTowards(_StartPositions[i], _StartPositions[_index[i]], (_LerpFactor * _distances[i]) );
         }
-
         _LastParentPos = _CurrParentPos;
-
-
     }
+    #endregion
 }
