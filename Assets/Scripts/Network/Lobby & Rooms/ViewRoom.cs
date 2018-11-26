@@ -25,6 +25,16 @@ public class ViewRoom : MonoBehaviourPunCallbacks
         _playerObjects = new Dictionary<int, GameObject>();
     }
 
+    #region UNITY API
+    private void Awake()
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            OnJoinedRoom();
+        }
+    }
+    #endregion
+
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();

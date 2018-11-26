@@ -33,11 +33,35 @@ namespace Network
             ConnectToServer();
         }
 
+        public void Restart()
+        {
+            if(!PhotonNetwork.IsConnected)
+            {
+                ConnectToServer();
+            }
+        }
+
         public void Shutdown()
         {
             GameController.Instance.Event_OnGameOver -= OnGameOver;
         }
         #endregion
+
+        #region STATIC METHODS
+        public static string RoomName(RoomInfo room)
+        {
+            if (room.CustomProperties.ContainsKey("room_name"))
+            {
+                return (string)room.CustomProperties["room_name"];
+            }
+            return "";
+        }
+
+        public static bool RoomJoinable(RoomInfo room)
+        {
+            return room.IsOpen && room.IsVisible && room.PlayerCount != room.MaxPlayers && !room.CustomProperties.ContainsKey("room_pass");
+        }
+        #endregion  
 
         public List<RoomInfo> CachedRooms { get; private set; }
 
@@ -49,7 +73,7 @@ namespace Network
 
         public PlayerController PlayerPreFab;
 
-        public bool DevAutoJoin = false;
+        public bool DevAutoJoin = true;
 
 
         #region PUN2 API
@@ -81,7 +105,6 @@ namespace Network
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
             Debug.Log("[Network Manager] AUTOJOIN: No random room: so ... \nCalling: CreatePublicRoom()");
-            // tried to create room ... failed so make one 
             CreatePublicRoom("Dev for 2", 2);
         }
 
@@ -89,9 +112,7 @@ namespace Network
         public override void OnJoinedLobby()
         {
             Debug.Log("[NetworkManager] OnJoinedLobby");
-            Debug.Log(PhotonNetwork.CurrentLobby.IsDefault);
             PhotonNetwork.AutomaticallySyncScene = true;
-            //PhotonNetwork.JoinOrCreateRoom("room", new RoomOptions(), PhotonNetwork.CurrentLobby);
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -129,22 +150,15 @@ namespace Network
             }
         }
         #endregion
-
-        #region STATIC METHODS
-        public static string RoomName(RoomInfo room)
-        { 
-            if(room.CustomProperties.ContainsKey("room_name"))
-            {
-                return (string)room.CustomProperties["room_name"];
-            }
-            return "";
-        }
-
-        public static bool RoomJoinable(RoomInfo room)
+        public void JoinRoom(string roomName)
         {
-            return room.IsOpen && room.IsVisible && room.PlayerCount != room.MaxPlayers && !room.CustomProperties.ContainsKey("room_pass");
+            PhotonNetwork.JoinRoom(roomName);
         }
-        #endregion  
+
+        public void StartGame()
+        {
+            PhotonNetwork.LoadLevel("Map for 2");
+        }
 
         public void Started(NetworkManagerStarted callback)
         {
@@ -227,22 +241,12 @@ namespace Network
             callback(false);
         }
 
-        public void JoinRoom(string roomName)
-        {
-            PhotonNetwork.JoinRoom(roomName);
-        }
-
-        public void StartGame()
-        {
-            PhotonNetwork.LoadLevel("Map for 2");
-        }
-
         #region CUSTOM EVENT RESPONSES
         private void OnGameOver(InGameVariables winningPlayer)
         {
             StartCoroutine(Wait(PhotonNetwork.Time + 5.0, delegate
             {
-                PhotonNetwork.LoadLevel(1);
+                GameController.Instance.Reset();
             }));
         }
         #endregion

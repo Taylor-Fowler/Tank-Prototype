@@ -50,25 +50,25 @@ public class PlayerController : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    private TankHelpers Help = new TankHelpers(); // A function Utility Class
+    public int TankChoice = 1; // default
+    public bool IsActive = false;
     public GameObject TankType1;
     public GameObject TankType2;
-
-    public int TankChoice = 1; // default
     public Vector3 _Vcolor = new Vector3(255, 0, 0); // default // public required for TankBase
-    private Color _color = new Color(255, 0, 0); // default
-    [SerializeField] private Transform[] _Spawns;
-    [SerializeField] private Transform[] _InitialSpawns;
     public InGameVariables OwnStats;
-    [SerializeField] private Vector3 _SpawnPos;
-    [SerializeField] private Quaternion _SpawnRot;
-    private TankBase _myTankScript;
-    private GameObject _myTankBody;
-    private GUIManager _myGUI;
-    public bool IsActive = false;
 #if UNITY_EDITOR
     public InGameVariables[] EditorOnlyControllers;
 #endif
+
+    [SerializeField] private Transform[] _Spawns;
+    [SerializeField] private Transform[] _InitialSpawns;
+    [SerializeField] private Vector3 _SpawnPos;
+    [SerializeField] private Quaternion _SpawnRot;
+    private Color _color = new Color(255, 0, 0); // default
+    private GameObject _myTankBody;
+    private TankBase _myTankScript;
+    private GUIManager _myGUI;
+    private TankHelpers Help = new TankHelpers(); // A function Utility Class
 
     #region UNITY API
     private void Awake()
@@ -149,13 +149,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     }
     #endregion
 
-
-    //// This is guaranteed to only be ran locally, this is called from TankBase.Start(), which only calls
-    //// this method if it is the local tank base.
-    //public void RecieveBaseHealth(float C_Health)
-    //{
-    //    photonView.RPC("RpcUpdateInitialHealth", RpcTarget.AllBuffered, C_Health);
-    //}
     public void Fire()
     {
         photonView.RPC("RpcFire", RpcTarget.AllBuffered, OwnStats.PlayerID);
@@ -163,16 +156,14 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     public void TakeDamage(int ShellOwnerID, float damage)
     {
-        if (photonView.IsMine && IsActive) // My View AND My Tank was hit .... still in the game?
+        if (photonView.IsMine && IsActive && GameController.Instance.GameRunning) // My View AND My Tank was hit .... still in the game?
         {
             OwnStats.Curr_Health -= damage;
             photonView.RPC("RpcUpdateIGVCurrHealth", RpcTarget.AllBuffered, OwnStats.PlayerID, OwnStats.Curr_Health);
             if (OwnStats.Curr_Health <= 0)
             {
                 IsActive = false; // now out of the game
-                //_myGUI.Splash_Died(PlayerControllers[ShellOwnerID].PlayerName);
                 photonView.RPC("RpcUpdateScore", RpcTarget.AllBuffered, ShellOwnerID);
-                //    _myTankScript.TankDie(); /// Someone died here .... Best respawn .....
             }
         }
     }
@@ -203,8 +194,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     /// </summary>
     private void Spawn()
     {
-        // let's make a tank
-        // Move Controller to Spawn
         switch (TankChoice)
         {
             case 1:
@@ -240,7 +229,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
             double time = PhotonNetwork.Time;
             _myGUI.Splash_Died(playerWhoKilled);
-            //PhotonNetwork.Destroy(_myTankBody); // now handled by TankDie()
             StartCoroutine(_myGUI.UpdateTimer(time + 3.0));
             StartCoroutine(WaitToRespawn(time + 3.0));
         }
@@ -331,40 +319,5 @@ public class PlayerController : MonoBehaviourPunCallbacks
             Die(PlayerControllers[ShellOwnerID].PlayerName);
         }
     }
-
-
-    //[PunRPC]
-    //private void RpcUpdateInitialHealth(float health)
-    //{
-    //    OwnStats.Curr_Health = OwnStats.Max_Health = health;
-    //}
-
-    // NOTE: We never ended up using this
-    /// <summary>
-    /// All called by Local Client when their OwnStats are modified, to synch up their and all other client's _Players[] record
-    /// </summary>
-    //[PunRPC]
-    //private void RpcSynchAllIGV (int OwnerID)
-    //{
-    //    RpcUpdateIGVMaxHealth(OwnerID,OwnStats.Max_Health);
-    //    RpcUpdateIGVCurrHealth(OwnerID, OwnStats.Curr_Health);
-    //    RpcUpdateIGVName(OwnerID, OwnStats.PlayerName);
-    //}
-    // NOTE: This was done locally so this just set the value to what it already was
-    //[PunRPC]
-    //private void RpcUpdateIGVName (int PlayerID, string Name)
-    //{
-    //    PlayerControllers[PlayerID].PlayerName = Name;
-    //}
-
-    //[PunRPC]
-    //private void RpcUpdateIGVMaxHealth(int PlayerID, float MaxHealth)
-    //{
-    //    PlayerControllers[PlayerID].Max_Health = MaxHealth;
-    //}
     #endregion
-
-
-
-
 }
