@@ -11,13 +11,19 @@ public enum PUType { FireRate, MoveRate, Health }
 
 public class PowerUpScript : MonoBehaviour {
 
-    private float _RotateSpeed = 90f;
+    #region PUBLIC MEMBERS
     public PUType type;
+    #endregion
+
+    #region PRIVATE MEMBERS
+    private bool _Hidden;
+    private float _RotateSpeed = 90f;
     private float _HideTime;
     private Renderer[] _Renderers;
     private Collider[] _Colliders;
-    public bool Hidden;
+    #endregion
 
+    #region UNITY API
     void Start() 
     {
         // initial configure, since there will probably be multiple collisions over the game ..
@@ -39,6 +45,11 @@ public class PowerUpScript : MonoBehaviour {
                 _HideTime = 20f;
                 break;
         }
+    }
+
+    void Update()
+    {
+        transform.Rotate(Vector3.up * _RotateSpeed * Time.deltaTime);
     }
 
     void OnTriggerEnter (Collider col)
@@ -68,6 +79,16 @@ public class PowerUpScript : MonoBehaviour {
         StartCoroutine(HideFor());
         }
     }
+    #endregion
+
+    #region PRIVATE METHODS
+    void HideMe()
+    {
+        _Hidden = true;
+        Debug.Log(type.ToString() + " hidden");
+        foreach (Renderer r in _Renderers) r.enabled = false;
+        foreach (Collider c in _Colliders) c.enabled = false;
+    }
 
     IEnumerator HideFor()  
     {
@@ -76,24 +97,13 @@ public class PowerUpScript : MonoBehaviour {
         UnHideMe();
     }
 
-    void HideMe()
-    {
-        Hidden = true;
-        Debug.Log(type.ToString() + " hidden");
-        foreach (Renderer r in _Renderers) r.enabled = false;
-        foreach (Collider c in _Colliders) c.enabled = false;
-    }
-	
     void UnHideMe()
     {
         Debug.Log(type.ToString() + " revealed");
         foreach (Renderer r in _Renderers) r.enabled = true;
         foreach (Collider c in _Colliders) c.enabled = true;
-        Hidden = false;
+        _Hidden = false;
     }
+    #endregion
 
-	// Update is called once per frame
-	void Update () {
-        transform.Rotate(Vector3.up * _RotateSpeed * Time.deltaTime);
-    }
 }
