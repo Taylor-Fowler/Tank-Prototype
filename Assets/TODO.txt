@@ -6,7 +6,13 @@ DONE:
 TODO:
 - In game menu for leave game
 - Player leaves a four player game
+
+
 - Adjust player ID's on return to room view
+Possibilities:
+4 Player Room
+2 and 3 in room (0 and 1 left)
+1, 2 and 3 in room (0 left)
 
 
 

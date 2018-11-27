@@ -73,7 +73,7 @@ namespace Network
 
         public PlayerController PlayerPreFab;
 
-        public bool DevAutoJoin = true;
+        public bool DevAutoJoin = false;
 
 
         #region PUN2 API
@@ -139,7 +139,6 @@ namespace Network
                 }
                 else if (valid)
                 {
-
                     CachedRooms.Add(room);
                 }
             }
@@ -163,7 +162,7 @@ namespace Network
 
         public void StartGame()
         {
-            PhotonNetwork.LoadLevel("Map for 2");
+            PhotonNetwork.LoadLevel("Map for " + PhotonNetwork.CurrentRoom.MaxPlayers.ToString());
         }
 
         public void Started(NetworkManagerStarted callback)
