@@ -4446,7 +4446,6 @@ MonoBehaviour:
   ServerPlayerCountText: {fileID: 2125654411}
   ServerPlayersInRoomsCountText: {fileID: 1098556147}
   ServerPlayersOnMasterCountText: {fileID: 372664129}
-  StartGameButton: {fileID: 1510480154}
   LoadingPanel: {fileID: 1595893914}
   KillsValue: {fileID: 1143702472}
   DeathsValue: {fileID: 479485447}
@@ -9432,7 +9431,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 509.57104, y: -202.49219}
+  m_AnchoredPosition: {x: 387.37598, y: -276.7766}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1365199601
@@ -14383,7 +14382,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 509.57104, y: -268.4922}
+  m_AnchoredPosition: {x: 387.37598, y: -342.7766}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1984141795

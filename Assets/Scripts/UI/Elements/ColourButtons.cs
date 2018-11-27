@@ -5,10 +5,8 @@
 // December 2018                                                         //
 ///////////////////////////////////////////////////////////////////////////
 using System.Collections;
-
 using UnityEngine;
 using UnityEngine.UI;
-
 using Photon.Pun;
 using Photon.Realtime;
 
@@ -29,6 +27,7 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
         public void Select(int playerID, int actorID)
         {
+            Debug.Log("Setting Actor ID Color: " + actorID + "\nLocal Actor ID: " + PhotonNetwork.LocalPlayer.ActorNumber);
             ActorID = actorID;
             Text.text = (playerID + 1).ToString();
             Image.enabled = true;
@@ -48,14 +47,8 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
     [SerializeField] private BITCombo[] _buttons;
     private BITCombo _selectedButton = null;
-    private bool _hasColour = false;
 
     #region UNITY API
-    private void Awake()
-    {
-        _hasColour = PhotonNetwork.IsConnected && (PlayerManager.PlayerColourIndex() != -1);
-    }
-
     private void Start()
     {
         Button[] allButtons = ButtonsAnchor.GetComponentsInChildren<Button>();
@@ -82,7 +75,7 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         Messenger<int>.AddListener("OnChangePlayerNumberID", OnChangePlayerNumberID);
         Messenger<int, int>.AddListener("OnRemoteChangePlayerID", OnRemoteChangePlayerID);
 
-        if(_hasColour)
+        if(GameController.Instance.PostGameLobby && PhotonNetwork.InRoom)
         {
             ReturnToRoomAfterGameEnd();
         }
@@ -125,7 +118,12 @@ public class ColourButtons : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region CUSTOM EVENTS
+    #region CUSTOM EVENT RESPONSES
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="color"></param>
     private void OnRemoteChangePlayerColour(Player player, Color color)
     {
         int playerID = PlayerManager.PlayerID(player);
@@ -134,7 +132,7 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         {
             if(button.ActorID == player.ActorNumber)
             {
-                button.Unselect();
+                //button.Unselect();
                 break;
             }
         }
@@ -142,6 +140,12 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         _buttons[PlayerManager.PlayerColourIndex(player)].Select(playerID, player.ActorNumber);
     }
 
+    /// <summary>
+    /// Called when the local player's room ID changes, if the player has a selected
+    /// colour button (technically they should), then the button is updated to match
+    /// the players new ID.
+    /// </summary>
+    /// <param name="id">The ID assigned to the local player</param>
     private void OnChangePlayerNumberID(int id)
     {
         if(_selectedButton != null)
@@ -150,6 +154,14 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Called when a remote players room ID changes, loops through all buttons
+    /// looking for a colour button registered to the players (the one with the new ID)
+    /// actor ID. If a button is registered to the player, the player ID is updated to
+    /// match their new ID, otherwise nothing is done.
+    /// </summary>
+    /// <param name="id">The new ID of the player</param>
+    /// <param name="actorID">The actor ID of the player, used to identify their button</param>
     private void OnRemoteChangePlayerID(int id, int actorID)
     {
         foreach(var button in _buttons)
@@ -185,12 +197,12 @@ public class ColourButtons : MonoBehaviourPunCallbacks
     {
         BITCombo button = _buttons[index];
 
-        // Somebody else has selected it
+        // Somebody else has selected it, cannot select it
         if(button.ActorID != -1)
         {
             return;
         }
-
+        // Unselect the previously selected button
         if(_selectedButton != null)
         {
             _selectedButton.Unselect();
@@ -210,15 +222,15 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
         if (!PhotonNetwork.IsMasterClient)
         {
-            foreach (var player in PhotonNetwork.PlayerList)
+            foreach (var player in PhotonNetwork.CurrentRoom.Players)
             {
-                if (player == PhotonNetwork.LocalPlayer)
+                if (player.Value == PhotonNetwork.LocalPlayer)
                 {
                     continue;
                 }
 
-                int playerSelection = PlayerManager.PlayerColourIndex(player);
-                int playerID = PlayerManager.PlayerID(player);
+                int playerSelection = PlayerManager.PlayerColourIndex(player.Value);
+                int playerID = PlayerManager.PlayerID(player.Value);
 
                 if (playerSelection == nextAvailableColour)
                 {

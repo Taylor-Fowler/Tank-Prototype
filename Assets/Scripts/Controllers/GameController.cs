@@ -28,6 +28,7 @@ public class GameController : MonoBehaviourPun
     public int KillsRequired = 2;
     public string DeviceID { get; private set; }
     public bool GameRunning { get; private set; }
+    public bool PostGameLobby { get; private set; }
     public NetworkManager NetworkManager { get; private set; }
     public PlayerManager PlayerManager { get; private set; }
 
@@ -70,6 +71,7 @@ public class GameController : MonoBehaviourPun
         instance = this;
         DontDestroyOnLoad(this);
         GameRunning = false;
+        PostGameLobby = false;
 
         NetworkManager = gameObject.AddComponent<NetworkManager>();
         PlayerManager = gameObject.AddComponent<PlayerManager>();
@@ -121,6 +123,8 @@ public class GameController : MonoBehaviourPun
         {
             PhotonNetwork.DestroyAll();
         }
+
+        PostGameLobby = true;
         PhotonNetwork.LoadLevel(1);
         foreach(var manager in _managers)
         {

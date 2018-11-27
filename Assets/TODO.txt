@@ -13,3 +13,9 @@ TO FIX:
   and on JoinedRoom, need a boolean or some kind of distinguishing feature to indicate post game room or just joined.
 - New player connecting to a post-game room who then leaves causes a NRE.
 - Player 1 leaves a room and the player index doesnt change, need to reset player ID's when returning to room view.
+
+
+Current Problem:
+- Game starts, one player leaves, return to room
+- Player that returns to room has their colour button selected
+- New player joins room, existing players colour button does not register as selected

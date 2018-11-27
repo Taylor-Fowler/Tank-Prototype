@@ -27,9 +27,9 @@ public class ViewRoom : MonoBehaviourPunCallbacks
     }
 
     #region UNITY API
-    private void Awake()
+    private void Start()
     {
-        if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex == 1 && PhotonNetwork.InRoom)
+        if(GameController.Instance.PostGameLobby && PhotonNetwork.InRoom)
         {
             OnJoinedRoom();
         }
@@ -97,8 +97,6 @@ public class ViewRoom : MonoBehaviourPunCallbacks
 
     private void AddPlayer(Player player)
     {
-        Debug.Log("PlayerObjects Count: " + _playerObjects.Count);
-        Debug.Log("Actor Number: " + player.ActorNumber);
         GameObject playerDetails = Instantiate(PlayerInListPrefab, RoomPlayersListAnchor);
         playerDetails.GetComponent<Text>().text = player.NickName;
 

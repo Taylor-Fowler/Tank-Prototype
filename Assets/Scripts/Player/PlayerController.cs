@@ -19,6 +19,7 @@ public class InGameVariables
     public float Max_Health;
     public float Curr_Health;
     public int Score;
+    public int Deaths;
 }
 
 public class PlayerController : MonoBehaviourPunCallbacks
@@ -96,6 +97,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         // configured when Tank body added
         OwnStats.Max_Health = 0; 
         OwnStats.Curr_Health = 0;
+        OwnStats.Deaths = 0;
     }
 
     private void Start()
@@ -307,6 +309,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private void RpcUpdateScore (int ShellOwnerID)
     {
         InGameVariables shooter = PlayerControllers[ShellOwnerID];
+        OwnStats.Deaths++;
         shooter.Score++;
         _myGUI.UpdateScore();
 
