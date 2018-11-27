@@ -9,6 +9,7 @@ using System.Collections;
 using UnityEngine.Networking;
 using Photon.Pun;
 
+#region INGAMEVARIABLES DECLARATION
 [System.Serializable]
 public class InGameVariables
 {
@@ -21,6 +22,7 @@ public class InGameVariables
     public int Score;
     public int Deaths;
 }
+#endregion
 
 public class PlayerController : MonoBehaviourPunCallbacks
 {
@@ -51,6 +53,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     }
     #endregion
 
+    #region PUBLIC / INSPECTOR MEMBERS
     public int TankChoice = 1; // default
     public bool IsActive = false;
     public GameObject TankType1;
@@ -60,7 +63,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
 #if UNITY_EDITOR
     public InGameVariables[] EditorOnlyControllers;
 #endif
+    #endregion
 
+    #region PRIVATE MEMBERS
     [SerializeField] private Transform[] _Spawns;
     [SerializeField] private Transform[] _InitialSpawns;
     [SerializeField] private Vector3 _SpawnPos;
@@ -70,87 +75,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private TankBase _myTankScript;
     private GUIManager _myGUI;
     private TankHelpers Help = new TankHelpers(); // A function Utility Class
-
-    #region UNITY API
-    private void Awake()
-    {
-        GameController.Instance.Event_OnGameStart += OnGameStart;
-
-        if (photonView.IsMine)
-        {
-            LocalPlayer = this;
-            // Static list of ingame variables, only the local client creates the empty list
-            // Later on, the Unity Start method has each controller add themselves to the list.
-            PlayerControllers = new InGameVariables[PlayerManager.PlayersInRoomCount()];
-            // Sound set-up
-            this.gameObject.AddComponent<AudioListener>();
-
-            Event_OnLocalPlayerRespawn += Respawn;
-        }
-        // Populate "OwnStats"
-        OwnStats.PlayerID = PlayerManager.PlayerID(photonView.Owner);
-        OwnStats.PlayerName = PlayerManager.PlayerNick(photonView.Owner);
-        Debug.Log(OwnStats.PlayerName);
-        OwnStats.Color = Help.ColorToV3(PlayerManager.PlayerColour(photonView.Owner));
-        OwnStats.Controller = this;
-        OwnStats.Score = 0;
-        // configured when Tank body added
-        OwnStats.Max_Health = 0; 
-        OwnStats.Curr_Health = 0;
-        OwnStats.Deaths = 0;
-    }
-
-    private void Start()
-    {
-        // Add ourselves to the array
-        PlayerControllers[OwnStats.PlayerID] = OwnStats;
-
-        // Get Spawn Points
-        // If more than one MapController in a scene ... we've done something wrong .....
-        MapController[] map = FindObjectsOfType(typeof(MapController)) as MapController[]; // there has to be a better way ....
-        _Spawns = map[0].ReportSpawns();
-        _InitialSpawns = map[0].ReportInitialSpawns();
-
-        // Find Spawn
-        // Developer Note ... initial spawn is based on "Player" ID ... 
-        // So each Map has as many Initial Spawn Sites as Players
-        _SpawnPos = _InitialSpawns[OwnStats.PlayerID].position;
-        _SpawnRot = Quaternion.LookRotation((new Vector3(25, _SpawnPos.y, 25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
-        transform.position = _SpawnPos;
-        transform.rotation = _SpawnRot;
-
-        if(PhotonNetwork.IsMasterClient)
-        {
-            LocalPlayer.CheckAllAreLoaded();
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if(photonView.IsMine)
-        {
-            Event_OnLocalPlayerRespawn -= Respawn;
-        }
-        GameController.Instance.Event_OnGameStart -= OnGameStart;
-    }
     #endregion
 
-    #region CUSTOM EVENT RESPONSES
-    private void OnGameStart()
-    {
-#if UNITY_EDITOR
-        EditorOnlyControllers = PlayerControllers;
-#endif      
-        _myGUI = FindObjectOfType<GUIManager>();
-
-        if (photonView.IsMine)
-        {
-            Spawn();
-            _myGUI.Configure(PlayerControllers.Length, OwnStats.PlayerID);
-        }
-    }
-    #endregion
-
+    #region PUBLIC METHODS
     public void Fire()
     {
         photonView.RPC("RpcFire", RpcTarget.AllBuffered, OwnStats.PlayerID);
@@ -188,7 +115,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         return _myTankBody.transform;
     }
+    #endregion
 
+    #region PRIVATE METHODS
     /// <summary>
     /// Should only be called from the local client, instantiates the chosen tank body across the network
     /// and then executes an RPC to inform the instance of this script (on other clients) that the tank body
@@ -260,7 +189,90 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
         photonView.RPC("RpcSetStartTime", RpcTarget.AllBuffered, PhotonNetwork.Time + 11.0);
     }
+    #endregion
 
+    #region UNITY API
+    private void Awake()
+    {
+        GameController.Instance.Event_OnGameStart += OnGameStart;
+
+        if (photonView.IsMine)
+        {
+            LocalPlayer = this;
+            // Static list of ingame variables, only the local client creates the empty list
+            // Later on, the Unity Start method has each controller add themselves to the list.
+            PlayerControllers = new InGameVariables[PlayerManager.PlayersInRoomCount()];
+            // Sound set-up
+            this.gameObject.AddComponent<AudioListener>();
+
+            Event_OnLocalPlayerRespawn += Respawn;
+        }
+        // Populate "OwnStats"
+        OwnStats.PlayerID = PlayerManager.PlayerID(photonView.Owner);
+        OwnStats.PlayerName = PlayerManager.PlayerNick(photonView.Owner);
+        Debug.Log(OwnStats.PlayerName);
+        OwnStats.Color = Help.ColorToV3(PlayerManager.PlayerColour(photonView.Owner));
+        OwnStats.Controller = this;
+        OwnStats.Score = 0;
+        // configured when Tank body added
+        OwnStats.Max_Health = 0; 
+        OwnStats.Curr_Health = 0;
+        OwnStats.Deaths = 0;
+    }
+
+    private void Start()
+    {
+        // Add ourselves to the array
+        PlayerControllers[OwnStats.PlayerID] = OwnStats;
+
+        // Get Spawn Points
+        // If more than one MapController in a scene ... we've done something wrong .....
+        MapController[] map = FindObjectsOfType(typeof(MapController)) as MapController[]; // there has to be a better way ....
+        _Spawns = map[0].ReportSpawns();
+        _InitialSpawns = map[0].ReportInitialSpawns();
+
+        // Find Spawn
+        // Developer Note ... initial spawn is based on "Player" ID ... 
+        // So each Map has as many Initial Spawn Sites as Players
+        _SpawnPos = _InitialSpawns[OwnStats.PlayerID].position;
+        _SpawnRot = Quaternion.LookRotation((new Vector3(25, _SpawnPos.y, 25) - _SpawnPos), Vector3.up); // assumes a 50x50 map .. looks at centre
+        transform.position = _SpawnPos;
+        transform.rotation = _SpawnRot;
+
+        if(PhotonNetwork.IsMasterClient)
+        {
+            LocalPlayer.CheckAllAreLoaded();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if(photonView.IsMine)
+        {
+            StopAllCoroutines();
+            Event_OnLocalPlayerRespawn -= Respawn;
+        }
+        GameController.Instance.Event_OnGameStart -= OnGameStart;
+    }
+    #endregion
+
+    #region CUSTOM EVENT RESPONSES
+    private void OnGameStart()
+    {
+#if UNITY_EDITOR
+        EditorOnlyControllers = PlayerControllers;
+#endif      
+        _myGUI = FindObjectOfType<GUIManager>();
+
+        if (photonView.IsMine)
+        {
+            Spawn();
+            _myGUI.Configure(PlayerControllers.Length, OwnStats.PlayerID);
+        }
+    }
+    #endregion
+
+    #region PUN RPC (BEHAVIOUR)
     [PunRPC]
     private void RpcSetStartTime(double time)
     {
@@ -293,8 +305,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         _myTankScript.Fire(playerID);
     }
-    #region Pun Update _Player InGameVariables
+    #endregion
 
+    #region PUN RPC (Changing InGameVariables)
 
     [PunRPC]
     private void RpcUpdateIGVCurrHealth(int PlayerID, float CurrHealth)
