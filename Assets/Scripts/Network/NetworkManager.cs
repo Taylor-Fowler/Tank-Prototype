@@ -149,6 +149,12 @@ namespace Network
                 OnRoomCacheUpdate(CachedRooms);
             }
         }
+
+        public override void OnLeftRoom()
+        {
+            GameController.Instance.LeftPostGame();
+        }
+
         #endregion
         public void JoinRoom(string roomName)
         {

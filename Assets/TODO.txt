@@ -1,21 +1,35 @@
 DONE:
 - Back to main menu after game allows for replayability
 - If last person in the room, end game
+- Register player stats after gameover
 
 TODO:
 - In game menu for leave game
 - Player leaves a four player game
-- Register player stats after gameover
+- Adjust player ID's on return to room view
+
 
 
 TO FIX:
 - New player connecting to a post-game room ends up adding themselves to a dictionary twice, both on Awake
   and on JoinedRoom, need a boolean or some kind of distinguishing feature to indicate post game room or just joined.
 - New player connecting to a post-game room who then leaves causes a NRE.
-- Player 1 leaves a room and the player index doesnt change, need to reset player ID's when returning to room view.
 
 
 Current Problem:
 - Game starts, one player leaves, return to room
 - Player that returns to room has their colour button selected
 - New player joins room, existing players colour button does not register as selected
+- New player can now select colour that existing player owns
+
+Fix:
+- Added an N to a button when it has been unselected! So either the button is being selected and
+then unselected OR just not being selected at all
+	- Uncommented the Unselect from OnRemoteChangePlayerColour...didn't solve
+- Manually dragged the BITCombos into the inspector
+- Adjusted the wait timer to make sure that buttons and player was initialised correctly
+- Added functionality to manually update the buttons for players already in the room (which are initialised)
+- I believe that setting player properties within a room is a buffered network command, so before a game
+all players receive the buffered property updates (triggering updates to the buttons)...but at the end
+of a game, PhotonNetwork.DestroyAll is called which effectively destroys the buffer. This resulted in new players
+not receiving the buffered commands and not selecting the buttons for pre-existing players.

@@ -159,14 +159,16 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         SM.PlaySFX(SFX.Boom);
         GameObject boom = Instantiate(ExpPreFab, transform.position, Quaternion.identity) as GameObject;
         Destroy(boom, 2);
+
         PhotonView[] _MyPhotons = GetComponentsInChildren<PhotonView>();
         Transform[] _MyShrapnel = GetComponentsInChildren<Transform>();
         foreach (Transform p in _MyShrapnel)
         {
-            p.transform.parent = null;
+            //p.transform.parent = null;
             p.gameObject.AddComponent<Shrapnel>();
             p.gameObject.GetComponent<Shrapnel>().Configure(transform.position);
         }
+        return;
         // Kill child PhotonViews
         foreach (PhotonView p in _MyPhotons)
         {
@@ -174,7 +176,6 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
         }
         // Kill TankBase PhotonView
         PhotonNetwork.Destroy(this.GetComponent<PhotonView>());
-
     }
     #endregion
 

@@ -39,6 +39,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public void Restart()
     {
+        StartCoroutine(NetworkService.DownloadUserData(GameController.Instance.DeviceID, GetUserData));
     }
 
     public void Shutdown()
@@ -51,12 +52,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
     #region STATIC METHODS
     public static Color PlayerColour()
     {
-        if(!PhotonNetwork.InRoom)
+        if(PhotonNetwork.InRoom)
         {
-            return Color.black;
+            return PlayerColour(PhotonNetwork.LocalPlayer);
         }
-
-        return PlayerColour(PhotonNetwork.LocalPlayer);
+        return Color.black;
     }
 
     public static Color PlayerColour(Player player)
@@ -66,17 +66,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public static int PlayerID()
     {
-        if (!PhotonNetwork.InRoom)
+        if(PhotonNetwork.InRoom)
         {
-            return -1;
+            return PlayerID(PhotonNetwork.LocalPlayer);
         }
-
-        return (int)PhotonNetwork.LocalPlayer.CustomProperties["NumberID"];
+        return - 1;
     }
 
     public static int PlayerID(Player player)
     {
-        return (int)player.CustomProperties["NumberID"];
+        if(player.CustomProperties.ContainsKey("NumberID"))
+        {
+            return (int)player.CustomProperties["NumberID"];
+        }
+        return -1;
     }
 
     public static string PlayerNick(Player player)
@@ -86,21 +89,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
 
     public static int PlayerColourIndex()
     {
-        if(!PhotonNetwork.InRoom || !PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("ColourIndex"))
+        if(PhotonNetwork.InRoom)
         {
-            return -1;
+            return PlayerColourIndex(PhotonNetwork.LocalPlayer);
         }
-
-        return (int)PhotonNetwork.LocalPlayer.CustomProperties["ColourIndex"];
+        return -1;
     }
 
     public static int PlayerColourIndex(Player player)
     {
-        if(!player.CustomProperties.ContainsKey("ColourIndex"))
+        if(player.CustomProperties.ContainsKey("ColourIndex"))
         {
-            return -1;
+            return (int)player.CustomProperties["ColourIndex"];
         }
-        return (int)player.CustomProperties["ColourIndex"];
+        return -1;
     }
 
     public static int PlayersInRoomCount()
@@ -145,6 +147,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
             }));
     }
 
+    public void UpdateUserStats(bool won, int kills, int deaths)
+    {
+        UserData gameData = new UserData
+        {
+            Device_ID = User.Device_ID,
+            Kills = kills,
+            Deaths = deaths,
+            Wins = (won) ? 1 : 0,
+            Losses = (won) ? 0 : 1
+        };
+
+        StartCoroutine(NetworkService.UpdateUserData(gameData, (response) => { }));
+    }
 
     private void GetUserData(NetworkResponseMessage response)
     {
@@ -256,7 +271,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
     #region CUSTOM EVENTS
     private void OnGameOver(InGameVariables winningPlayer)
     {
-
+        InGameVariables self = PlayerController.LocalPlayer.OwnStats;
+        UpdateUserStats(self == winningPlayer, self.Score, self.Deaths);
     }
 
     private void OnChangePlayerColour(Color playerColour, int colourIndex)

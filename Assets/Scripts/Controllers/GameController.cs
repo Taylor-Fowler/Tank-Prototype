@@ -133,6 +133,11 @@ public class GameController : MonoBehaviourPun
     }
     #endregion
 
+    public void LeftPostGame()
+    {
+        PostGameLobby = false;
+    }
+
     private void InjectServices()
     {
         _networkService = new NetworkService();
