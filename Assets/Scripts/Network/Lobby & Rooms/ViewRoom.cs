@@ -113,6 +113,6 @@ public class ViewRoom : MonoBehaviourPunCallbacks
 
     private void UpdateButton(int playersInRoom)
     {
-        StartGameButton.interactable = GameController.Instance.NetworkManager.DevAutoJoin || playersInRoom > 1;
+        StartGameButton.interactable = GameController.Instance.NetworkManager.DevAutoJoin || playersInRoom == PhotonNetwork.CurrentRoom.MaxPlayers;
     }
 }

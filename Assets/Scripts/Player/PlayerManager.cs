@@ -40,6 +40,22 @@ public class PlayerManager : MonoBehaviourPunCallbacks, IManager
     public void Restart()
     {
         StartCoroutine(NetworkService.DownloadUserData(GameController.Instance.DeviceID, GetUserData));
+        if(PhotonNetwork.CurrentRoom.MaxPlayers != PhotonNetwork.CurrentRoom.PlayerCount)
+        {
+            if(PhotonNetwork.IsMasterClient)
+            {
+                SetPlayerNumberID(0);
+            }
+            else if(PlayerID() >= PhotonNetwork.CurrentRoom.PlayerCount)
+            {
+                int newID = PlayerID() - (PhotonNetwork.CurrentRoom.MaxPlayers - PhotonNetwork.CurrentRoom.PlayerCount);
+                if(newID == 0)
+                {
+                    newID++;
+                }
+                SetPlayerNumberID(newID);
+            }
+        }
     }
 
     public void Shutdown()
