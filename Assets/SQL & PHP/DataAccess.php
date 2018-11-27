@@ -56,6 +56,18 @@ class DataAccess
 
 		return $this->Login($device_id);
 	}
+
+	public function Update($device_id, $kills, $deaths, $wins, $losses)
+	{
+		$query = $this->connection->prepare("UPDATE `TankGame_Users` SET `Kills` = `Kills` + :kills, `Deaths` = `Deaths` + :deaths, `Wins` = `Wins` + :wins, `Losses` = `Losses` + :losses, `Games_Played` = `Games_Played` + 1 WHERE `Device_ID` = :device_id");
+		$query->bindValue(":device_id", $device_id);
+		$query->bindValue(":kills", $kills);
+		$query->bindValue(":deaths", $deaths);
+		$query->bindValue(":wins", $wins);
+		$query->bindValue(":losses", $losses);
+
+		$query->execute();
+	}
 	
 	
 	private function __construct()

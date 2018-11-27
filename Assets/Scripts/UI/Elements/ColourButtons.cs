@@ -27,7 +27,7 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
         public void Select(int playerID, int actorID)
         {
-            Debug.Log("Setting Actor ID Color: " + actorID + "\nLocal Actor ID: " + PhotonNetwork.LocalPlayer.ActorNumber);
+            Debug.Log("Setting Actor/Player ID Color: " + actorID + "/" + playerID + "\nLocal Actor ID: " + PhotonNetwork.LocalPlayer.ActorNumber);
             ActorID = actorID;
             Text.text = (playerID + 1).ToString();
             Image.enabled = true;
@@ -36,6 +36,10 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
         public void Unselect()
         {
+            if(ActorID != -1)
+            {
+                Debug.Log("Unsetting Actor ID Color: " + ActorID + "\nLocal Actor ID: " + PhotonNetwork.LocalPlayer.ActorNumber);
+            }
             ActorID = -1;
             Text.text = "";
             Image.enabled = false;
@@ -51,19 +55,8 @@ public class ColourButtons : MonoBehaviourPunCallbacks
     #region UNITY API
     private void Start()
     {
-        Button[] allButtons = ButtonsAnchor.GetComponentsInChildren<Button>();
-        _buttons = new BITCombo[allButtons.Length];
-
-        for(int i = 0; i < allButtons.Length; i++)
+        for(int i = 0; i <_buttons.Length; i++)
         {
-            _buttons[i] = new BITCombo
-            {
-                Button = allButtons[i],
-                Image = allButtons[i].GetComponentsInChildren<Image>()[0],
-                Text = allButtons[i].GetComponentInChildren<Text>()
-            };
-            _buttons[i].Unselect();
-            
             int iValue = i;
             _buttons[i].Button.onClick.AddListener(delegate
             {
@@ -132,7 +125,7 @@ public class ColourButtons : MonoBehaviourPunCallbacks
         {
             if(button.ActorID == player.ActorNumber)
             {
-                //button.Unselect();
+                button.Unselect();
                 break;
             }
         }
@@ -177,12 +170,23 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
     private void ReturnToRoomAfterGameEnd()
     {
-        Debug.Log(PhotonNetwork.CurrentRoom.PlayerCount);
         foreach(var player in PhotonNetwork.CurrentRoom.Players)
         {
-            BITCombo button = _buttons[PlayerManager.PlayerColourIndex(player.Value)];
+            int playerColourIndex = PlayerManager.PlayerColourIndex(player.Value);
+            if(playerColourIndex == -1)
+            {
+                continue;
+            }
+
+            int playerID = PlayerManager.PlayerID(player.Value);
+            if(playerID == -1)
+            {
+                continue;
+            }
+
+            BITCombo button = _buttons[playerColourIndex];
             button.Select(
-                        PlayerManager.PlayerID(player.Value),
+                        playerID,
                         player.Value.ActorNumber
                         );
 
@@ -217,7 +221,12 @@ public class ColourButtons : MonoBehaviourPunCallbacks
 
     private IEnumerator SelectNextAvailableColour()
     {
-        yield return new WaitForSeconds(1f);
+        while(_buttons.Length != 9 || PlayerManager.PlayerID() == -1)
+        {
+            yield return null;
+        }
+
+        ReturnToRoomAfterGameEnd();
         int nextAvailableColour = 0;
 
         if (!PhotonNetwork.IsMasterClient)

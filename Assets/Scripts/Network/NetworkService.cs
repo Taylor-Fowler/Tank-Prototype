@@ -71,14 +71,12 @@ namespace Network
         {
             WWWForm form = new WWWForm();
             form.AddField("Device_ID", userData.Device_ID);
-            form.AddField("Games_Played", userData.Games_Played);
             form.AddField("Kills", userData.Kills);
             form.AddField("Deaths", userData.Deaths);
-            form.AddField("Assists", userData.Assists);
             form.AddField("Wins", userData.Wins);
             form.AddField("Losses", userData.Losses);
             
-            UnityWebRequest webRequest = UnityWebRequest.Post(WebPath + "updates.php", form);
+            UnityWebRequest webRequest = UnityWebRequest.Post(WebPath + "update.php", form);
             yield return webRequest.SendWebRequest();
 
             callback(IsRequestValid(webRequest));

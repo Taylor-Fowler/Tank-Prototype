@@ -35,7 +35,7 @@ public enum MessengerMode
 static internal class MessengerInternal
 {
     readonly public static Dictionary<string, Delegate> eventTable = new Dictionary<string, Delegate>();
-    static public readonly MessengerMode DEFAULT_MODE = MessengerMode.REQUIRE_LISTENER;
+    static public readonly MessengerMode DEFAULT_MODE = MessengerMode.DONT_REQUIRE_LISTENER;
 
     static public void AddListener(string eventType, Delegate callback)
     {
@@ -231,6 +231,10 @@ static public class Messenger<T>
     {
         MessengerInternal.OnBroadcasting(eventType, mode);
         var invocationList = MessengerInternal.GetInvocationList<Action<T>>(eventType);
+
+        // Added by Taylor...
+        if(invocationList == null)
+            return;
 
         foreach (var callback in invocationList)
             callback.Invoke(arg1);
