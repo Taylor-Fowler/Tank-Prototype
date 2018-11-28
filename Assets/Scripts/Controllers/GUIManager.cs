@@ -36,6 +36,7 @@ public class GUIManager : MonoBehaviour
     public RectTransform BG0;
     public RectTransform BG1;
     public RectTransform BG2;
+    public RectTransform BG3;
 
     [Header("Time for damage flash")]
     public float FlashTime = 0.1f;
@@ -108,6 +109,7 @@ public class GUIManager : MonoBehaviour
         BG0.GetComponent<Image>().color = BGCol;
         BG1.GetComponent<Image>().color = BGCol;
         BG2.GetComponent<Image>().color = BGCol;
+        BG3.GetComponent<Image>().color = BGCol;
 
         // Initial Panel Set-up
         for (int i = 0; i < _PlayerCount; i++)
@@ -117,6 +119,7 @@ public class GUIManager : MonoBehaviour
             _myPanels[i].SetColor(_Help.V3ToColor(_myPlayers[i].Color));
             _myPanels[i].SetHealth(1f);
             _myPanels[i].SetFlashTime(FlashTime);
+            _myPanels[i].Connect(true);
         }
     }
 
@@ -138,6 +141,12 @@ public class GUIManager : MonoBehaviour
             _myPanels[i].SetHealth(_myPlayers[i].Curr_Health / _myPlayers[i].Max_Health);
         }
     }
+
+    public void UpdateConnectionStatus (int PlayerID, bool status)
+    {
+        _myPanels[PlayerID].Connect(status);
+    }
+
     #endregion
 
     #region SplashScreen - Public Methods (called by PlayerController - relayed to Splashscreen)

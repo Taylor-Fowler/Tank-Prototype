@@ -101,6 +101,7 @@ MonoBehaviour:
     Max_Health: 0
     Curr_Health: 0
     Score: 0
+    Deaths: 0
   EditorOnlyControllers: []
   _Spawns: []
   _InitialSpawns: []

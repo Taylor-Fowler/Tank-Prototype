@@ -19,7 +19,7 @@ public class TankCameraScript : MonoBehaviour {
     #endregion
 
     #region PRIVATE MEMBERS
-    [SerializeField] private float _Lerp = 0;
+    [SerializeField] private float _Lerp = 1;
     #endregion
 
     #region PUBLIC METHODS

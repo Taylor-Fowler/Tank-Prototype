@@ -51,7 +51,7 @@ public abstract class TankBase : MonoBehaviourPun, IDamageable, ITakesPowerUps
     private Rigidbody _RB;
     private Vector3 _MyV3Color;
     private TankHelpers _Help = new TankHelpers();
-    private bool _turretlock = false;
+    private bool _turretlock = true;
     [SerializeField]
     private float Cooldown = 0;
 

@@ -20,6 +20,7 @@ public class PanelScript : MonoBehaviour {
     public RectTransform Flash;
     public Text Name;
     public Text Score;
+    public Text Disconnect;
     #endregion
 
     #region Private Vars
@@ -44,6 +45,18 @@ public class PanelScript : MonoBehaviour {
     public void SetFlashTime(float Time)
     {
         _FlashTime = Time;
+    }
+
+    public void Connect(bool status)
+    {
+        if (status)
+        {
+            Disconnect.text = "";
+        }
+        else
+        {
+            Disconnect.text = "DISCONNECTED !!";
+        }
     }
 
     public void SetColor (Color col)
