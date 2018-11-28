@@ -8,6 +8,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.Networking;
 using Photon.Pun;
+using Photon.Realtime;
 
 #region INGAMEVARIABLES DECLARATION
 [System.Serializable]
@@ -253,6 +254,16 @@ public class PlayerController : MonoBehaviourPunCallbacks
             Event_OnLocalPlayerRespawn -= Respawn;
         }
         GameController.Instance.Event_OnGameStart -= OnGameStart;
+    }
+    #endregion
+
+    #region PUN2 API
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        if(this == LocalPlayer && _myGUI != null)
+        {
+            _myGUI.UpdateConnectionStatus(PlayerManager.PlayerID(otherPlayer), false);
+        }
     }
     #endregion
 

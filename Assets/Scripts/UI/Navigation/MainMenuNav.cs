@@ -5,6 +5,7 @@
 // December 2018                                                         //
 ///////////////////////////////////////////////////////////////////////////
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
@@ -97,7 +98,15 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
         {
             OnConnectedToMaster();
             UpdateOnlinePlayerStatistics();
-            OnUserDataUpdate(GameController.Instance.PlayerManager.User.Username);
+
+            if(GameController.Instance.PlayerManager.User.Player_ID == -1)
+            {
+                OnDeviceIdNotRegistered();
+            }
+            else
+            {
+                OnUserDataUpdate(GameController.Instance.PlayerManager.User.Username);
+            }
 
             if(PhotonNetwork.InRoom)
             {
@@ -118,6 +127,7 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
 
         _textFieldAction.Initialise();
         RegisterBlinker.GetComponent<Button>().onClick.AddListener(_textFieldAction.Open);
+        StartCoroutine(UpdateStatistics());
     }
 
     private void OnDestroy()
@@ -125,6 +135,7 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
         Messenger.RemoveListener("OnDeviceIdNotRegistered", OnDeviceIdNotRegistered);
         Messenger<string>.RemoveListener("OnUserDataUpdate", OnUserDataUpdate);
         Messenger<string>.RemoveListener("OnUserDataDownloadError", OnUserDataDownloadError);
+        StopAllCoroutines();
     }
     #endregion
 
@@ -225,6 +236,18 @@ public class MainMenuNav : MonoBehaviourPunCallbacks
             if(otherCanvas != canvas)
             {
                 otherCanvas.SetActive(false);
+            }
+        }
+    }
+
+    private IEnumerator UpdateStatistics()
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(5f);
+            if(PhotonNetwork.IsConnected)
+            {
+                UpdateOnlinePlayerStatistics();
             }
         }
     }

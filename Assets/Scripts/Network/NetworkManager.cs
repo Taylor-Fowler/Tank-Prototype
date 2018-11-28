@@ -39,6 +39,10 @@ namespace Network
             {
                 ConnectToServer();
             }
+            else if(PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new PhotonHashtable() { {"in_progress", false } }, new PhotonHashtable() { {"in_progress", true } });
+            }
         }
 
         public void Shutdown()
@@ -60,6 +64,16 @@ namespace Network
         public static bool RoomJoinable(RoomInfo room)
         {
             return room.IsOpen && room.IsVisible && room.PlayerCount != room.MaxPlayers && !room.CustomProperties.ContainsKey("room_pass");
+        }
+
+        public static bool InProgress(RoomInfo room)
+        {
+            if(room.CustomProperties.ContainsKey("in_progress"))
+            {
+                Debug.Log("got here");
+                return (bool)room.CustomProperties["in_progress"];
+            }
+            return false;
         }
         #endregion  
 
@@ -124,7 +138,8 @@ namespace Network
             foreach (var room in roomList)
             {
                 int cachedIndex = CachedRooms.IndexOf(room);
-                bool valid = room.PlayerCount != 0;
+                Debug.Log(!InProgress(room));
+                bool valid = room.PlayerCount != 0 && !InProgress(room);
 
                 if (cachedIndex != -1)
                 {
@@ -162,6 +177,7 @@ namespace Network
 
         public void StartGame()
         {
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new PhotonHashtable() { {"in_progress", true} }, new PhotonHashtable() { {"in_progress", false} });
             PhotonNetwork.LoadLevel("Map for " + PhotonNetwork.CurrentRoom.MaxPlayers.ToString());
         }
 
@@ -182,11 +198,12 @@ namespace Network
             UserData callingUser = GameController.Instance.PlayerManager.User;
             RoomOptions roomOptions = new RoomOptions
             {
-                CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name" },
+                CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name", "in_progress" },
                 CustomRoomProperties = new PhotonHashtable()
                 {
                     { "room_host", callingUser.Username },
-                    { "room_name", roomName }
+                    { "room_name", roomName },
+                    { "in_progress", false }
                 },
                 PublishUserId = true,
                 MaxPlayers = (byte)maxPlayers,
@@ -202,12 +219,13 @@ namespace Network
             UserData callingUser = GameController.Instance.PlayerManager.User;
             RoomOptions roomOptions = new RoomOptions
             {
-                CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name", "room_pass" },
+                CustomRoomPropertiesForLobby = new string[] { "room_host", "room_name", "room_pass", "in_progress" },
                 CustomRoomProperties = new PhotonHashtable()
                 {
                     { "room_host", callingUser.Username },
                     { "room_name", roomName },
-                    { "room_pass", roomPassword }
+                    { "room_pass", roomPassword },
+                    { "in_progress", false }
                 },
                 PublishUserId = true,
                 MaxPlayers = (byte)maxPlayers,
