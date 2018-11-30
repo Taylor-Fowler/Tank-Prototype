@@ -6320,7 +6320,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 1379102525601468, guid: 65c450d661ed8ab408bc31c2776ed79a,
     type: 2}
   PlayerCount: 0
-  KillsRequired: 2
+  KillsRequired: 5
 --- !u!4 &959058080
 Transform:
   m_ObjectHideFlags: 0
