@@ -35,7 +35,7 @@ public class SplashScript : MonoBehaviour {
 
     // For Tweening
     private TankHelpers Help = new TankHelpers();
-    private bool DEBUG = true; // Allows Debugging of Transition screens with 1-7
+    private bool DEBUG = false; // Allows Debugging of Transition screens with 1-7
     #endregion
 
     #region UNITY API
